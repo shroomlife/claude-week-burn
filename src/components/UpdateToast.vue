@@ -2,7 +2,6 @@
 import { ref, onMounted } from 'vue'
 
 const showRefresh = ref(false)
-const showReady = ref(false)
 let updateSW: ((reload?: boolean) => Promise<void>) | null = null
 
 onMounted(async () => {
@@ -11,10 +10,8 @@ onMounted(async () => {
     updateSW = registerSW({
       immediate: true,
       onNeedRefresh: () => { showRefresh.value = true },
-      onOfflineReady: () => {
-        showReady.value = true
-        window.setTimeout(() => { showReady.value = false }, 3000)
-      },
+      // Offline-ready toast removed intentionally — fires on every first
+      // visit per device and tells the user nothing actionable.
     })
   } catch {
     // PWA virtual module is not available in dev — silently ignore.
@@ -32,11 +29,6 @@ async function reload(): Promise<void> {
       <div v-if="showRefresh" class="sw-toast">
         <span>Neue Version verfügbar ✨</span>
         <button type="button" @click="reload">Reload</button>
-      </div>
-    </transition>
-    <transition name="slide">
-      <div v-if="showReady" class="sw-toast soft">
-        <span>Offline-Modus bereit 🪐</span>
       </div>
     </transition>
   </div>

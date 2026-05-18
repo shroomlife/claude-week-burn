@@ -16,6 +16,7 @@ import BurnControls from './components/BurnControls.vue'
 import CommandPalette from './components/CommandPalette.vue'
 import UpdateToast from './components/UpdateToast.vue'
 import InstallIosModal from './components/InstallIosModal.vue'
+import InstallCta from './components/InstallCta.vue'
 import OnboardingCard from './components/OnboardingCard.vue'
 import { useGitHubAuth } from './composables/useGitHubAuth'
 import { useGistSync } from './composables/useGistSync'
@@ -285,6 +286,8 @@ const modeClass = computed(() => `mode-${c.status.value.mode}`)
         {{ t.text }}
       </div>
     </div>
+
+    <InstallCta @show-ios="showIosInstall" />
 
     <!-- SEO crawlable content (visible to readers + search engines) -->
     <section class="about">
