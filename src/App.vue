@@ -211,7 +211,6 @@ const modeClass = computed(() => `mode-${c.status.value.mode}`)
     <BurnHeader
       :countdown="c.countdown.value"
       @open-palette="openPalette"
-      @show-ios-install="showIosInstall"
     />
 
     <transition name="boot" mode="out-in" appear>
@@ -347,6 +346,7 @@ const modeClass = computed(() => `mode-${c.status.value.mode}`)
       <p class="meta-row">
         <a href="https://github.com/shroomlife/claude-week-burn" rel="noopener noreferrer">GitHub Repo</a>
         · build by you · for you · shroomlife flavor
+        · <button type="button" class="reset-link" @click="openReset">App zurücksetzen</button>
       </p>
     </section>
   </main>
@@ -464,6 +464,22 @@ main {
   font-weight: 500;
 }
 .meta-row { font-size: 12px; opacity: 0.85; }
+.reset-link {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  color: var(--c-mute);
+  text-decoration: underline;
+  text-decoration-color: var(--c-line);
+  text-underline-offset: 3px;
+  cursor: pointer;
+  transition: color 0.15s ease, text-decoration-color 0.15s ease;
+}
+.reset-link:hover {
+  color: var(--c-pace-behind);
+  text-decoration-color: var(--c-pace-behind);
+}
 
 .toast-tray {
   position: fixed;

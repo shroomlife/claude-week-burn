@@ -2,15 +2,11 @@
 import { computed, onMounted, onUnmounted } from 'vue'
 import IconLightning from '~icons/ph/lightning-fill'
 import AuthButton from './AuthButton.vue'
-import InstallButton from './InstallButton.vue'
 import { AUTH_ENABLED } from '../config/auth'
 import type { Countdown } from '../types/burn'
 
 const props = defineProps<{ countdown: Countdown }>()
-const emit = defineEmits<{
-  (e: 'open-palette'): void
-  (e: 'show-ios-install'): void
-}>()
+const emit = defineEmits<{ (e: 'open-palette'): void }>()
 
 const countdownShort = computed(() => {
   const { days, hours, minutes } = props.countdown
@@ -41,7 +37,6 @@ onUnmounted(() => window.removeEventListener('keydown', onKey))
     </div>
 
     <div class="actions">
-      <InstallButton @show-ios="emit('show-ios-install')" />
       <AuthButton
         v-if="AUTH_ENABLED"
         @open-menu="emit('open-palette')"
