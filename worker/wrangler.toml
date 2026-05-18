@@ -9,5 +9,8 @@ workers_dev = true
 # browser. No bindings, no secrets, no state.
 
 [observability]
-enabled = true
-head_sampling_rate = 0.1
+enabled = false
+# Defense in depth: this worker proxies OAuth token exchanges. Even though we
+# never `console.log` request/response bodies, the platform observability layer
+# may capture metadata that could correlate to active sessions. The CORS-proxy
+# is simple enough that we don't need server-side telemetry.

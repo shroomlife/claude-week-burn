@@ -50,7 +50,13 @@ const user = ref<GitHubUser | null>(null)
 const phase = ref<DeviceFlowPhase>('idle')
 const challenge = ref<DeviceFlowChallenge | null>(null)
 const errorMessage = ref<string | null>(null)
-let polling = false
+/**
+ * Generation counter so that cancelling a flow mid-poll and immediately
+ * starting a new one doesn't leave the previous poll loop racing alongside.
+ * Each flow captures its own generation; the loop bails as soon as the
+ * shared counter advances.
+ */
+let pollGeneration = 0
 let userFetched = false
 
 function form(body: Record<string, string>): string {
@@ -105,17 +111,23 @@ function logout(): void {
   errorMessage.value = null
 }
 
-async function pollForToken(deviceCode: string, intervalMs: number, expiresAt: number): Promise<string> {
+async function pollForToken(
+  deviceCode: string,
+  intervalMs: number,
+  expiresAt: number,
+  ownGeneration: number,
+): Promise<string> {
   let cadence = intervalMs
   // GitHub allows a +5s grace per slow_down
   while (Date.now() < expiresAt) {
     await new Promise((r) => setTimeout(r, cadence))
-    if (!polling) throw new Error('cancelled')
+    if (ownGeneration !== pollGeneration) throw new Error('cancelled')
     const data = await postProxy<TokenSuccessResponse | TokenErrorResponse>('/login/oauth/access_token', {
       client_id: GH_CLIENT_ID,
       device_code: deviceCode,
       grant_type: 'urn:ietf:params:oauth:grant-type:device_code',
     })
+    if (ownGeneration !== pollGeneration) throw new Error('cancelled')
     if ('access_token' in data && data.access_token) return data.access_token
 
     const err = (data as TokenErrorResponse).error
@@ -141,12 +153,16 @@ async function startDeviceFlow(): Promise<void> {
   errorMessage.value = null
   challenge.value = null
   phase.value = 'requesting'
-  polling = true
+  // Advance the generation BEFORE starting so any in-flight previous poll
+  // sees the change and bails on its next iteration.
+  pollGeneration += 1
+  const ownGeneration = pollGeneration
   try {
     const code = await postProxy<DeviceCodeResponse>('/login/device/code', {
       client_id: GH_CLIENT_ID,
       scope: GH_SCOPES,
     })
+    if (ownGeneration !== pollGeneration) return
     const expiresAt = Date.now() + code.expires_in * 1000
     challenge.value = {
       userCode: code.user_code,
@@ -156,26 +172,26 @@ async function startDeviceFlow(): Promise<void> {
     }
     phase.value = 'awaiting-user'
 
-    const accessToken = await pollForToken(code.device_code, code.interval * 1000, expiresAt)
+    const accessToken = await pollForToken(code.device_code, code.interval * 1000, expiresAt, ownGeneration)
+    if (ownGeneration !== pollGeneration) return
     token.value = accessToken
     user.value = await fetchCurrentUser(accessToken)
     userFetched = true
     phase.value = 'success'
     challenge.value = null
   } catch (err) {
+    if (ownGeneration !== pollGeneration) return
     if ((err as Error).message === 'cancelled') {
       phase.value = 'idle'
       return
     }
     errorMessage.value = (err as Error).message
     phase.value = 'error'
-  } finally {
-    polling = false
   }
 }
 
 function cancelDeviceFlow(): void {
-  polling = false
+  pollGeneration += 1
   phase.value = 'idle'
   challenge.value = null
 }

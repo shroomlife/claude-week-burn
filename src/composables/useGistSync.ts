@@ -33,8 +33,13 @@ const gistId = usePersistedState<string | null>('burnRate:gh:gistId', null, {
   validate: (v) => (typeof v === 'string' && v.length > 0 ? v : null),
 })
 
+/** ISO timestamp of the last successful push payload — drives conflict resolution. */
+const lastSyncedAt = usePersistedState<string | null>('burnRate:gh:lastSyncedAt', null, {
+  version: 1,
+  validate: (v) => (typeof v === 'string' && v.length > 0 ? v : null),
+})
+
 const status = ref<SyncStatus>('off')
-const lastSyncedAt = ref<string | null>(null)
 const errorMessage = ref<string | null>(null)
 
 const auth = useGitHubAuth()
@@ -47,20 +52,26 @@ function authHeaders(token: string): HeadersInit {
   }
 }
 
-async function listOwnedGists(token: string): Promise<GistResponse[]> {
-  const res = await fetch('https://api.github.com/gists?per_page=100', {
-    headers: authHeaders(token),
-  })
-  if (!res.ok) throw new Error(`gist list failed: ${res.status}`)
-  return (await res.json()) as GistResponse[]
-}
-
+/** Walks pages until the marker gist is found or the listing is exhausted. */
 async function findOurGist(token: string): Promise<string | null> {
-  const list = await listOwnedGists(token)
-  const match = list.find(
-    (g) => g.description === GIST_DESCRIPTION && Object.prototype.hasOwnProperty.call(g.files, GIST_FILENAME),
-  )
-  return match ? match.id : null
+  const PAGE_SIZE = 100
+  const MAX_PAGES = 50 // 5000 gists, more than anyone should have
+  for (let page = 1; page <= MAX_PAGES; page += 1) {
+    const res = await fetch(
+      `https://api.github.com/gists?per_page=${PAGE_SIZE}&page=${page}`,
+      { headers: authHeaders(token) },
+    )
+    if (!res.ok) throw new Error(`gist list failed: ${res.status}`)
+    const data = (await res.json()) as GistResponse[]
+    const match = data.find(
+      (g) =>
+        g.description === GIST_DESCRIPTION &&
+        Object.prototype.hasOwnProperty.call(g.files, GIST_FILENAME),
+    )
+    if (match) return match.id
+    if (data.length < PAGE_SIZE) return null
+  }
+  return null
 }
 
 function buildPayload(state: PersistedDataV1): GistPayloadV1 {
@@ -83,7 +94,15 @@ async function readGistContent(token: string, id: string): Promise<GistPayloadV1
   if (!file) return null
   let raw = file.content
   if (file.truncated && file.raw_url) {
+    // Defense in depth: the bearer token gets sent on this fetch; only trust
+    // GitHub's canonical raw host. If the API response is ever tampered with,
+    // we refuse rather than leak the token to an arbitrary origin.
+    const rawUrl = new URL(file.raw_url)
+    if (rawUrl.hostname !== 'gist.githubusercontent.com') {
+      throw new Error(`unexpected raw_url host: ${rawUrl.hostname}`)
+    }
     const r = await fetch(file.raw_url, { headers: authHeaders(token) })
+    if (!r.ok) throw new Error(`gist raw fetch failed: ${r.status}`)
     raw = await r.text()
   }
   if (!raw) return null
@@ -138,44 +157,75 @@ async function ensureGist(token: string): Promise<string> {
     gistId.value = found
     return found
   }
-  const newId = await createGist(token, buildPayload(_persistedBurnState.value))
+  const payload = buildPayload(_persistedBurnState.value)
+  const newId = await createGist(token, payload)
   gistId.value = newId
+  lastSyncedAt.value = payload.updatedAt
   return newId
 }
 
+/** Returns true if the error looks like an auth failure (revoked / expired). */
+function isAuthError(err: unknown): boolean {
+  const msg = (err as Error | undefined)?.message ?? ''
+  return msg.includes('401') || msg.includes('403')
+}
+
 async function pull(): Promise<void> {
-  if (!auth.token.value) return
+  const token = auth.token.value
+  if (!token) return
   if (status.value === 'syncing') return
   errorMessage.value = null
   status.value = 'syncing'
   try {
-    const id = await ensureGist(auth.token.value)
-    const remote = await readGistContent(auth.token.value, id)
+    const id = await ensureGist(token)
+    const remote = await readGistContent(token, id)
     if (remote) {
       const remoteTs = new Date(remote.updatedAt).getTime()
-      const localTs = new Date(_persistedBurnState.value.lastSeen).getTime()
+      // Compare against our last successful push timestamp, NOT lastSeen (which
+      // is user-interaction time and unrelated to sync). On a fresh device
+      // lastSyncedAt is null → remote always wins (it's the canonical state).
+      const localTs = lastSyncedAt.value ? new Date(lastSyncedAt.value).getTime() : 0
       if (Number.isFinite(remoteTs) && remoteTs > localTs + 500) {
         _persistedBurnState.value = remote.state
+        lastSyncedAt.value = remote.updatedAt
       }
     }
-    lastSyncedAt.value = new Date().toISOString()
     status.value = 'idle'
   } catch (err) {
+    if (isAuthError(err)) {
+      // Revoked / expired — self-heal so the user can sign in again cleanly.
+      console.warn('[gist-sync] auth error, logging out', err)
+      auth.logout()
+      gistId.value = null
+      lastSyncedAt.value = null
+      status.value = 'off'
+      return
+    }
     errorMessage.value = (err as Error).message
     status.value = 'error'
   }
 }
 
 async function push(): Promise<void> {
-  if (!auth.token.value) return
+  const token = auth.token.value
+  if (!token) return
   errorMessage.value = null
   status.value = 'syncing'
   try {
-    const id = await ensureGist(auth.token.value)
-    await updateGist(auth.token.value, id, buildPayload(_persistedBurnState.value))
-    lastSyncedAt.value = new Date().toISOString()
+    const id = await ensureGist(token)
+    const payload = buildPayload(_persistedBurnState.value)
+    await updateGist(token, id, payload)
+    lastSyncedAt.value = payload.updatedAt
     status.value = 'idle'
   } catch (err) {
+    if (isAuthError(err)) {
+      console.warn('[gist-sync] auth error, logging out', err)
+      auth.logout()
+      gistId.value = null
+      lastSyncedAt.value = null
+      status.value = 'off'
+      return
+    }
     errorMessage.value = (err as Error).message
     status.value = 'error'
   }
@@ -183,7 +233,6 @@ async function push(): Promise<void> {
 
 const pushDebounced = useDebounceFn(push, 3000)
 
-// Reactive wiring — only when authenticated.
 watch(
   () => auth.isAuthenticated.value,
   (yes, was) => {
@@ -192,6 +241,8 @@ watch(
       void pull()
     } else if (!yes && was) {
       status.value = 'off'
+      // Clear gist pointer + sync timestamp so a future login on the same
+      // device starts clean (find or create logic re-runs).
       gistId.value = null
       lastSyncedAt.value = null
     }
@@ -199,7 +250,6 @@ watch(
   { immediate: true },
 )
 
-// Push on state change while authenticated
 watch(
   () => _persistedBurnState.value,
   () => {
@@ -208,7 +258,6 @@ watch(
   { deep: true },
 )
 
-// Pull when the tab becomes visible again
 useEventListener(document, 'visibilitychange', () => {
   if (!document.hidden && auth.isAuthenticated.value) void pull()
 })
