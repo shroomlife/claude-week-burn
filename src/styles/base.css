@@ -1,0 +1,98 @@
+body {
+  font-family: var(--font-sans);
+  color: var(--c-ink);
+  background: var(--c-bg);
+  min-height: 100vh;
+  position: relative;
+  overflow-x: hidden;
+  letter-spacing: -0.005em;
+}
+
+/* Mesh gradient — animate translate only (no scale, Priya). */
+body::before {
+  content: '';
+  position: fixed;
+  inset: -15%;
+  z-index: -2;
+  background:
+    radial-gradient(at 8% 18%, rgba(167, 243, 208, 0.65) 0px, transparent 45%),
+    radial-gradient(at 92% 14%, rgba(254, 215, 170, 0.6) 0px, transparent 50%),
+    radial-gradient(at 78% 88%, rgba(199, 210, 254, 0.65) 0px, transparent 50%),
+    radial-gradient(at 12% 82%, rgba(251, 207, 232, 0.65) 0px, transparent 50%),
+    radial-gradient(at 50% 50%, rgba(165, 243, 252, 0.45) 0px, transparent 60%);
+  background-color: var(--c-bg);
+  animation: drift 40s ease-in-out infinite alternate;
+  will-change: transform;
+}
+
+@keyframes drift {
+  0%   { transform: translate3d(0, 0, 0); }
+  100% { transform: translate3d(-2%, 2%, 0); }
+}
+
+/* Subtle grain — pre-baked, no mix-blend (Priya). */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0.18;
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(%23n)" opacity="0.6"/></svg>');
+  background-size: 200px 200px;
+}
+
+/* Mode-coupled body tint — soft, behind glass surfaces */
+body {
+  transition: background-color 0.6s ease;
+}
+
+/* Glass primitive — backdrop-filter ONLY on .glass-hero (Priya diet). */
+.glass {
+  background: var(--c-glass);
+  border: 1px solid var(--c-glass-border);
+  border-radius: var(--r-card);
+  box-shadow: var(--s-card-flat);
+  contain: paint;
+}
+
+.glass-hero {
+  background: rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(28px) saturate(1.7);
+  -webkit-backdrop-filter: blur(28px) saturate(1.7);
+  border: 1px solid rgba(255, 255, 255, 0.75);
+  border-radius: var(--r-card);
+  box-shadow: var(--s-card);
+  contain: paint;
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .glass-hero {
+    background: rgba(255, 255, 255, 0.86);
+    backdrop-filter: none;
+  }
+}
+
+/* Tabular nums everywhere a number reads */
+.num,
+.delta-value,
+.cd-num,
+.metric-value,
+.pace-readout {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Reduced motion: kill ambient + bounces, keep opacity crossfades */
+@media (prefers-reduced-motion: reduce) {
+  body::before {
+    animation: none;
+    transform: translate3d(-1%, 1%, 0);
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 200ms !important;
+  }
+}

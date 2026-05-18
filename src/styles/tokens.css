@@ -1,0 +1,65 @@
+:root {
+  /* Typography */
+  --font-sans: 'Outfit Variable', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono Variable', ui-monospace, monospace;
+  --font-serif: 'Instrument Serif', Georgia, serif;
+
+  /* Neutral palette */
+  --c-ink: #0a0e1a;
+  --c-ink-soft: #0f172a;
+  --c-mute: #475569;
+  --c-mute-soft: #64748b;
+  --c-line: #94a3b8;
+  --c-bg: #fbfbfd;
+  --c-glass: rgba(255, 255, 255, 0.78);
+  --c-glass-border: rgba(255, 255, 255, 0.85);
+  --c-divider: rgba(15, 23, 42, 0.08);
+
+  /* Brand */
+  --c-flame-1: #fb923c;
+  --c-flame-2: #ea580c;
+  --c-flame-3: #f43f5e;
+  --c-orchid: #d946ef;
+
+  /* Mode tokens (rebound by App per status mode) */
+  --c-mode: var(--c-ink);
+  --c-mode-glow: transparent;
+  --c-mode-bg-tint: transparent;
+
+  /* Pace bar */
+  --c-pace-ahead: #10b981;
+  --c-pace-behind: #ef4444;
+  --c-pace-track: rgba(15, 23, 42, 0.08);
+  --c-pace-fill: linear-gradient(90deg, #fb923c, #ea580c);
+
+  /* Rings */
+  --c-time-1: #22d3ee;
+  --c-time-2: #0891b2;
+  --c-usage-1: #fb923c;
+  --c-usage-2: #ea580c;
+
+  /* Radius */
+  --r-card: 28px;
+  --r-card-sm: 22px;
+  --r-pill: 999px;
+  --r-input: 14px;
+
+  /* Shadows */
+  --s-card: 0 30px 60px -25px rgba(15, 23, 42, 0.18),
+            0 8px 20px -10px rgba(15, 23, 42, 0.08),
+            inset 0 1px 0 rgba(255, 255, 255, 0.85);
+  --s-card-flat: 0 16px 36px -22px rgba(15, 23, 42, 0.18),
+                 inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  --s-press: 0 4px 14px -6px rgba(15, 23, 42, 0.18);
+
+  /* Easings */
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-out-quint: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-emphasized: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Mode bindings — set on <main class="mode-…"> in App.vue */
+.mode-burn    { --c-mode: #059669; --c-mode-glow: rgba(16, 185, 129, 0.55); }
+.mode-cruise  { --c-mode: #65a30d; --c-mode-glow: rgba(132, 204, 22, 0.45); }
+.mode-careful { --c-mode: #d97706; --c-mode-glow: rgba(245, 158, 11, 0.5); }
+.mode-save    { --c-mode: #e11d48; --c-mode-glow: rgba(244, 63, 94, 0.55); }

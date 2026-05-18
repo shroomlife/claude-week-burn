@@ -1,0 +1,994 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Burn Rate · Live Weekly Pace</title>
+<script src="https://unpkg.com/vue@3.5.13/dist/vue.global.prod.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200..900&family=JetBrains+Mono:wght@400..700&display=swap" rel="stylesheet">
+<style>
+  /* ====== RESET ====== */
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; min-height: 100%; }
+  [v-cloak] { display: none; }
+
+  body {
+    font-family: 'Outfit', system-ui, -apple-system, sans-serif;
+    color: #0a0e1a;
+    background: #fbfbfd;
+    min-height: 100vh;
+    position: relative;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    letter-spacing: -0.005em;
+  }
+
+  /* ====== MESH GRADIENT BG ====== */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: -15%;
+    z-index: -2;
+    background:
+      radial-gradient(at 8% 18%, rgba(167, 243, 208, 0.7) 0px, transparent 45%),
+      radial-gradient(at 92% 14%, rgba(254, 215, 170, 0.65) 0px, transparent 50%),
+      radial-gradient(at 78% 88%, rgba(199, 210, 254, 0.7) 0px, transparent 50%),
+      radial-gradient(at 12% 82%, rgba(251, 207, 232, 0.7) 0px, transparent 50%),
+      radial-gradient(at 50% 50%, rgba(165, 243, 252, 0.5) 0px, transparent 60%);
+    background-color: #fbfbfd;
+    animation: drift 32s ease-in-out infinite alternate;
+  }
+  @keyframes drift {
+    0% { transform: translate3d(0,0,0) scale(1); }
+    100% { transform: translate3d(-2%, 2%, 0) scale(1.06); }
+  }
+
+  /* Subtle grain */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    opacity: 0.35;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E");
+  }
+
+  /* ====== GLASS PRIMITIVE ====== */
+  .glass {
+    background: rgba(255, 255, 255, 0.55);
+    backdrop-filter: blur(28px) saturate(1.7);
+    -webkit-backdrop-filter: blur(28px) saturate(1.7);
+    border: 1px solid rgba(255, 255, 255, 0.75);
+    border-radius: 28px;
+    box-shadow:
+      0 30px 60px -25px rgba(15, 23, 42, 0.18),
+      0 8px 20px -10px rgba(15, 23, 42, 0.08),
+      inset 0 1px 0 rgba(255, 255, 255, 0.85);
+  }
+
+  /* ====== LAYOUT ====== */
+  #app {
+    min-height: 100vh;
+    display: grid;
+    place-items: center;
+    padding: 28px 22px;
+  }
+  main {
+    width: 100%;
+    max-width: 1180px;
+    display: grid;
+    gap: 22px;
+    transition: --mode-color 0.6s ease;
+  }
+
+  /* ====== HEADER ====== */
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 0 8px;
+  }
+  .logo-mark {
+    width: 52px; height: 52px;
+    border-radius: 18px;
+    background: linear-gradient(135deg, #fb923c 0%, #f43f5e 70%, #d946ef 100%);
+    display: grid; place-items: center;
+    font-size: 24px;
+    box-shadow:
+      0 14px 30px -8px rgba(244, 63, 94, 0.45),
+      inset 0 1px 0 rgba(255,255,255,0.4);
+    transform: rotate(-4deg);
+  }
+  .brand-text { flex: 1; }
+  .brand-name {
+    font-weight: 700;
+    font-size: 23px;
+    letter-spacing: -0.025em;
+    line-height: 1.1;
+  }
+  .brand-tag {
+    font-size: 13px;
+    color: #64748b;
+    font-weight: 400;
+    margin-top: 2px;
+  }
+  .live-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 16px;
+    background: rgba(255, 255, 255, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.9);
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    color: #0f172a;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+  .live-pill .pulse {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: #10b981;
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.55);
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%   { box-shadow: 0 0 0 0   rgba(16, 185, 129, 0.6); }
+    70%  { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
+    100% { box-shadow: 0 0 0 0   rgba(16, 185, 129, 0); }
+  }
+
+  /* ====== HERO GAUGE ====== */
+  .hero {
+    padding: 48px 32px 40px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 50% 0%, var(--mode-glow, transparent) 0%, transparent 55%);
+    opacity: 0.4;
+    pointer-events: none;
+    transition: background 0.8s ease;
+    z-index: 0;
+  }
+  .hero > * { position: relative; z-index: 1; }
+
+  .gauge-wrap {
+    position: relative;
+    width: 100%;
+    max-width: 460px;
+    aspect-ratio: 1;
+  }
+  .gauge {
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+  }
+  .gauge .track {
+    fill: none;
+    stroke-linecap: round;
+  }
+  .gauge .time-track  { stroke: rgba(8, 145, 178, 0.12); stroke-width: 22; }
+  .gauge .time-fill   {
+    stroke: url(#timeGrad);
+    stroke-width: 22;
+    transition: stroke-dashoffset 0.8s cubic-bezier(0.4, 0.0, 0.2, 1);
+    filter: drop-shadow(0 4px 14px rgba(6, 182, 212, 0.4));
+  }
+  .gauge .usage-track { stroke: rgba(234, 88, 12, 0.12); stroke-width: 22; }
+  .gauge .usage-fill  {
+    stroke: url(#usageGrad);
+    stroke-width: 22;
+    transition: stroke-dashoffset 0.8s cubic-bezier(0.4, 0.0, 0.2, 1);
+    filter: drop-shadow(0 4px 14px rgba(249, 115, 22, 0.45));
+  }
+
+  .gauge-center {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 18%;
+    pointer-events: none;
+  }
+  .status-emoji {
+    font-size: 56px;
+    line-height: 1;
+    margin-bottom: 6px;
+    filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.12));
+    transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .delta-value {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 60px;
+    font-weight: 700;
+    letter-spacing: -0.04em;
+    line-height: 1;
+    color: var(--mode-color, #0a0e1a);
+    transition: color 0.5s ease;
+  }
+  .delta-value .sign {
+    font-size: 0.7em;
+    margin-right: 2px;
+    opacity: 0.85;
+  }
+  .delta-value .pct {
+    font-size: 0.5em;
+    margin-left: 4px;
+    opacity: 0.7;
+    font-weight: 500;
+  }
+  .delta-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: #94a3b8;
+    margin-top: 6px;
+  }
+
+  /* Mode-coupled status block */
+  .status-block {
+    margin-top: 28px;
+    text-align: center;
+    max-width: 380px;
+  }
+  .status-label {
+    font-size: 15px;
+    font-weight: 800;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--mode-color, #0a0e1a);
+    transition: color 0.5s ease;
+  }
+  .status-msg {
+    margin-top: 8px;
+    font-size: 15px;
+    color: #475569;
+    line-height: 1.5;
+  }
+
+  /* Legend */
+  .legend {
+    margin-top: 26px;
+    display: flex;
+    gap: 26px;
+    flex-wrap: wrap;
+    justify-content: center;
+    padding-top: 24px;
+    border-top: 1px dashed rgba(15, 23, 42, 0.1);
+    width: 100%;
+    max-width: 480px;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+  }
+  .legend-item .dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+  }
+  .legend-item.time .dot {
+    background: linear-gradient(135deg, #22d3ee, #0891b2);
+    box-shadow: 0 0 0 4px rgba(6, 182, 212, 0.18);
+  }
+  .legend-item.usage .dot {
+    background: linear-gradient(135deg, #fb923c, #ea580c);
+    box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.18);
+  }
+  .legend-item .label {
+    color: #64748b;
+    font-weight: 500;
+  }
+  .legend-item .value {
+    font-weight: 700;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    color: #0f172a;
+  }
+
+  /* Sparkles for burn mode */
+  .sparkle {
+    position: absolute;
+    font-size: 18px;
+    pointer-events: none;
+    opacity: 0;
+    animation: floatUp 4.5s ease-out infinite;
+    z-index: 0;
+  }
+  @keyframes floatUp {
+    0%   { transform: translateY(0) scale(0) rotate(0deg); opacity: 0; }
+    20%  { opacity: 1; }
+    80%  { opacity: 1; }
+    100% { transform: translateY(-140px) scale(1.3) rotate(45deg); opacity: 0; }
+  }
+
+  /* ====== METRICS ====== */
+  .metrics {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr 1fr;
+    gap: 18px;
+  }
+  .metric {
+    padding: 22px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    transition: transform 0.25s ease;
+  }
+  .metric:hover { transform: translateY(-2px); }
+  .metric-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #64748b;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .metric-value {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 30px;
+    font-weight: 600;
+    letter-spacing: -0.03em;
+    color: #0a0e1a;
+    line-height: 1;
+    display: flex;
+    align-items: baseline;
+    gap: 3px;
+  }
+  .metric-value .unit {
+    font-size: 13px;
+    font-weight: 500;
+    color: #94a3b8;
+    margin-left: 4px;
+    font-family: 'Outfit', sans-serif;
+    letter-spacing: 0.02em;
+  }
+
+  /* Countdown special layout */
+  .metric.countdown .metric-value {
+    display: flex;
+    gap: 6px;
+    align-items: stretch;
+  }
+  .cd-cell {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 44px;
+  }
+  .cd-num {
+    font-size: 26px;
+    font-weight: 700;
+    line-height: 1;
+    color: #0a0e1a;
+  }
+  .cd-lbl {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    color: #94a3b8;
+    margin-top: 6px;
+    font-family: 'Outfit', sans-serif;
+  }
+  .cd-sep {
+    font-size: 20px;
+    color: #cbd5e1;
+    line-height: 1;
+    align-self: flex-start;
+    margin-top: 2px;
+    font-weight: 300;
+  }
+
+  /* ====== CONTROLS ====== */
+  .controls {
+    padding: 28px 32px;
+    display: grid;
+    grid-template-columns: 1fr 1.5fr;
+    gap: 36px;
+    align-items: center;
+  }
+  .control {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .control-label {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #475569;
+  }
+  .control-label .read {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 17px;
+    color: #ea580c;
+    text-transform: none;
+    letter-spacing: -0.02em;
+    font-weight: 700;
+  }
+
+  /* Date input */
+  input[type="datetime-local"] {
+    font-family: 'Outfit', sans-serif;
+    font-size: 15px;
+    padding: 14px 18px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.85);
+    border: 1px solid rgba(15, 23, 42, 0.1);
+    color: #0a0e1a;
+    outline: none;
+    transition: all 0.2s ease;
+    font-weight: 500;
+    width: 100%;
+  }
+  input[type="datetime-local"]:focus {
+    border-color: #06b6d4;
+    background: white;
+    box-shadow: 0 0 0 4px rgba(6, 182, 212, 0.15);
+  }
+
+  /* Slider */
+  input[type="range"].usage-slider {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 16px;
+    border-radius: 999px;
+    background: linear-gradient(to right,
+      #fb923c 0%,
+      #ea580c var(--val, 0%),
+      rgba(15, 23, 42, 0.08) var(--val, 0%),
+      rgba(15, 23, 42, 0.08) 100%);
+    outline: none;
+    cursor: pointer;
+  }
+  input[type="range"].usage-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    background: white;
+    border: 3px solid #ea580c;
+    cursor: grab;
+    box-shadow:
+      0 8px 20px -4px rgba(234, 88, 12, 0.55),
+      0 2px 4px rgba(0,0,0,0.1),
+      inset 0 1px 0 rgba(255,255,255,1);
+    transition: transform 0.15s ease;
+  }
+  input[type="range"].usage-slider::-webkit-slider-thumb:hover { transform: scale(1.12); }
+  input[type="range"].usage-slider::-webkit-slider-thumb:active { cursor: grabbing; transform: scale(1.18); }
+  input[type="range"].usage-slider::-moz-range-thumb {
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    background: white;
+    border: 3px solid #ea580c;
+    cursor: grab;
+    box-shadow: 0 8px 20px -4px rgba(234, 88, 12, 0.55), 0 2px 4px rgba(0,0,0,0.1);
+  }
+
+  /* Quick-set chips */
+  .chips {
+    display: flex;
+    gap: 8px;
+    margin-top: 6px;
+    flex-wrap: wrap;
+  }
+  .chip {
+    font-family: 'Outfit', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 7px 13px;
+    background: rgba(255, 255, 255, 0.7);
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    border-radius: 999px;
+    cursor: pointer;
+    color: #475569;
+    transition: all 0.15s ease;
+  }
+  .chip:hover {
+    background: white;
+    border-color: #ea580c;
+    color: #ea580c;
+    transform: translateY(-1px);
+  }
+
+  /* ====== MODE COLORS ====== */
+  .mode-burn    { --mode-color: #059669; --mode-glow: rgba(16, 185, 129, 0.55); }
+  .mode-cruise  { --mode-color: #65a30d; --mode-glow: rgba(132, 204, 22, 0.45); }
+  .mode-careful { --mode-color: #d97706; --mode-glow: rgba(245, 158, 11, 0.5); }
+  .mode-save    { --mode-color: #e11d48; --mode-glow: rgba(244, 63, 94, 0.55); }
+
+  /* Save mode pulse */
+  .mode-save .delta-value {
+    animation: warn-pulse 1.6s ease-in-out infinite;
+  }
+  @keyframes warn-pulse {
+    0%, 100% { transform: scale(1); }
+    50%      { transform: scale(1.05); }
+  }
+
+  /* Burn mode emoji bounce */
+  .mode-burn .status-emoji {
+    animation: bounce 1.8s ease-in-out infinite;
+  }
+  @keyframes bounce {
+    0%, 100% { transform: translateY(0) rotate(-2deg); }
+    50%      { transform: translateY(-6px) rotate(2deg); }
+  }
+
+  /* ====== META PILLS & HINT BANNER ====== */
+  .meta-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 4px;
+  }
+  .meta-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 11px;
+    background: rgba(255, 255, 255, 0.6);
+    border: 1px solid rgba(15, 23, 42, 0.06);
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: #475569;
+    font-family: 'Outfit', sans-serif;
+  }
+  .meta-pill .ico { opacity: 0.7; font-size: 12px; }
+  .meta-pill code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    background: transparent;
+    padding: 0;
+    color: #0f172a;
+    font-weight: 700;
+  }
+
+  /* Hint banner */
+  .hint-banner {
+    padding: 16px 22px;
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    font-size: 14px;
+    color: #92400e;
+    background: linear-gradient(135deg, rgba(254, 240, 199, 0.85) 0%, rgba(254, 215, 170, 0.7) 100%);
+    border: 1px solid rgba(234, 88, 12, 0.25);
+    border-radius: 22px;
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    box-shadow: 0 14px 36px -16px rgba(234, 88, 12, 0.3);
+  }
+  .hint-banner .hint-emoji { font-size: 26px; line-height: 1; }
+  .hint-banner strong { color: #9a3412; font-weight: 700; }
+  .hint-banner p {
+    margin: 4px 0 0;
+    font-size: 13px;
+    color: #78350f;
+    line-height: 1.5;
+  }
+  .hint-banner .hint-cta {
+    display: inline-block;
+    margin-top: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 6px 12px;
+    background: rgba(255, 255, 255, 0.75);
+    border: 1px solid rgba(234, 88, 12, 0.35);
+    border-radius: 999px;
+    color: #9a3412;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .hint-banner .hint-cta:hover {
+    background: white;
+    transform: translateY(-1px);
+  }
+
+  /* ====== RESPONSIVE ====== */
+  @media (max-width: 880px) {
+    .metrics { grid-template-columns: 1fr; }
+    .controls { grid-template-columns: 1fr; gap: 24px; padding: 24px; }
+  }
+  @media (max-width: 560px) {
+    #app { padding: 16px 14px; }
+    .hero { padding: 32px 18px 28px; }
+    .gauge-wrap { max-width: 320px; }
+    .delta-value { font-size: 46px; }
+    .status-emoji { font-size: 44px; }
+    .brand-name { font-size: 19px; }
+    .logo-mark { width: 44px; height: 44px; font-size: 20px; }
+    .live-pill { padding: 7px 12px; font-size: 10px; }
+    .cd-num { font-size: 22px; }
+    .cd-cell { min-width: 38px; }
+  }
+
+  /* Footer */
+  .foot {
+    text-align: center;
+    font-size: 12px;
+    color: #94a3b8;
+    padding: 6px 0 4px;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+  }
+  .foot strong { color: #475569; font-weight: 700; }
+</style>
+</head>
+<body>
+<div id="app" v-cloak>
+  <main :class="`mode-${status.mode}`">
+
+    <!-- Header -->
+    <header class="brand">
+      <div class="logo-mark">⚡</div>
+      <div class="brand-text">
+        <div class="brand-name">claude burn rate</div>
+        <div class="brand-tag">live weekly pace · feuer oder sparen?</div>
+      </div>
+      <div class="live-pill">
+        <span class="pulse"></span>
+        LIVE
+      </div>
+    </header>
+
+    <!-- Pre-week warning -->
+    <section v-if="preWeek" class="hint-banner">
+      <span class="hint-emoji">🤔</span>
+      <div>
+        <strong>Dein Reset ist {{ Math.ceil(daysUntilWeekStart) }} Tage entfernt — passt das?</strong>
+        <p>
+          Claude nutzt ein rolling <strong>7-Tage-Fenster</strong>. Mit deinem Datum würde die Woche erst am <strong>{{ weekStartLabel }}</strong> starten — bis dahin bleibt "Zeit verstrichen" bei 0% und der Vergleich kippt unrealistisch ins Rot.
+        </p>
+        <button class="hint-cta" @click="snapResetToSevenDays">📅 Reset auf 7 Tage ab jetzt setzen</button>
+      </div>
+    </section>
+
+    <!-- Hero: the big gauge -->
+    <section class="hero glass">
+      <div class="gauge-wrap">
+        <svg class="gauge" viewBox="-10 -10 420 420">
+          <defs>
+            <linearGradient id="timeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%"  stop-color="#22d3ee"/>
+              <stop offset="100%" stop-color="#0891b2"/>
+            </linearGradient>
+            <linearGradient id="usageGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%"  stop-color="#fb923c"/>
+              <stop offset="100%" stop-color="#ea580c"/>
+            </linearGradient>
+          </defs>
+
+          <!-- Time outer ring -->
+          <circle class="track time-track"
+                  cx="200" cy="200" r="170"
+                  transform="rotate(-90 200 200)"/>
+          <circle class="track time-fill"
+                  cx="200" cy="200" r="170"
+                  transform="rotate(-90 200 200)"
+                  :stroke-dasharray="TIME_CIRC"
+                  :stroke-dashoffset="timeOffset"/>
+
+          <!-- Usage inner ring -->
+          <circle class="track usage-track"
+                  cx="200" cy="200" r="130"
+                  transform="rotate(-90 200 200)"/>
+          <circle class="track usage-fill"
+                  cx="200" cy="200" r="130"
+                  transform="rotate(-90 200 200)"
+                  :stroke-dasharray="USAGE_CIRC"
+                  :stroke-dashoffset="usageOffset"/>
+        </svg>
+
+        <div class="gauge-center">
+          <div class="status-emoji">{{ status.emoji }}</div>
+          <div class="delta-value">
+            <span class="sign">{{ delta >= 0 ? '+' : '−' }}</span>{{ Math.abs(delta).toFixed(1) }}<span class="pct">%</span>
+          </div>
+          <div class="delta-label">Headroom Delta</div>
+        </div>
+
+        <!-- burn mode sparkles -->
+        <template v-if="status.mode === 'burn'">
+          <span v-for="i in 8" :key="i" class="sparkle" :style="sparkleStyle(i)">
+            {{ ['✨','🚀','💫','⚡'][i % 4] }}
+          </span>
+        </template>
+      </div>
+
+      <div class="status-block">
+        <div class="status-label">{{ status.label }}</div>
+        <div class="status-msg">{{ status.message }}</div>
+      </div>
+
+      <div class="legend">
+        <div class="legend-item time">
+          <span class="dot"></span>
+          <span class="label">Zeit verstrichen</span>
+          <span class="value">{{ timePercent.toFixed(1) }}%</span>
+        </div>
+        <div class="legend-item usage">
+          <span class="dot"></span>
+          <span class="label">Usage verbraucht</span>
+          <span class="value">{{ usagePercent.toFixed(1) }}%</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Metrics row -->
+    <section class="metrics">
+      <div class="metric glass countdown">
+        <div class="metric-label">⏱ Reset in</div>
+        <div class="metric-value">
+          <div class="cd-cell">
+            <span class="cd-num">{{ countdown.days }}</span>
+            <span class="cd-lbl">TAGE</span>
+          </div>
+          <div class="cd-sep">:</div>
+          <div class="cd-cell">
+            <span class="cd-num">{{ pad(countdown.hours) }}</span>
+            <span class="cd-lbl">STD</span>
+          </div>
+          <div class="cd-sep">:</div>
+          <div class="cd-cell">
+            <span class="cd-num">{{ pad(countdown.minutes) }}</span>
+            <span class="cd-lbl">MIN</span>
+          </div>
+          <div class="cd-sep">:</div>
+          <div class="cd-cell">
+            <span class="cd-num">{{ pad(countdown.seconds) }}</span>
+            <span class="cd-lbl">SEK</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="metric glass">
+        <div class="metric-label">🔋 Daily Budget</div>
+        <div class="metric-value">
+          {{ dailyBudget.toFixed(1) }}<span class="unit">% / Tag</span>
+        </div>
+      </div>
+
+      <div class="metric glass">
+        <div class="metric-label">⚡ Quota übrig</div>
+        <div class="metric-value">
+          {{ remainingPercent.toFixed(1) }}<span class="unit">%</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Controls -->
+    <section class="controls glass">
+      <div class="control">
+        <div class="control-label">📅 Weekly Reset</div>
+        <input type="datetime-local" v-model="resetDate">
+        <div class="meta-row">
+          <span class="meta-pill"><span class="ico">🌐</span> <code>{{ timezone }}</code></span>
+          <span class="meta-pill"><span class="ico">📍</span> Woche seit <code>{{ weekStartLabel }}</code></span>
+        </div>
+      </div>
+
+      <div class="control">
+        <div class="control-label">
+          <span>🔥 Weekly Usage</span>
+          <span class="read">{{ usagePercent.toFixed(1) }}%</span>
+        </div>
+        <input
+          type="range"
+          min="0" max="100" step="0.1"
+          v-model.number="usagePercent"
+          class="usage-slider"
+          :style="`--val: ${Math.min(100, usagePercent)}%`">
+        <div class="chips">
+          <button class="chip" @click="usagePercent = 0">0%</button>
+          <button class="chip" @click="usagePercent = 25">25%</button>
+          <button class="chip" @click="usagePercent = 50">50%</button>
+          <button class="chip" @click="usagePercent = 75">75%</button>
+          <button class="chip" @click="usagePercent = timePercent">= Zeit ({{ timePercent.toFixed(0) }}%)</button>
+        </div>
+      </div>
+    </section>
+
+    <div class="foot">
+      build by you · for you · <strong>shroomlife flavor</strong> ✨
+    </div>
+
+  </main>
+</div>
+
+<script>
+const { createApp, ref, computed, onMounted, onUnmounted } = Vue;
+
+createApp({
+  setup() {
+    // ===== Helpers =====
+    function pad2(n) { return String(n).padStart(2, '0'); }
+    function toLocalISO(d) {
+      return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}T${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
+    }
+    function getDefaultReset() {
+      // Default: next Monday 09:00 local
+      const d = new Date();
+      const day = d.getDay(); // 0 = Sun
+      const offset = day === 1 ? 7 : ((8 - day) % 7) || 7;
+      d.setDate(d.getDate() + offset);
+      d.setHours(9, 0, 0, 0);
+      return toLocalISO(d);
+    }
+
+    // ===== State =====
+    const resetDate    = ref(getDefaultReset());
+    const usagePercent = ref(45);
+    const now          = ref(Date.now());
+
+    let timer;
+    onMounted(() => {
+      timer = setInterval(() => { now.value = Date.now(); }, 1000);
+    });
+    onUnmounted(() => clearInterval(timer));
+
+    // ===== Constants =====
+    const WEEK_MS    = 7 * 24 * 60 * 60 * 1000;
+    const TIME_CIRC  = 2 * Math.PI * 170;
+    const USAGE_CIRC = 2 * Math.PI * 130;
+
+    // ===== Computed =====
+    const resetTs = computed(() => {
+      const t = new Date(resetDate.value).getTime();
+      return isNaN(t) ? Date.now() + WEEK_MS : t;
+    });
+    const weekStart      = computed(() => resetTs.value - WEEK_MS);
+    const timeElapsedMs  = computed(() => Math.max(0, Math.min(WEEK_MS, now.value - weekStart.value)));
+    const timeRemainingMs= computed(() => Math.max(0, resetTs.value - now.value));
+    const timePercent    = computed(() => (timeElapsedMs.value / WEEK_MS) * 100);
+
+    // ===== Timezone & week-start transparency =====
+    const timezone = computed(() => {
+      try {
+        const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        const parts = new Date().toLocaleString('de-DE', { timeZoneName: 'short' }).split(' ');
+        const abbr = parts[parts.length - 1];
+        return `${tz} · ${abbr}`;
+      } catch { return 'Lokale Zeit'; }
+    });
+    const weekStartLabel = computed(() =>
+      new Date(weekStart.value).toLocaleString('de-DE', {
+        day: '2-digit', month: '2-digit', year: 'numeric',
+        hour: '2-digit', minute: '2-digit'
+      })
+    );
+    const preWeek = computed(() => now.value < weekStart.value);
+    const daysUntilWeekStart = computed(() =>
+      Math.max(0, (weekStart.value - now.value) / 86400000)
+    );
+
+    function snapResetToSevenDays() {
+      const d = new Date(Date.now() + WEEK_MS);
+      resetDate.value = toLocalISO(d);
+    }
+
+    // Delta: positive => time > usage => you have headroom
+    //        negative => usage > time => you must save
+    const delta = computed(() => timePercent.value - usagePercent.value);
+
+    const status = computed(() => {
+      const d = delta.value;
+      const u = usagePercent.value;
+      if (u >= 100) return {
+        mode: 'save', emoji: '🚫', label: 'AUSGESCHÖPFT',
+        message: 'Quota leer — bis Reset abwarten oder umsteigen.'
+      };
+      if (timeRemainingMs.value <= 0) return {
+        mode: 'cruise', emoji: '🎉', label: 'RESET DA',
+        message: 'Die Woche ist vorbei — frische Quota! Neues Datum eintragen.'
+      };
+      if (preWeek.value) return {
+        mode: 'careful', emoji: '🤔', label: 'PRE-WEEK',
+        message: `Woche startet erst in ${Math.ceil(daysUntilWeekStart.value)} Tagen — Reset-Datum prüfen.`
+      };
+      if (d > 12) return {
+        mode: 'burn', emoji: '🚀', label: 'FEUER FREI',
+        message: 'Massig Headroom — Vollgas drücken, Bro!'
+      };
+      if (d >= 0) return {
+        mode: 'cruise', emoji: '🟢', label: 'CHILL PACE',
+        message: 'Alles im Flow — pace passt perfekt.'
+      };
+      if (d > -12) return {
+        mode: 'careful', emoji: '⚠️', label: 'AUGE DRAUF',
+        message: 'Bisschen flott — locker auf die Bremse treten.'
+      };
+      return {
+        mode: 'save', emoji: '🔋', label: 'SPARMODUS',
+        message: 'Du brennst zu schnell — jetzt clever sparen!'
+      };
+    });
+
+    const countdown = computed(() => {
+      const ms = timeRemainingMs.value;
+      return {
+        days:    Math.floor(ms / 86400000),
+        hours:   Math.floor((ms % 86400000) / 3600000),
+        minutes: Math.floor((ms % 3600000) / 60000),
+        seconds: Math.floor((ms % 60000) / 1000)
+      };
+    });
+
+    const remainingPercent = computed(() => Math.max(0, 100 - usagePercent.value));
+    const daysRemaining    = computed(() => timeRemainingMs.value / 86400000);
+    const dailyBudget      = computed(() =>
+      daysRemaining.value > 0.005
+        ? remainingPercent.value / daysRemaining.value
+        : 0
+    );
+
+    // SVG offsets
+    const timeOffset  = computed(() =>
+      TIME_CIRC * (1 - Math.min(100, timePercent.value) / 100)
+    );
+    const usageOffset = computed(() =>
+      USAGE_CIRC * (1 - Math.min(100, usagePercent.value) / 100)
+    );
+
+    // ===== Template helpers =====
+    function pad(n) { return pad2(n); }
+    function sparkleStyle(i) {
+      const left  = 8 + (i * 11.7) % 84;
+      const top   = 55 + (i * 9.3) % 35;
+      const delay = (i * 0.55) % 4;
+      return {
+        left: `${left}%`,
+        top:  `${top}%`,
+        animationDelay: `${delay}s`
+      };
+    }
+
+    return {
+      // state
+      resetDate, usagePercent,
+      // computed
+      timePercent, delta, status, countdown,
+      remainingPercent, dailyBudget,
+      timeOffset, usageOffset,
+      // transparency
+      timezone, weekStartLabel, preWeek, daysUntilWeekStart,
+      // constants
+      TIME_CIRC, USAGE_CIRC,
+      // helpers
+      pad, sparkleStyle, snapResetToSevenDays, Math
+    };
+  }
+}).mount('#app');
+</script>
+</body>
+</html>
