@@ -18,6 +18,7 @@ import UpdateToast from './components/UpdateToast.vue'
 import InstallIosModal from './components/InstallIosModal.vue'
 import InstallCta from './components/InstallCta.vue'
 import OnboardingCard from './components/OnboardingCard.vue'
+import ResetDialog from './components/ResetDialog.vue'
 import { useGitHubAuth } from './composables/useGitHubAuth'
 import { useGistSync } from './composables/useGistSync'
 import type { Mode } from './types/burn'
@@ -136,6 +137,31 @@ const iosInstallOpen = ref(false)
 function showIosInstall(): void { iosInstallOpen.value = true }
 function closeIosInstall(): void { iosInstallOpen.value = false }
 
+// Reset confirm dialog
+const resetOpen = ref(false)
+function openReset(): void { resetOpen.value = true }
+function cancelReset(): void { resetOpen.value = false }
+function performReset(): void {
+  auth.logout()
+  // Nuke every burnRate:* key — covers main state, gist pointer, last-synced,
+  // any future UI prefs we might add. Other origins' storage is untouched.
+  try {
+    const keys: string[] = []
+    for (let i = 0; i < localStorage.length; i += 1) {
+      const k = localStorage.key(i)
+      if (k && k.startsWith('burnRate:')) keys.push(k)
+    }
+    for (const k of keys) localStorage.removeItem(k)
+  } catch { /* storage may be unavailable */ }
+  try {
+    sessionStorage.removeItem('burnRate:gh:pkce_verifier')
+    sessionStorage.removeItem('burnRate:gh:oauth_state')
+  } catch { /* noop */ }
+  resetOpen.value = false
+  // Full reload so module-level singletons re-init from a clean slate.
+  window.location.reload()
+}
+
 watch(() => auth.phase.value, (p) => {
   if (p === 'success') pushToast(`Eingeloggt als @${auth.user.value?.login ?? ''}`, 'celebrate')
   if (p === 'error' && auth.errorMessage.value) pushToast(auth.errorMessage.value)
@@ -253,6 +279,15 @@ const modeClass = computed(() => `mode-${c.status.value.mode}`)
       @sign-in="() => { void auth.startLogin() }"
       @sync-now="() => { void sync.pushNow(); pushToast('Synchronisiere…') }"
       @logout="() => { auth.logout(); pushToast('Abgemeldet') }"
+      @reset-app="openReset"
+    />
+
+    <ResetDialog
+      :open="resetOpen"
+      :logged-in="auth.isAuthenticated.value"
+      :login="auth.user.value ? auth.user.value.login : null"
+      @cancel="cancelReset"
+      @confirm="performReset"
     />
 
     <UpdateToast />

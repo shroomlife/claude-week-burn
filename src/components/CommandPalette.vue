@@ -8,6 +8,7 @@ import IconShare from '~icons/ph/share-network'
 import IconCloudUp from '~icons/ph/cloud-arrow-up'
 import IconSignout from '~icons/ph/sign-out'
 import IconSignin from '~icons/ph/sign-in'
+import IconTrash from '~icons/ph/trash'
 import { AUTH_ENABLED } from '../config/auth'
 
 const props = defineProps<{ open: boolean; authenticated: boolean }>()
@@ -20,10 +21,11 @@ const emit = defineEmits<{
   (e: 'sync-now'): void
   (e: 'logout'): void
   (e: 'sign-in'): void
+  (e: 'reset-app'): void
 }>()
 
 interface Action {
-  id: 'snap' | 'sync' | 'share' | 'new-week' | 'sync-now' | 'logout' | 'sign-in'
+  id: 'snap' | 'sync' | 'share' | 'new-week' | 'sync-now' | 'logout' | 'sign-in' | 'reset-app'
   icon: Component
   title: string
   hint: string
@@ -100,7 +102,16 @@ const authActions = computed<Action[]>(() => {
   ]
 })
 
-const actions = computed<Action[]>(() => [...baseActions, ...authActions.value])
+const resetAction: Action = {
+  id: 'reset-app',
+  icon: IconTrash,
+  title: 'App zurücksetzen',
+  hint: 'Löscht alle lokalen Daten und startet wieder im Onboarding.',
+  keys: '',
+  emit: () => emit('reset-app'),
+}
+
+const actions = computed<Action[]>(() => [...baseActions, ...authActions.value, resetAction])
 
 const query = ref('')
 const selectedIndex = ref(0)
