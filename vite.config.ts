@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import { VitePWA } from 'vite-plugin-pwa'
+import Icons from 'unplugin-icons/vite'
 
 // For GitHub Pages: served under /<repo>/. Override with VITE_BASE if you fork to a different repo name.
 const base = process.env.VITE_BASE ?? (process.env.GITHUB_ACTIONS ? '/claude-week-burn/' : '/')
@@ -9,6 +10,7 @@ export default defineConfig({
   base,
   plugins: [
     vue(),
+    Icons({ compiler: 'vue3', defaultStyle: 'display: inline-block; vertical-align: middle;' }),
     VitePWA({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.svg', 'favicon.ico', 'apple-touch-icon-180x180.png'],

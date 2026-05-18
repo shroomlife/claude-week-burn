@@ -2,17 +2,79 @@
 <html lang="de">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-180x180.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+
+    <!-- Primary Meta -->
+    <title>Claude Burn Rate — Live Pace Tracker für deine wöchentliche Claude-Quota</title>
+    <meta name="description" content="Tracke deine Claude Code Usage gegen das rolling 7-Tage-Limit. Wie viel Quota hast du noch? Reichts bis zum Reset? Open-Source Vue 3 PWA, läuft lokal — kein Account, keine Tracker." />
+    <meta name="keywords" content="claude code usage, claude weekly limit, claude pro quota, anthropic claude rate limit, claude weekly reset, claude burn rate, claude code limit tracker, claude max plan, rolling 7 day quota" />
+    <meta name="author" content="shroomlife" />
     <meta name="theme-color" content="#ea580c" />
+    <meta name="color-scheme" content="light" />
+
+    <!-- Favicons & PWA -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-180x180.png" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Burn Rate" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <meta name="description" content="Live weekly Claude burn rate tracker — shroomlife flavor" />
-    <title>Claude Burn Rate · Live Weekly Pace</title>
+    <meta name="mobile-web-app-capable" content="yes" />
+
+    <!-- Canonical -->
+    <link rel="canonical" href="https://shroomlife.github.io/claude-week-burn/" />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://shroomlife.github.io/claude-week-burn/" />
+    <meta property="og:title" content="Claude Burn Rate — Live Pace Tracker für deine wöchentliche Claude-Quota" />
+    <meta property="og:description" content="Tracke deine Claude Code Usage gegen das rolling 7-Tage-Limit. Live-Pace, Daily Budget, Forecast — alles lokal, installierbar als PWA." />
+    <meta property="og:image" content="https://shroomlife.github.io/claude-week-burn/pwa-512x512.png" />
+    <meta property="og:image:width" content="512" />
+    <meta property="og:image:height" content="512" />
+    <meta property="og:locale" content="de_DE" />
+    <meta property="og:site_name" content="Claude Burn Rate" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Claude Burn Rate — Live Pace Tracker" />
+    <meta name="twitter:description" content="Tracke deine Claude Quota gegen das rolling 7-Tage-Limit. Lokal, installierbar, open source." />
+    <meta name="twitter:image" content="https://shroomlife.github.io/claude-week-burn/pwa-512x512.png" />
+
+    <!-- JSON-LD: SoftwareApplication -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "Claude Burn Rate",
+        "description": "Live Pace Tracker für die wöchentliche Claude-Quota. Tracke deine Claude Code Usage gegen das rolling 7-Tage-Limit. Open Source, lokal, installierbar als PWA.",
+        "url": "https://shroomlife.github.io/claude-week-burn/",
+        "applicationCategory": "ProductivityApplication",
+        "operatingSystem": "Web · iOS · Android · Windows · macOS",
+        "browserRequirements": "Modern browser with localStorage + Service Worker support",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "EUR"
+        },
+        "softwareVersion": "0.2.0",
+        "creator": {
+          "@type": "Organization",
+          "name": "shroomlife",
+          "url": "https://github.com/shroomlife"
+        },
+        "license": "https://opensource.org/licenses/MIT",
+        "inLanguage": "de"
+      }
+    </script>
   </head>
   <body>
     <div id="app"></div>
+    <noscript>
+      <p style="padding: 24px; font-family: system-ui; color: #475569;">
+        Diese App braucht JavaScript. Aktiviere es in den Browser-Einstellungen, um deine Claude Burn Rate zu tracken.
+      </p>
+    </noscript>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

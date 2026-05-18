@@ -14,15 +14,9 @@ export interface Countdown {
   seconds: number
 }
 
-export interface HistoryEntry {
-  date: string
-  usagePercent: number
-}
-
 export interface PersistedDataV1 {
   resetDate: string
   usagePercent: number
-  history: HistoryEntry[]
   lastSeen: string
 }
 

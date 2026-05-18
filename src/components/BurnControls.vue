@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { Globe, MapPin } from 'lucide-vue-next'
+import DatePicker from './DatePicker.vue'
+import UsageStepper from './UsageStepper.vue'
 
 const props = defineProps<{
   usagePercent: number
@@ -43,36 +44,32 @@ function setUsage(n: number): void {
   }
 }
 
-function onDate(e: Event): void {
-  const target = e.target as HTMLInputElement
-  if (target.value) emit('update:resetDate', target.value)
-}
-
-const sliderStyle = computed(() => ({
-  '--val': `${props.usagePercent}%`,
-}))
+const sliderStyle = computed(() => ({ '--val': `${props.usagePercent}%` }))
 </script>
 
 <template>
-  <section class="controls glass">
+  <section class="controls card">
     <div class="control">
-      <div class="control-label">📅 Weekly Reset</div>
-      <input
-        type="datetime-local"
-        :value="resetDate"
-        @change="onDate"
+      <div class="control-label">
+        <span class="eyebrow">Weekly Reset</span>
+      </div>
+      <DatePicker
+        :model-value="resetDate"
+        @update:model-value="emit('update:resetDate', $event)"
       />
-      <div class="meta-row">
-        <span class="meta-pill"><Globe :size="12" :stroke-width="2.2" /> <code>{{ timezoneLabel }}</code></span>
-        <span class="meta-pill"><MapPin :size="12" :stroke-width="2.2" /> Woche ab <code>{{ weekStartLabel }}</code></span>
+      <div class="meta">
+        <span class="meta-pill"><code>{{ timezoneLabel }}</code></span>
+        <span class="meta-pill">Woche ab <code>{{ weekStartLabel }}</code></span>
       </div>
     </div>
 
     <div class="control">
       <div class="control-label">
-        <span>🔥 Weekly Usage</span>
-        <span class="read num">{{ usagePercent }}%</span>
+        <span class="eyebrow">Weekly Usage</span>
       </div>
+
+      <UsageStepper :value="usagePercent" :min="0" :max="100" @change="setUsage" />
+
       <input
         type="range"
         min="0"
@@ -89,12 +86,12 @@ const sliderStyle = computed(() => ({
         aria-label="Weekly Usage Prozent"
       />
       <div class="chips">
-        <button class="chip" type="button" @click="setUsage(0)">0%</button>
-        <button class="chip" type="button" @click="setUsage(25)">25%</button>
-        <button class="chip" type="button" @click="setUsage(50)">50%</button>
-        <button class="chip" type="button" @click="setUsage(75)">75%</button>
+        <button class="chip" type="button" @click="setUsage(0)">0</button>
+        <button class="chip" type="button" @click="setUsage(25)">25</button>
+        <button class="chip" type="button" @click="setUsage(50)">50</button>
+        <button class="chip" type="button" @click="setUsage(75)">75</button>
         <button class="chip chip-sync" type="button" @click="setUsage(timePercent)">
-          = Zeit ({{ timePercent }}%)
+          = Zeit · {{ timePercent }}
         </button>
       </div>
     </div>
@@ -103,149 +100,117 @@ const sliderStyle = computed(() => ({
 
 <style scoped>
 .controls {
-  padding: 26px 28px;
+  padding: 26px 30px;
   display: grid;
-  grid-template-columns: 1fr 1.4fr;
+  grid-template-columns: 1fr 1.25fr;
   gap: 32px;
   align-items: start;
 }
-.control {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
+.control { display: flex; flex-direction: column; gap: 12px; }
 .control-label {
   display: flex;
   justify-content: space-between;
   align-items: baseline;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--c-mute);
-}
-.control-label .read {
-  font-family: var(--font-mono);
-  font-size: 17px;
-  color: var(--c-flame-2);
-  text-transform: none;
-  letter-spacing: -0.02em;
-  font-weight: 700;
-}
-
-input[type='datetime-local'] {
-  font-family: var(--font-sans);
-  font-size: 15px;
-  padding: 13px 16px;
-  border-radius: var(--r-input);
-  background: rgba(255, 255, 255, 0.92);
-  border: 1px solid rgba(15, 23, 42, 0.1);
-  color: var(--c-ink);
-  outline: none;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
-  font-weight: 500;
-  width: 100%;
-}
-input[type='datetime-local']:focus-visible {
-  border-color: #06b6d4;
-  background: white;
-  box-shadow: 0 0 0 4px rgba(6, 182, 212, 0.15);
 }
 
 .usage-slider {
   -webkit-appearance: none;
   appearance: none;
   width: 100%;
-  height: 16px;
+  height: 8px;
   border-radius: var(--r-pill);
   background: linear-gradient(
     to right,
     #fb923c 0%,
     #ea580c var(--val, 0%),
-    rgba(15, 23, 42, 0.08) var(--val, 0%),
-    rgba(15, 23, 42, 0.08) 100%
+    rgba(15, 23, 42, 0.06) var(--val, 0%),
+    rgba(15, 23, 42, 0.06) 100%
   );
   outline: none;
   cursor: pointer;
+  margin-top: 4px;
 }
 .usage-slider::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 30px;
-  height: 30px;
+  width: 22px;
+  height: 22px;
   border-radius: 50%;
   background: white;
-  border: 3px solid #ea580c;
+  border: 2px solid #ea580c;
   cursor: grab;
-  box-shadow: 0 8px 20px -4px rgba(234, 88, 12, 0.55),
-              0 2px 4px rgba(0, 0, 0, 0.1),
-              inset 0 1px 0 rgba(255, 255, 255, 1);
   transition: transform 0.15s ease;
 }
-.usage-slider::-webkit-slider-thumb:hover { transform: scale(1.12); }
-.usage-slider::-webkit-slider-thumb:active { cursor: grabbing; transform: scale(1.18); }
+.usage-slider::-webkit-slider-thumb:hover { transform: scale(1.1); }
+.usage-slider::-webkit-slider-thumb:active { cursor: grabbing; transform: scale(1.15); }
 .usage-slider::-moz-range-thumb {
-  width: 30px;
-  height: 30px;
+  width: 22px;
+  height: 22px;
   border-radius: 50%;
   background: white;
-  border: 3px solid #ea580c;
+  border: 2px solid #ea580c;
   cursor: grab;
-  box-shadow: 0 8px 20px -4px rgba(234, 88, 12, 0.55), 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 .usage-slider:focus-visible::-webkit-slider-thumb {
-  box-shadow: 0 0 0 4px rgba(6, 182, 212, 0.3),
-              0 8px 20px -4px rgba(234, 88, 12, 0.55);
+  box-shadow: 0 0 0 4px rgba(234, 88, 12, 0.25);
 }
 
 .chips {
   display: flex;
-  gap: 7px;
-  margin-top: 6px;
+  gap: 6px;
   flex-wrap: wrap;
 }
 .chip {
-  font-family: var(--font-sans);
+  font-family: var(--font-mono);
   font-size: 12px;
-  font-weight: 600;
-  padding: 7px 13px;
-  background: rgba(255, 255, 255, 0.78);
-  border: 1px solid rgba(15, 23, 42, 0.08);
+  font-weight: 500;
+  padding: 6px 11px;
+  background: rgba(15, 23, 42, 0.04);
+  border: 1px solid transparent;
   border-radius: var(--r-pill);
-  color: var(--c-mute);
-  transition: transform 0.15s ease, background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+  color: var(--c-ink-soft);
+  transition: background 0.15s ease, transform 0.15s ease, color 0.15s ease;
+  letter-spacing: -0.02em;
+  cursor: pointer;
 }
 .chip:hover {
-  background: white;
-  border-color: var(--c-flame-2);
-  color: var(--c-flame-2);
+  background: rgba(15, 23, 42, 0.08);
+  color: var(--c-ink);
   transform: translateY(-1px);
 }
-.chip-sync { border-style: dashed; }
+.chip-sync {
+  border: 1px dashed rgba(234, 88, 12, 0.35);
+  background: transparent;
+  color: var(--c-flame-2);
+}
+.chip-sync:hover {
+  background: rgba(234, 88, 12, 0.08);
+  color: var(--c-flame-2);
+}
 
-.meta-row {
+.meta {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 4px;
+  gap: 6px;
+  margin-top: 2px;
 }
 .meta-pill {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 5px 11px;
-  background: rgba(255, 255, 255, 0.6);
-  border: 1px solid rgba(15, 23, 42, 0.06);
+  padding: 3px 9px;
+  background: transparent;
+  border: 1px solid var(--c-hair);
   border-radius: var(--r-pill);
   font-size: 11px;
-  font-weight: 600;
+  font-weight: 500;
   color: var(--c-mute);
 }
 .meta-pill code {
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: 10.5px;
   color: var(--c-ink-soft);
-  font-weight: 700;
+  font-weight: 500;
 }
 
 @media (max-width: 880px) {

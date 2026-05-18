@@ -85,11 +85,15 @@ export interface BurnComputeds {
   dailyBudget: ComputedRef<number>      // integer
   ghostUsage: ComputedRef<number>       // 0..200 projected end-of-week
   forecast: ComputedRef<Forecast>
+  forecastReliable: ComputedRef<boolean> // true after ~24h elapsed within the week
   tomorrowSentence: ComputedRef<string> // "Tomorrow Robin" narrative
   preWeek: ComputedRef<boolean>
   daysUntilWeekStart: ComputedRef<number>
   weekStartLabel: ComputedRef<string>
   timezoneLabel: ComputedRef<string>
+  msPerPercent: ComputedRef<number>     // WEEK_MS / 100 — constant
+  msUntilNextTick: ComputedRef<number>  // until timePercent advances by 1
+  nextTickProgress: ComputedRef<number> // 0..1 progress toward next tick
 }
 
 export function useBurnComputeds(now: Ref<number>): BurnComputeds {
@@ -206,6 +210,22 @@ export function useBurnComputeds(now: Ref<number>): BurnComputeds {
     }
   })
 
+  // Reliability gate: forecast is reliable after ~24h elapsed.
+  const forecastReliable = computed(() => {
+    const elapsedDays = timeElapsedMs.value / DAY_MS
+    return elapsedDays >= 1
+  })
+
+  // Time-percent tick countdown — when does timePercent advance to next integer?
+  const msPerPercent = computed(() => burnConstants.WEEK_MS / 100)
+  const msUntilNextTick = computed(() => {
+    const nextWholeMs = (Math.floor(timeElapsedMs.value / msPerPercent.value) + 1) * msPerPercent.value
+    return Math.max(0, nextWholeMs - timeElapsedMs.value)
+  })
+  const nextTickProgress = computed(() => {
+    return 1 - msUntilNextTick.value / msPerPercent.value
+  })
+
   return {
     resetTs,
     weekStart,
@@ -218,10 +238,14 @@ export function useBurnComputeds(now: Ref<number>): BurnComputeds {
     dailyBudget,
     ghostUsage,
     forecast,
+    forecastReliable,
     tomorrowSentence,
     preWeek,
     daysUntilWeekStart,
     weekStartLabel,
     timezoneLabel,
+    msPerPercent,
+    msUntilNextTick,
+    nextTickProgress,
   }
 }

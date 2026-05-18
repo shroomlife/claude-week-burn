@@ -1,6 +1,10 @@
 <script setup lang="ts">
-import { computed, nextTick, ref, watch } from 'vue'
-import { Search, CalendarClock, Equal, RefreshCw, Share2 } from 'lucide-vue-next'
+import { computed, nextTick, ref, watch, type Component } from 'vue'
+import IconSearch from '~icons/ph/magnifying-glass'
+import IconCalendar from '~icons/ph/calendar-plus'
+import IconEqual from '~icons/ph/equals'
+import IconRefresh from '~icons/ph/arrows-clockwise'
+import IconShare from '~icons/ph/share-network'
 
 const props = defineProps<{ open: boolean }>()
 const emit = defineEmits<{
@@ -13,7 +17,7 @@ const emit = defineEmits<{
 
 interface Action {
   id: 'snap' | 'sync' | 'share' | 'new-week'
-  icon: typeof Search
+  icon: Component
   title: string
   hint: string
   keys: string
@@ -23,7 +27,7 @@ interface Action {
 const actions: Action[] = [
   {
     id: 'snap',
-    icon: CalendarClock,
+    icon: IconCalendar,
     title: 'Reset auf 7 Tage ab jetzt',
     hint: 'Verschiebt das Wochenende-Datum exakt 7 Tage in die Zukunft.',
     keys: 'R',
@@ -31,7 +35,7 @@ const actions: Action[] = [
   },
   {
     id: 'sync',
-    icon: Equal,
+    icon: IconEqual,
     title: 'Usage = Zeit',
     hint: 'Setzt den Usage-Slider auf die aktuell verstrichene Zeit.',
     keys: 'S',
@@ -39,7 +43,7 @@ const actions: Action[] = [
   },
   {
     id: 'new-week',
-    icon: RefreshCw,
+    icon: IconRefresh,
     title: 'Neue Woche starten',
     hint: 'Setzt Usage auf 0%. Das Reset-Datum bleibt unverändert.',
     keys: 'N',
@@ -47,7 +51,7 @@ const actions: Action[] = [
   },
   {
     id: 'share',
-    icon: Share2,
+    icon: IconShare,
     title: 'Share Burn Rate',
     hint: 'Teilt deinen aktuellen Stand als Text-Card.',
     keys: '⇧S',
@@ -108,7 +112,7 @@ function onKey(e: KeyboardEvent): void {
     <div v-if="open" class="palette-backdrop" @click.self="close">
       <div class="palette" role="dialog" aria-modal="true" aria-label="Command Palette" @keydown="onKey">
         <div class="search-bar">
-          <Search :size="16" :stroke-width="2" />
+          <IconSearch />
           <input
             ref="inputEl"
             v-model="query"
@@ -129,7 +133,7 @@ function onKey(e: KeyboardEvent): void {
             @mouseenter="selectedIndex = i"
             @click="trigger(a)"
           >
-            <component :is="a.icon" :size="16" :stroke-width="2" />
+            <component :is="a.icon" />
             <div class="action-text">
               <span class="title">{{ a.title }}</span>
               <span class="hint">{{ a.hint }}</span>
@@ -175,9 +179,10 @@ function onKey(e: KeyboardEvent): void {
   align-items: center;
   gap: 10px;
   padding: 14px 16px;
-  border-bottom: 1px solid var(--c-divider);
+  border-bottom: 1px solid var(--c-divider, rgba(15, 23, 42, 0.06));
   color: var(--c-mute);
 }
+.search-bar svg { width: 16px; height: 16px; }
 .search-bar input {
   flex: 1;
   border: 0;
@@ -185,6 +190,7 @@ function onKey(e: KeyboardEvent): void {
   font-size: 15px;
   font-family: var(--font-sans);
   color: var(--c-ink);
+  background: transparent;
 }
 .actions {
   list-style: none;
@@ -203,7 +209,9 @@ function onKey(e: KeyboardEvent): void {
   cursor: pointer;
   color: var(--c-ink-soft);
 }
+.actions li svg { width: 18px; height: 18px; color: var(--c-mute); }
 .actions li.active { background: rgba(15, 23, 42, 0.06); }
+.actions li.active svg { color: var(--c-flame-2); }
 .action-text { display: flex; flex-direction: column; min-width: 0; }
 .action-text .title { font-weight: 600; font-size: 14px; }
 .action-text .hint { font-size: 11.5px; color: var(--c-mute); }
@@ -222,7 +230,7 @@ function onKey(e: KeyboardEvent): void {
   padding: 10px 14px;
   font-size: 11px;
   color: var(--c-mute);
-  border-top: 1px solid var(--c-divider);
+  border-top: 1px solid var(--c-hair);
 }
 .palette-foot kbd {
   font-family: var(--font-mono);

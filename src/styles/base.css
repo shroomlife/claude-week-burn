@@ -8,85 +8,103 @@ body {
   letter-spacing: -0.005em;
 }
 
-/* Mesh gradient — animate translate only (no scale, Priya). */
+/* Single offscreen accent blob — ambient color hint, no kitsch */
 body::before {
   content: '';
   position: fixed;
-  inset: -15%;
-  z-index: -2;
+  top: -25%;
+  right: -15%;
+  width: 70vw;
+  height: 70vw;
+  max-width: 1100px;
+  max-height: 1100px;
+  z-index: -1;
   background:
-    radial-gradient(at 8% 18%, rgba(167, 243, 208, 0.65) 0px, transparent 45%),
-    radial-gradient(at 92% 14%, rgba(254, 215, 170, 0.6) 0px, transparent 50%),
-    radial-gradient(at 78% 88%, rgba(199, 210, 254, 0.65) 0px, transparent 50%),
-    radial-gradient(at 12% 82%, rgba(251, 207, 232, 0.65) 0px, transparent 50%),
-    radial-gradient(at 50% 50%, rgba(165, 243, 252, 0.45) 0px, transparent 60%);
-  background-color: var(--c-bg);
-  animation: drift 40s ease-in-out infinite alternate;
+    radial-gradient(circle at 30% 30%, rgba(251, 207, 232, 0.5) 0%, transparent 55%),
+    radial-gradient(circle at 70% 70%, rgba(254, 215, 170, 0.4) 0%, transparent 60%);
+  filter: blur(40px);
+  pointer-events: none;
+  animation: drift 60s ease-in-out infinite alternate;
   will-change: transform;
+}
+
+body::after {
+  content: '';
+  position: fixed;
+  bottom: -25%;
+  left: -15%;
+  width: 60vw;
+  height: 60vw;
+  max-width: 900px;
+  max-height: 900px;
+  z-index: -1;
+  background: radial-gradient(circle, rgba(199, 210, 254, 0.42) 0%, transparent 60%);
+  filter: blur(50px);
+  pointer-events: none;
 }
 
 @keyframes drift {
   0%   { transform: translate3d(0, 0, 0); }
-  100% { transform: translate3d(-2%, 2%, 0); }
+  100% { transform: translate3d(-3%, 3%, 0); }
 }
 
-/* Subtle grain — pre-baked, no mix-blend (Priya). */
-body::after {
-  content: '';
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  opacity: 0.18;
-  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(%23n)" opacity="0.6"/></svg>');
-  background-size: 200px 200px;
-}
-
-/* Mode-coupled body tint — soft, behind glass surfaces */
-body {
-  transition: background-color 0.6s ease;
-}
-
-/* Glass primitive — backdrop-filter ONLY on .glass-hero (Priya diet). */
-.glass {
-  background: var(--c-glass);
-  border: 1px solid var(--c-glass-border);
-  border-radius: var(--r-card);
-  box-shadow: var(--s-card-flat);
-  contain: paint;
-}
-
-.glass-hero {
-  background: rgba(255, 255, 255, 0.55);
-  backdrop-filter: blur(28px) saturate(1.7);
-  -webkit-backdrop-filter: blur(28px) saturate(1.7);
-  border: 1px solid rgba(255, 255, 255, 0.75);
+/* Card primitives — flat, hairline border, single tiny shadow */
+.card {
+  background: var(--c-surface);
+  border: 1px solid var(--c-hair);
   border-radius: var(--r-card);
   box-shadow: var(--s-card);
   contain: paint;
 }
 
+.card-soft {
+  background: var(--c-surface-soft);
+  border: 1px solid var(--c-hair);
+  border-radius: var(--r-card);
+  backdrop-filter: blur(20px) saturate(1.3);
+  -webkit-backdrop-filter: blur(20px) saturate(1.3);
+  contain: paint;
+}
+
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-  .glass-hero {
-    background: rgba(255, 255, 255, 0.86);
+  .card-soft {
+    background: var(--c-surface);
     backdrop-filter: none;
   }
 }
 
-/* Tabular nums everywhere a number reads */
+/* Tabular nums everywhere there's a number */
 .num,
 .delta-value,
 .cd-num,
 .metric-value,
 .pace-readout {
   font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1;
 }
 
-/* Reduced motion: kill ambient + bounces, keep opacity crossfades */
+/* Eyebrow label — replaces the loud uppercase 0.18em treatment */
+.eyebrow {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--c-mute-soft);
+}
+
+/* Pause all infinite ambient animations during direct manipulation (slider drag) — keeps the
+   input feel locked at 1:1 without competing repaints. */
+body.is-dragging::before { animation-play-state: paused; }
+body.is-dragging * { animation-play-state: paused !important; }
+
+/* Same for backgrounded tab — keep RAM/CPU low when not visible */
+body.is-hidden::before { animation-play-state: paused; }
+body.is-hidden * { animation-play-state: paused !important; }
+
+/* Reduced motion: kill ambient + bounces, keep crossfades */
 @media (prefers-reduced-motion: reduce) {
   body::before {
     animation: none;
-    transform: translate3d(-1%, 1%, 0);
   }
   *,
   *::before,

@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import { Command } from 'lucide-vue-next'
+import { computed, onMounted, onUnmounted } from 'vue'
+import IconLightning from '~icons/ph/lightning-fill'
 import type { Countdown } from '../types/burn'
 
 const props = defineProps<{ countdown: Countdown }>()
@@ -20,28 +20,23 @@ function onKey(e: KeyboardEvent): void {
   }
 }
 
-if (typeof window !== 'undefined') {
-  window.addEventListener('keydown', onKey)
-}
+onMounted(() => window.addEventListener('keydown', onKey))
+onUnmounted(() => window.removeEventListener('keydown', onKey))
 </script>
 
 <template>
   <header class="brand">
-    <div class="logo-mark" aria-hidden="true">⚡</div>
-    <div class="brand-text">
-      <div class="brand-name">claude burn rate</div>
-      <div class="brand-tag">live weekly pace · feuer oder sparen?</div>
+    <div class="logo" aria-hidden="true">
+      <IconLightning />
+    </div>
+    <div class="text">
+      <div class="name">claude burn rate</div>
+      <div class="tag">live weekly pace tracker</div>
     </div>
 
-    <button
-      class="cmd-pill"
-      type="button"
-      :aria-label="`Reset in ${countdownShort}`"
-      @click="emit('open-palette')"
-    >
-      <Command :size="13" :stroke-width="2.2" />
-      <span class="cmd-letter">K</span>
-      <span class="sep">·</span>
+    <button class="cmd-pill" type="button" @click="emit('open-palette')" aria-label="Command palette öffnen">
+      <kbd>⌘K</kbd>
+      <span class="sep" aria-hidden="true">·</span>
       <span class="cd num">{{ countdownShort }}</span>
     </button>
   </header>
@@ -52,30 +47,28 @@ if (typeof window !== 'undefined') {
   display: flex;
   align-items: center;
   gap: 14px;
-  padding: 0 6px;
+  padding: 4px 4px;
 }
-.logo-mark {
-  width: 48px;
-  height: 48px;
-  border-radius: 16px;
-  background: linear-gradient(135deg, #fb923c 0%, #f43f5e 70%, #d946ef 100%);
+.logo {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
   display: grid;
   place-items: center;
-  font-size: 22px;
-  box-shadow: 0 12px 28px -8px rgba(244, 63, 94, 0.45),
-              inset 0 1px 0 rgba(255, 255, 255, 0.4);
-  transform: rotate(-4deg);
+  background: linear-gradient(135deg, #fb923c 0%, #f43f5e 65%, #d946ef 100%);
   color: white;
+  flex-shrink: 0;
 }
-.brand-text { flex: 1; min-width: 0; }
-.brand-name {
-  font-weight: 700;
-  font-size: 21px;
-  letter-spacing: -0.025em;
-  line-height: 1.1;
-  text-wrap: balance;
+.logo svg { width: 20px; height: 20px; }
+.text { flex: 1; min-width: 0; }
+.name {
+  font-weight: 600;
+  font-size: 18px;
+  letter-spacing: -0.022em;
+  line-height: 1.15;
+  color: var(--c-ink);
 }
-.brand-tag {
+.tag {
   font-size: 12.5px;
   color: var(--c-mute-soft);
   font-weight: 400;
@@ -84,34 +77,35 @@ if (typeof window !== 'undefined') {
 .cmd-pill {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 7px 13px 7px 11px;
-  background: var(--c-glass);
-  border: 1px solid var(--c-glass-border);
+  gap: 8px;
+  padding: 7px 12px;
+  background: var(--c-surface);
+  border: 1px solid var(--c-hair);
   border-radius: var(--r-pill);
   font-size: 12px;
-  font-weight: 700;
   color: var(--c-mute);
-  letter-spacing: 0.02em;
-  transition: transform 0.15s var(--ease-spring), background 0.2s ease;
+  transition: background 0.18s ease, transform 0.18s ease;
+  cursor: pointer;
 }
-.cmd-pill:hover { transform: translateY(-1px); background: white; }
-.cmd-letter {
+.cmd-pill:hover { background: rgba(15, 23, 42, 0.03); transform: translateY(-1px); }
+.cmd-pill kbd {
   font-family: var(--font-mono);
   font-size: 11px;
   color: var(--c-ink);
-  margin-right: 1px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
 }
-.sep { opacity: 0.5; }
+.sep { opacity: 0.4; }
 .cd {
   font-family: var(--font-mono);
   color: var(--c-ink);
   letter-spacing: -0.02em;
+  font-weight: 500;
 }
 
 @media (max-width: 560px) {
-  .logo-mark { width: 42px; height: 42px; font-size: 19px; }
-  .brand-name { font-size: 18px; }
-  .brand-tag { font-size: 11.5px; }
+  .logo { width: 36px; height: 36px; }
+  .name { font-size: 16.5px; }
+  .tag { font-size: 11.5px; }
 }
 </style>
