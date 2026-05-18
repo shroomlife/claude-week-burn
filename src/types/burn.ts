@@ -18,6 +18,7 @@ export interface PersistedDataV1 {
   resetDate: string
   usagePercent: number
   lastSeen: string
+  setupComplete: boolean
 }
 
 export interface Forecast {

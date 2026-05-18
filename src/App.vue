@@ -16,6 +16,7 @@ import BurnControls from './components/BurnControls.vue'
 import CommandPalette from './components/CommandPalette.vue'
 import UpdateToast from './components/UpdateToast.vue'
 import InstallIosModal from './components/InstallIosModal.vue'
+import OnboardingCard from './components/OnboardingCard.vue'
 import { useGitHubAuth } from './composables/useGitHubAuth'
 import { useGistSync } from './composables/useGistSync'
 import type { Mode } from './types/burn'
@@ -186,45 +187,56 @@ const modeClass = computed(() => `mode-${c.status.value.mode}`)
       @show-ios-install="showIosInstall"
     />
 
-    <PreWeekBanner
-      v-if="c.preWeek.value"
-      :days="c.daysUntilWeekStart.value"
-      :week-start-label="c.weekStartLabel.value"
-      @snap="burn.snapResetToSevenDays"
-    />
-
-    <PaceBar
-      :time-percent="c.timePercent.value"
+    <OnboardingCard
+      v-if="!burn.setupComplete.value"
+      :reset-date="burn.resetDate.value"
       :usage-percent="burn.usagePercent.value"
-      :delta="c.delta.value"
-      :status="c.status.value"
-      :week-start="c.weekStart.value"
-      :ms-per-percent="c.msPerPercent.value"
+      @update:reset-date="burn.resetDate.value = $event"
+      @update:usage-percent="burn.usagePercent.value = $event"
+      @complete="burn.completeSetup"
     />
 
-    <InsightCard
-      :sentence="c.tomorrowSentence.value"
-      :projected-end="c.forecast.value.projectedEndUsage"
-      :reliable="c.forecastReliable.value"
-      :time-percent="c.timePercent.value"
-      :usage-percent="burn.usagePercent.value"
-      :ghost-usage="c.ghostUsage.value"
-      :delta="c.delta.value"
-    />
+    <template v-else>
+      <PreWeekBanner
+        v-if="c.preWeek.value"
+        :days="c.daysUntilWeekStart.value"
+        :week-start-label="c.weekStartLabel.value"
+        @snap="burn.snapResetToSevenDays"
+      />
 
-    <MetricsRow
-      :countdown="c.countdown.value"
-      :daily-budget="c.dailyBudget.value"
-      :remaining-percent="c.remainingPercent.value"
-    />
+      <PaceBar
+        :time-percent="c.timePercent.value"
+        :usage-percent="burn.usagePercent.value"
+        :delta="c.delta.value"
+        :status="c.status.value"
+        :week-start="c.weekStart.value"
+        :ms-per-percent="c.msPerPercent.value"
+      />
 
-    <BurnControls
-      v-model:usage-percent="burn.usagePercent.value"
-      v-model:reset-date="burn.resetDate.value"
-      :time-percent="c.timePercent.value"
-      :timezone-label="c.timezoneLabel.value"
-      :week-start-label="c.weekStartLabel.value"
-    />
+      <InsightCard
+        :sentence="c.tomorrowSentence.value"
+        :projected-end="c.forecast.value.projectedEndUsage"
+        :reliable="c.forecastReliable.value"
+        :time-percent="c.timePercent.value"
+        :usage-percent="burn.usagePercent.value"
+        :ghost-usage="c.ghostUsage.value"
+        :delta="c.delta.value"
+      />
+
+      <MetricsRow
+        :countdown="c.countdown.value"
+        :daily-budget="c.dailyBudget.value"
+        :remaining-percent="c.remainingPercent.value"
+      />
+
+      <BurnControls
+        v-model:usage-percent="burn.usagePercent.value"
+        v-model:reset-date="burn.resetDate.value"
+        :time-percent="c.timePercent.value"
+        :timezone-label="c.timezoneLabel.value"
+        :week-start-label="c.weekStartLabel.value"
+      />
+    </template>
 
     <CommandPalette
       :open="paletteOpen"

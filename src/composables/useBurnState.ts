@@ -31,8 +31,9 @@ function clampPercent(n: unknown): number {
 function defaultState(): PersistedDataV1 {
   return {
     resetDate: defaultResetDate(),
-    usagePercent: 45,
+    usagePercent: 0,
     lastSeen: new Date().toISOString(),
+    setupComplete: false,
   }
 }
 
@@ -41,7 +42,11 @@ function validate(value: PersistedDataV1): PersistedDataV1 | null {
   const resetDate = typeof value.resetDate === 'string' ? value.resetDate : defaultResetDate()
   const usagePercent = clampPercent(value.usagePercent)
   const lastSeen = typeof value.lastSeen === 'string' ? value.lastSeen : new Date().toISOString()
-  return { resetDate, usagePercent, lastSeen }
+  // Existing localStorage from before the onboarding gate landed has no
+  // setupComplete field — treat those users as already-onboarded so we don't
+  // force them back through the intro.
+  const setupComplete = typeof value.setupComplete === 'boolean' ? value.setupComplete : true
+  return { resetDate, usagePercent, lastSeen, setupComplete }
 }
 
 // Singleton bound at module load. Survives HMR via the module cache.
@@ -69,18 +74,29 @@ const usagePercent: WritableComputedRef<number> = computed({
   },
 })
 
+const setupComplete: WritableComputedRef<boolean> = computed({
+  get: () => persisted.value.setupComplete,
+  set: (v) => {
+    if (v === persisted.value.setupComplete) return
+    persisted.value = { ...persisted.value, setupComplete: v, lastSeen: new Date().toISOString() }
+  },
+})
+
 export interface BurnStateApi {
   resetDate: WritableComputedRef<string>
   usagePercent: WritableComputedRef<number>
+  setupComplete: WritableComputedRef<boolean>
   shiftResetByWeek: () => void
   resetWeek: () => void
   snapResetToSevenDays: () => void
+  completeSetup: () => void
 }
 
 export function useBurnState(): BurnStateApi {
   return {
     resetDate,
     usagePercent,
+    setupComplete,
     shiftResetByWeek: () => {
       const t = new Date(persisted.value.resetDate).getTime()
       const next = new Date(Number.isFinite(t) ? t + WEEK_MS : Date.now() + WEEK_MS)
@@ -93,6 +109,10 @@ export function useBurnState(): BurnStateApi {
     snapResetToSevenDays: () => {
       const d = new Date(Date.now() + WEEK_MS)
       persisted.value = { ...persisted.value, resetDate: toLocalISO(d) }
+    },
+    completeSetup: () => {
+      if (persisted.value.setupComplete) return
+      persisted.value = { ...persisted.value, setupComplete: true, lastSeen: new Date().toISOString() }
     },
   }
 }
