@@ -179,15 +179,25 @@ async function pull(): Promise<void> {
   try {
     const id = await ensureGist(token)
     const remote = await readGistContent(token, id)
+    // Fresh-login pull: remote is the canonical state, overwrite local
+    // unconditionally. This is the documented UX — "Login = your GitHub state
+    // wins". Subsequent pulls (visibilitychange, manual sync-now) use the
+    // normal timestamp-based last-write-wins logic.
+    const isFreshLogin = auth.consumeJustLoggedIn()
     if (remote) {
-      const remoteTs = new Date(remote.updatedAt).getTime()
-      // Compare against our last successful push timestamp, NOT lastSeen (which
-      // is user-interaction time and unrelated to sync). On a fresh device
-      // lastSyncedAt is null → remote always wins (it's the canonical state).
-      const localTs = lastSyncedAt.value ? new Date(lastSyncedAt.value).getTime() : 0
-      if (Number.isFinite(remoteTs) && remoteTs > localTs + 500) {
+      if (isFreshLogin) {
         _persistedBurnState.value = remote.state
         lastSyncedAt.value = remote.updatedAt
+      } else {
+        const remoteTs = new Date(remote.updatedAt).getTime()
+        // Compare against our last successful push timestamp, NOT lastSeen
+        // (which is user-interaction time and unrelated to sync). On a fresh
+        // device lastSyncedAt is null → remote always wins.
+        const localTs = lastSyncedAt.value ? new Date(lastSyncedAt.value).getTime() : 0
+        if (Number.isFinite(remoteTs) && remoteTs > localTs + 500) {
+          _persistedBurnState.value = remote.state
+          lastSyncedAt.value = remote.updatedAt
+        }
       }
     }
     status.value = 'idle'

@@ -1,28 +1,37 @@
 /**
- * burn-rate-gh-proxy
+ * burn-rate-gh-proxy v2
  *
- * Stateless CORS reverse-proxy for GitHub's OAuth Device Flow endpoints.
- * The browser cannot call github.com/login/* directly because GitHub's
- * OAuth endpoints don't send CORS headers. This worker re-issues those two
- * requests server-side and returns them with proper CORS so the SPA can
- * complete a Device Flow without any backend of its own.
+ * Stateless OAuth token-exchange relay for GitHub's web application flow
+ * with PKCE. The SPA cannot talk to github.com/login/oauth/access_token
+ * directly because (a) that endpoint has no CORS, and (b) GitHub still
+ * requires the client_secret on every token exchange — even with PKCE —
+ * so the secret has to live somewhere the browser can't see.
+ *
+ * This Worker holds GITHUB_CLIENT_ID + GITHUB_CLIENT_SECRET as encrypted
+ * environment secrets, injects them into the GitHub call, and reflects
+ * the response with CORS headers for our allowlisted origins.
  *
  * Endpoints:
- *   POST /login/device/code        → proxies to github.com/login/device/code
- *   POST /login/oauth/access_token → proxies to github.com/login/oauth/access_token
+ *   POST /token  →  proxies the code exchange to GitHub
  *
- * Everything else returns 404. No state, no logs, no DB.
+ * Everything else returns 404. No state, no logs, no DB, no observability.
  */
 
-const ALLOWED_PATHS = new Set([
-  '/login/device/code',
-  '/login/oauth/access_token',
-])
+interface Env {
+  GITHUB_CLIENT_ID: string
+  GITHUB_CLIENT_SECRET: string
+}
 
 const ALLOWED_ORIGINS = new Set([
   'https://shroomlife.github.io',
   'http://localhost:5173',
   'http://localhost:4173',
+])
+
+const ALLOWED_REDIRECT_URIS = new Set([
+  'https://shroomlife.github.io/claude-week-burn/',
+  'http://localhost:5173/',
+  'http://localhost:4173/',
 ])
 
 function corsHeaders(origin: string | null): HeadersInit {
@@ -36,8 +45,15 @@ function corsHeaders(origin: string | null): HeadersInit {
   }
 }
 
+function json(status: number, body: unknown, origin: string | null): Response {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { ...corsHeaders(origin), 'Content-Type': 'application/json' },
+  })
+}
+
 export default {
-  async fetch(req: Request): Promise<Response> {
+  async fetch(req: Request, env: Env): Promise<Response> {
     const url = new URL(req.url)
     const origin = req.headers.get('Origin')
 
@@ -45,32 +61,44 @@ export default {
       return new Response(null, { status: 204, headers: corsHeaders(origin) })
     }
 
-    if (!ALLOWED_PATHS.has(url.pathname) || req.method !== 'POST') {
-      return new Response(JSON.stringify({ error: 'not_found' }), {
-        status: 404,
-        headers: { ...corsHeaders(origin), 'Content-Type': 'application/json' },
-      })
+    if (url.pathname !== '/token' || req.method !== 'POST') {
+      return json(404, { error: 'not_found' }, origin)
     }
 
-    let body: string
+    let payload: { code?: string; code_verifier?: string; redirect_uri?: string } = {}
     try {
-      body = await req.text()
+      payload = (await req.json()) as typeof payload
     } catch {
-      return new Response(JSON.stringify({ error: 'bad_request' }), {
-        status: 400,
-        headers: { ...corsHeaders(origin), 'Content-Type': 'application/json' },
-      })
+      return json(400, { error: 'bad_request' }, origin)
     }
 
-    const target = `https://github.com${url.pathname}`
-    const ghReq = await fetch(target, {
+    const { code, code_verifier, redirect_uri } = payload
+    if (!code || !code_verifier || !redirect_uri) {
+      return json(400, { error: 'missing_params' }, origin)
+    }
+    if (!ALLOWED_REDIRECT_URIS.has(redirect_uri)) {
+      return json(400, { error: 'bad_redirect_uri' }, origin)
+    }
+    if (!env.GITHUB_CLIENT_ID || !env.GITHUB_CLIENT_SECRET) {
+      return json(500, { error: 'server_misconfigured' }, origin)
+    }
+
+    const ghBody = new URLSearchParams({
+      client_id: env.GITHUB_CLIENT_ID,
+      client_secret: env.GITHUB_CLIENT_SECRET,
+      code,
+      code_verifier,
+      redirect_uri,
+    }).toString()
+
+    const ghReq = await fetch('https://github.com/login/oauth/access_token', {
       method: 'POST',
       headers: {
         Accept: 'application/json',
         'Content-Type': 'application/x-www-form-urlencoded',
-        'User-Agent': 'burn-rate-gh-proxy/1.0',
+        'User-Agent': 'burn-rate-gh-proxy/2.0',
       },
-      body,
+      body: ghBody,
     })
 
     const text = await ghReq.text()

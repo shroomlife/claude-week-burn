@@ -132,46 +132,60 @@ Workflow: [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml). Setzt 
 
 ## Optional: GitHub Login + Gist Sync
 
-Wenn du Cross-Device-Sync willst, kannst du den optionalen Sign-In aktivieren. Dein State landet dann in einem privaten GitHub-Gist (nur du hast Lesezugriff). Komplett ohne DB, ohne Account-Anlage, ohne Server-State.
+Cross-Device-Sync via privatem Gist. Kein DB, kein Backend-State — nur ein winziger Cloudflare Worker, der den OAuth-Code-Exchange macht (weil GitHub `client_secret` weiterhin verlangt, auch mit PKCE).
 
 **Architektur:**
-- **Cloudflare Worker** `burn-rate-gh-proxy.shroomlife.workers.dev` proxied GitHubs OAuth Device-Flow Endpoints mit CORS-Headers (notwendig weil github.com/login/* keine CORS-Headers sendet). Stateless, ~50 Zeilen. Free tier covers 100k req/Tag.
-- **GitHub Device Flow** ohne client_secret. App holt einen 8-stelligen Code, du bestätigst auf github.com, App pollt bis Token kommt.
-- **Token** liegt lokal in deinem `localStorage` (Schlüssel `burnRate:gh:token`). Nur `gist`-Scope — kein Repo-Access, kein User-Write.
-- **Gist** namens `claude-burn-rate-state.json` wird beim ersten Login angelegt (privat). Push debounced 3s nach State-Änderung, Pull on init + visibilitychange.
+- **Cloudflare Worker** `burn-rate-gh-proxy.shroomlife.workers.dev` (~80 Zeilen, stateless). Hält `GITHUB_CLIENT_ID` + `GITHUB_CLIENT_SECRET` als encrypted Worker Secrets, exchanged Code-for-Token gegen GitHub, returned Token an SPA. Free tier (100k req/Tag).
+- **Authorization Code Flow + PKCE**: SPA generiert `code_verifier` + `code_challenge`, redirected zu `github.com/login/oauth/authorize`, GitHub redirected zurück mit `?code=`, SPA POSTet `{code, code_verifier}` an Worker `/token`, kriegt Token. Defense-in-depth selbst wenn Code in Logs leakt.
+- **Token** in `localStorage` (Key `burnRate:gh:token`). Scope `gist` only — kein Repo-Access.
+- **Login = remote überschreibt local**: beim ersten erfolgreichen Login wird die lokale Quota durch den Gist-Stand ersetzt. Danach normale Last-Write-Wins-Sync.
+- **Gist** `claude-burn-rate-state.json` (privat) wird beim ersten Login angelegt. Push debounced 3s, Pull on init + visibilitychange.
 
 ### Setup
 
 1. **OAuth App registrieren** auf https://github.com/settings/developers:
    - Application name: `Claude Burn Rate`
    - Homepage URL: `https://shroomlife.github.io/claude-week-burn/`
-   - Authorization callback URL: `https://shroomlife.github.io/claude-week-burn/` (wird beim Device Flow nicht verwendet, ist aber Pflichtfeld)
-   - **Checkbox "Enable Device Flow" aktivieren** — ohne das geht's nicht
+   - Authorization callback URL: `https://shroomlife.github.io/claude-week-burn/`
    - Auf "Register application" klicken
+   - Auf der App-Seite: **"Generate a new client secret"** → String **sofort kopieren** (zeigt er nur einmal)
 
-2. **Client ID** kopieren (sieht aus wie `Iv23liXXXXXXXXXXXXXX`).
+2. **Client ID** und **Client Secret** kopieren.
 
-3. **In GH-Actions als Secret hinterlegen**:
+3. **VITE_GITHUB_CLIENT_ID als GH-Actions-Secret hinterlegen** (öffentlich, kann im Bundle erscheinen):
    ```bash
-   gh secret set VITE_GITHUB_CLIENT_ID --body "Iv23liXXXXXXXXXXXXXX"
+   gh secret set VITE_GITHUB_CLIENT_ID --body "Ov23liXXXXXXXXXXXXXX"
    ```
 
-4. **Re-Deploy** triggern: leeren Commit auf main pushen oder Actions-Workflow manuell starten.
+4. **Worker-Secrets setzen** (encrypted at rest, niemals im Bundle):
+   ```bash
+   cd worker
+   wrangler secret put GITHUB_CLIENT_ID    # selber String wie oben
+   wrangler secret put GITHUB_CLIENT_SECRET # NIE in Git!
+   ```
+   Oder via CF Dashboard → Workers → burn-rate-gh-proxy → Settings → Variables.
 
-Nach dem nächsten Deploy taucht im Header eine "Sign in"-Pill auf. Klick → Code wird angezeigt → "Auf GitHub bestätigen" → einloggen → fertig.
+5. **Re-Deploy** triggern:
+   ```bash
+   gh workflow run "Deploy to GitHub Pages" --repo shroomlife/claude-week-burn
+   ```
 
-### Worker fork
+Nach dem Deploy: Header → "Sign in" → 1 Click → Redirect zu GitHub → Authorize → Redirect zurück → fertig. Kein Code-Paste, kein Modal.
 
-Falls du das ganze auf deinem eigenen Account betreiben willst:
+### Worker-Fork
+
+Eigene Instanz auf eigenem CF-Account:
 
 ```bash
 cd worker
 bun install -g wrangler
 wrangler login
+wrangler secret put GITHUB_CLIENT_ID
+wrangler secret put GITHUB_CLIENT_SECRET
 wrangler deploy
 ```
 
-Dann `VITE_GH_PROXY_URL` auf deine Worker-URL setzen.
+Im `worker/src/index.ts` musst du den `ALLOWED_ORIGINS` + `ALLOWED_REDIRECT_URIS`-Allowlist auf deine Domain anpassen. Dann `VITE_GH_PROXY_URL` auf deine Worker-URL setzen.
 
 ---
 

@@ -7,10 +7,14 @@ import IconSyncing from '~icons/ph/arrows-clockwise'
 import { useGitHubAuth } from '../composables/useGitHubAuth'
 import { useGistSync } from '../composables/useGistSync'
 
-const emit = defineEmits<{ (e: 'open-login'): void; (e: 'open-menu'): void }>()
+const emit = defineEmits<{ (e: 'open-menu'): void }>()
 
 const auth = useGitHubAuth()
 const sync = useGistSync()
+
+function signIn(): void {
+  void auth.startLogin()
+}
 
 const statusIcon = computed(() => {
   switch (sync.status.value) {
@@ -36,11 +40,12 @@ const statusTitle = computed(() => {
     v-if="!auth.isAuthenticated.value"
     class="auth-pill auth-signin"
     type="button"
-    @click="emit('open-login')"
+    :disabled="auth.phase.value === 'redirecting' || auth.phase.value === 'exchanging'"
+    @click="signIn"
     aria-label="Mit GitHub anmelden"
   >
     <IconGithub />
-    <span>Sign in</span>
+    <span>{{ auth.phase.value === 'exchanging' ? 'Logge ein…' : 'Sign in' }}</span>
   </button>
 
   <button

@@ -2,13 +2,14 @@
 import { computed, onMounted, onUnmounted } from 'vue'
 import IconLightning from '~icons/ph/lightning-fill'
 import AuthButton from './AuthButton.vue'
+import InstallButton from './InstallButton.vue'
 import { AUTH_ENABLED } from '../config/auth'
 import type { Countdown } from '../types/burn'
 
 const props = defineProps<{ countdown: Countdown }>()
 const emit = defineEmits<{
   (e: 'open-palette'): void
-  (e: 'open-login'): void
+  (e: 'show-ios-install'): void
 }>()
 
 const countdownShort = computed(() => {
@@ -40,9 +41,9 @@ onUnmounted(() => window.removeEventListener('keydown', onKey))
     </div>
 
     <div class="actions">
+      <InstallButton @show-ios="emit('show-ios-install')" />
       <AuthButton
         v-if="AUTH_ENABLED"
-        @open-login="emit('open-login')"
         @open-menu="emit('open-palette')"
       />
       <button class="cmd-pill" type="button" @click="emit('open-palette')" aria-label="Command palette öffnen">

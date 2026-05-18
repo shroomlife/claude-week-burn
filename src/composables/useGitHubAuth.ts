@@ -9,23 +9,7 @@ export interface GitHubUser {
   html_url: string
 }
 
-export interface DeviceFlowChallenge {
-  userCode: string
-  verificationUri: string
-  verificationUriComplete: string
-  expiresAt: number
-}
-
-export type DeviceFlowPhase = 'idle' | 'requesting' | 'awaiting-user' | 'success' | 'error'
-
-interface DeviceCodeResponse {
-  device_code: string
-  user_code: string
-  verification_uri: string
-  verification_uri_complete?: string
-  expires_in: number
-  interval: number
-}
+export type AuthPhase = 'idle' | 'redirecting' | 'exchanging' | 'success' | 'error'
 
 interface TokenSuccessResponse {
   access_token: string
@@ -36,10 +20,12 @@ interface TokenSuccessResponse {
 interface TokenErrorResponse {
   error: string
   error_description?: string
-  interval?: number
+  error_uri?: string
 }
 
 const TOKEN_STORAGE_KEY = 'burnRate:gh:token'
+const SESSION_VERIFIER_KEY = 'burnRate:gh:pkce_verifier'
+const SESSION_STATE_KEY = 'burnRate:gh:oauth_state'
 
 const token = usePersistedState<string | null>(TOKEN_STORAGE_KEY, null, {
   version: 1,
@@ -47,36 +33,40 @@ const token = usePersistedState<string | null>(TOKEN_STORAGE_KEY, null, {
 })
 
 const user = ref<GitHubUser | null>(null)
-const phase = ref<DeviceFlowPhase>('idle')
-const challenge = ref<DeviceFlowChallenge | null>(null)
+const phase = ref<AuthPhase>('idle')
 const errorMessage = ref<string | null>(null)
-/**
- * Generation counter so that cancelling a flow mid-poll and immediately
- * starting a new one doesn't leave the previous poll loop racing alongside.
- * Each flow captures its own generation; the loop bails as soon as the
- * shared counter advances.
- */
-let pollGeneration = 0
 let userFetched = false
 
-function form(body: Record<string, string>): string {
-  return new URLSearchParams(body).toString()
+/**
+ * Set to true exactly once, right after a fresh successful login completes.
+ * The sync layer reads + consumes this so it knows to *overwrite* local state
+ * with the remote gist on first pull (instead of doing the normal timestamp-
+ * based last-write-wins resolution). Boot-with-existing-token does not flip
+ * this flag.
+ */
+const justLoggedIn = ref(false)
+
+function base64urlEncode(buffer: ArrayBuffer): string {
+  const bytes = new Uint8Array(buffer)
+  let str = ''
+  for (let i = 0; i < bytes.length; i += 1) str += String.fromCharCode(bytes[i] as number)
+  return btoa(str).replaceAll('+', '-').replaceAll('/', '_').replaceAll('=', '')
 }
 
-async function postProxy<T>(path: string, body: Record<string, string>): Promise<T> {
-  const res = await fetch(`${GH_PROXY_URL}${path}`, {
-    method: 'POST',
-    headers: {
-      Accept: 'application/json',
-      'Content-Type': 'application/x-www-form-urlencoded',
-    },
-    body: form(body),
-  })
-  const data = (await res.json()) as T
-  if (!res.ok && !(data as { error?: string }).error) {
-    throw new Error(`HTTP ${res.status}`)
-  }
-  return data
+function randomBase64Url(byteLength: number): string {
+  const bytes = new Uint8Array(byteLength)
+  crypto.getRandomValues(bytes)
+  return base64urlEncode(bytes.buffer)
+}
+
+async function sha256Base64Url(input: string): Promise<string> {
+  const data = new TextEncoder().encode(input)
+  const hash = await crypto.subtle.digest('SHA-256', data)
+  return base64urlEncode(hash)
+}
+
+function redirectUri(): string {
+  return `${window.location.origin}${window.location.pathname}`
 }
 
 async function fetchCurrentUser(accessToken: string): Promise<GitHubUser> {
@@ -107,107 +97,162 @@ function logout(): void {
   user.value = null
   userFetched = false
   phase.value = 'idle'
-  challenge.value = null
   errorMessage.value = null
+  justLoggedIn.value = false
+  try {
+    sessionStorage.removeItem(SESSION_VERIFIER_KEY)
+    sessionStorage.removeItem(SESSION_STATE_KEY)
+  } catch { /* sessionStorage may be unavailable */ }
 }
 
-async function pollForToken(
-  deviceCode: string,
-  intervalMs: number,
-  expiresAt: number,
-  ownGeneration: number,
-): Promise<string> {
-  let cadence = intervalMs
-  // GitHub allows a +5s grace per slow_down
-  while (Date.now() < expiresAt) {
-    await new Promise((r) => setTimeout(r, cadence))
-    if (ownGeneration !== pollGeneration) throw new Error('cancelled')
-    const data = await postProxy<TokenSuccessResponse | TokenErrorResponse>('/login/oauth/access_token', {
-      client_id: GH_CLIENT_ID,
-      device_code: deviceCode,
-      grant_type: 'urn:ietf:params:oauth:grant-type:device_code',
-    })
-    if (ownGeneration !== pollGeneration) throw new Error('cancelled')
-    if ('access_token' in data && data.access_token) return data.access_token
-
-    const err = (data as TokenErrorResponse).error
-    if (err === 'authorization_pending') continue
-    if (err === 'slow_down') {
-      cadence += 5000
-      continue
-    }
-    if (err === 'expired_token') throw new Error('Der Code ist abgelaufen. Bitte neu starten.')
-    if (err === 'access_denied') throw new Error('Zugriff verweigert.')
-    if (err === 'device_flow_disabled') throw new Error('Device Flow ist in der OAuth-App nicht aktiviert.')
-    throw new Error(err || 'Unbekannter Fehler beim Polling.')
-  }
-  throw new Error('Code abgelaufen. Bitte neu starten.')
-}
-
-async function startDeviceFlow(): Promise<void> {
+async function startLogin(): Promise<void> {
   if (!GH_CLIENT_ID) {
     errorMessage.value = 'Kein VITE_GITHUB_CLIENT_ID konfiguriert.'
     phase.value = 'error'
     return
   }
   errorMessage.value = null
-  challenge.value = null
-  phase.value = 'requesting'
-  // Advance the generation BEFORE starting so any in-flight previous poll
-  // sees the change and bails on its next iteration.
-  pollGeneration += 1
-  const ownGeneration = pollGeneration
-  try {
-    const code = await postProxy<DeviceCodeResponse>('/login/device/code', {
-      client_id: GH_CLIENT_ID,
-      scope: GH_SCOPES,
-    })
-    if (ownGeneration !== pollGeneration) return
-    const expiresAt = Date.now() + code.expires_in * 1000
-    challenge.value = {
-      userCode: code.user_code,
-      verificationUri: code.verification_uri,
-      verificationUriComplete: code.verification_uri_complete ?? `${code.verification_uri}?user_code=${code.user_code}`,
-      expiresAt,
-    }
-    phase.value = 'awaiting-user'
+  phase.value = 'redirecting'
 
-    const accessToken = await pollForToken(code.device_code, code.interval * 1000, expiresAt, ownGeneration)
-    if (ownGeneration !== pollGeneration) return
+  const verifier = randomBase64Url(64)
+  const challenge = await sha256Base64Url(verifier)
+  const state = randomBase64Url(16)
+
+  try {
+    sessionStorage.setItem(SESSION_VERIFIER_KEY, verifier)
+    sessionStorage.setItem(SESSION_STATE_KEY, state)
+  } catch (err) {
+    errorMessage.value = 'sessionStorage nicht verfügbar — Login nicht möglich.'
+    phase.value = 'error'
+    return
+  }
+
+  const params = new URLSearchParams({
+    client_id: GH_CLIENT_ID,
+    redirect_uri: redirectUri(),
+    scope: GH_SCOPES,
+    state,
+    code_challenge: challenge,
+    code_challenge_method: 'S256',
+    allow_signup: 'false',
+  })
+
+  window.location.assign(`https://github.com/login/oauth/authorize?${params.toString()}`)
+}
+
+async function exchangeCodeForToken(code: string, codeVerifier: string): Promise<string> {
+  const res = await fetch(`${GH_PROXY_URL}/token`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+    body: JSON.stringify({
+      code,
+      code_verifier: codeVerifier,
+      redirect_uri: redirectUri(),
+    }),
+  })
+  const data = (await res.json()) as TokenSuccessResponse | TokenErrorResponse
+  if (!res.ok) throw new Error(`proxy /token returned ${res.status}`)
+  if ('access_token' in data && data.access_token) return data.access_token
+  const err = (data as TokenErrorResponse).error
+  if (err === 'access_denied') throw new Error('Zugriff verweigert.')
+  if (err === 'bad_redirect_uri') throw new Error('Falsche Redirect-URI im Proxy.')
+  if (err === 'server_misconfigured') throw new Error('Worker hat keinen client_secret konfiguriert.')
+  throw new Error(
+    (data as TokenErrorResponse).error_description ||
+    err ||
+    'Unbekannter Fehler beim Token-Exchange.',
+  )
+}
+
+/**
+ * Inspects the current URL for an OAuth callback (?code=&state=). If found,
+ * validates state, performs the code-for-token exchange via the Worker proxy,
+ * stores the token + fetched user, and cleans the URL.
+ *
+ * Idempotent: safe to call multiple times.
+ */
+async function handleCallbackOnce(): Promise<void> {
+  const search = new URLSearchParams(window.location.search)
+  const code = search.get('code')
+  const state = search.get('state')
+  const oauthError = search.get('error')
+
+  if (oauthError) {
+    errorMessage.value = oauthError
+    phase.value = 'error'
+    cleanCallbackParams()
+    return
+  }
+  if (!code || !state) return
+
+  let storedState: string | null = null
+  let storedVerifier: string | null = null
+  try {
+    storedState = sessionStorage.getItem(SESSION_STATE_KEY)
+    storedVerifier = sessionStorage.getItem(SESSION_VERIFIER_KEY)
+  } catch { /* fallthrough */ }
+
+  cleanCallbackParams()
+
+  if (!storedState || storedState !== state) {
+    errorMessage.value = 'State-Parameter stimmt nicht — Login abgebrochen.'
+    phase.value = 'error'
+    return
+  }
+  if (!storedVerifier) {
+    errorMessage.value = 'code_verifier verloren — bitte erneut versuchen.'
+    phase.value = 'error'
+    return
+  }
+
+  try {
+    sessionStorage.removeItem(SESSION_VERIFIER_KEY)
+    sessionStorage.removeItem(SESSION_STATE_KEY)
+  } catch { /* noop */ }
+
+  phase.value = 'exchanging'
+  try {
+    const accessToken = await exchangeCodeForToken(code, storedVerifier)
     token.value = accessToken
     user.value = await fetchCurrentUser(accessToken)
     userFetched = true
+    justLoggedIn.value = true
     phase.value = 'success'
-    challenge.value = null
   } catch (err) {
-    if (ownGeneration !== pollGeneration) return
-    if ((err as Error).message === 'cancelled') {
-      phase.value = 'idle'
-      return
-    }
     errorMessage.value = (err as Error).message
     phase.value = 'error'
   }
 }
 
-function cancelDeviceFlow(): void {
-  pollGeneration += 1
-  phase.value = 'idle'
-  challenge.value = null
+function cleanCallbackParams(): void {
+  const url = new URL(window.location.href)
+  url.searchParams.delete('code')
+  url.searchParams.delete('state')
+  url.searchParams.delete('error')
+  url.searchParams.delete('error_description')
+  url.searchParams.delete('error_uri')
+  window.history.replaceState({}, '', url.toString())
+}
+
+/** Called by the sync layer once to consume the fresh-login signal. */
+function consumeJustLoggedIn(): boolean {
+  if (!justLoggedIn.value) return false
+  justLoggedIn.value = false
+  return true
 }
 
 void loadUserOnce()
+void handleCallbackOnce()
 
 export interface AuthApi {
   token: Ref<string | null>
   user: Ref<GitHubUser | null>
-  phase: Ref<DeviceFlowPhase>
-  challenge: Ref<DeviceFlowChallenge | null>
+  phase: Ref<AuthPhase>
   errorMessage: Ref<string | null>
   isAuthenticated: ComputedRef<boolean>
-  startDeviceFlow: () => Promise<void>
-  cancelDeviceFlow: () => void
+  startLogin: () => Promise<void>
   logout: () => void
+  consumeJustLoggedIn: () => boolean
 }
 
 export function useGitHubAuth(): AuthApi {
@@ -215,11 +260,10 @@ export function useGitHubAuth(): AuthApi {
     token,
     user,
     phase,
-    challenge,
     errorMessage,
     isAuthenticated: computed(() => Boolean(token.value && user.value)),
-    startDeviceFlow,
-    cancelDeviceFlow,
+    startLogin,
     logout,
+    consumeJustLoggedIn,
   }
 }

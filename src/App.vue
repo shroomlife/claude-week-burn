@@ -15,7 +15,7 @@ import MetricsRow from './components/MetricsRow.vue'
 import BurnControls from './components/BurnControls.vue'
 import CommandPalette from './components/CommandPalette.vue'
 import UpdateToast from './components/UpdateToast.vue'
-import LoginDialog from './components/LoginDialog.vue'
+import InstallIosModal from './components/InstallIosModal.vue'
 import { useGitHubAuth } from './composables/useGitHubAuth'
 import { useGistSync } from './composables/useGistSync'
 import type { Mode } from './types/burn'
@@ -123,23 +123,23 @@ watch(() => c.status.value.mode, async (mode: Mode, old: Mode | undefined) => {
 // Auth + sync
 const auth = useGitHubAuth()
 const sync = useGistSync()
-const loginOpen = ref(false)
-function openLogin(): void { loginOpen.value = true }
-function closeLogin(): void { loginOpen.value = false }
 
 // Command Palette
 const paletteOpen = ref(false)
 function openPalette(): void { paletteOpen.value = true }
 function closePalette(): void { paletteOpen.value = false }
 
+// iOS Install Modal
+const iosInstallOpen = ref(false)
+function showIosInstall(): void { iosInstallOpen.value = true }
+function closeIosInstall(): void { iosInstallOpen.value = false }
+
 watch(() => auth.phase.value, (p) => {
   if (p === 'success') pushToast(`Eingeloggt als @${auth.user.value?.login ?? ''}`, 'celebrate')
+  if (p === 'error' && auth.errorMessage.value) pushToast(auth.errorMessage.value)
 })
-watch(() => sync.status.value, (s, was) => {
+watch(() => sync.status.value, (s) => {
   if (s === 'error') pushToast(sync.errorMessage.value ?? 'Sync-Fehler')
-  if (s === 'idle' && was === 'syncing') {
-    /* silent success — pill already reflects it */
-  }
 })
 
 async function shareBurnRate(): Promise<void> {
@@ -183,7 +183,7 @@ const modeClass = computed(() => `mode-${c.status.value.mode}`)
     <BurnHeader
       :countdown="c.countdown.value"
       @open-palette="openPalette"
-      @open-login="openLogin"
+      @show-ios-install="showIosInstall"
     />
 
     <PreWeekBanner
@@ -234,14 +234,14 @@ const modeClass = computed(() => `mode-${c.status.value.mode}`)
       @snap="() => { burn.snapResetToSevenDays(); pushToast('Reset auf 7 Tage gesetzt') }"
       @sync="() => { burn.usagePercent.value = c.timePercent.value; pushToast('Usage = Zeit') }"
       @new-week="() => { burn.resetWeek(); pushToast('Neue Woche — Usage zurückgesetzt') }"
-      @sign-in="openLogin"
+      @sign-in="() => { void auth.startLogin() }"
       @sync-now="() => { void sync.pushNow(); pushToast('Synchronisiere…') }"
       @logout="() => { auth.logout(); pushToast('Abgemeldet') }"
     />
 
-    <LoginDialog :open="loginOpen" @close="closeLogin" />
-
     <UpdateToast />
+
+    <InstallIosModal :open="iosInstallOpen" @close="closeIosInstall" />
 
     <!-- Score-Pop overlay: arcade-style percent floaters -->
     <div class="pop-layer" aria-hidden="true">
