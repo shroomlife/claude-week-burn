@@ -1,0 +1,13 @@
+name = "burn-rate-gh-proxy"
+main = "src/index.ts"
+compatibility_date = "2026-05-01"
+workers_dev = true
+
+# This worker is a stateless CORS reverse-proxy for the GitHub OAuth Device
+# Flow endpoints. It is fronted by https://burn-rate-gh-proxy.shroomlife.workers.dev
+# and used by the claude-week-burn SPA to complete the login flow from the
+# browser. No bindings, no secrets, no state.
+
+[observability]
+enabled = true
+head_sampling_rate = 0.1

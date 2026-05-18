@@ -50,6 +50,9 @@ const persisted = usePersistedState<PersistedDataV1>(STORAGE_KEY, defaultState()
   validate,
 })
 
+/** Internal: raw state ref. Only the sync layer should read/write this directly. */
+export const _persistedBurnState = persisted
+
 const resetDate: WritableComputedRef<string> = computed({
   get: () => persisted.value.resetDate,
   set: (v) => {

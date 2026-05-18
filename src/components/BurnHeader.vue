@@ -1,10 +1,15 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted } from 'vue'
 import IconLightning from '~icons/ph/lightning-fill'
+import AuthButton from './AuthButton.vue'
+import { AUTH_ENABLED } from '../config/auth'
 import type { Countdown } from '../types/burn'
 
 const props = defineProps<{ countdown: Countdown }>()
-const emit = defineEmits<{ (e: 'open-palette'): void }>()
+const emit = defineEmits<{
+  (e: 'open-palette'): void
+  (e: 'open-login'): void
+}>()
 
 const countdownShort = computed(() => {
   const { days, hours, minutes } = props.countdown
@@ -34,11 +39,18 @@ onUnmounted(() => window.removeEventListener('keydown', onKey))
       <div class="tag">live weekly pace tracker</div>
     </div>
 
-    <button class="cmd-pill" type="button" @click="emit('open-palette')" aria-label="Command palette öffnen">
-      <kbd>⌘K</kbd>
-      <span class="sep" aria-hidden="true">·</span>
-      <span class="cd num">{{ countdownShort }}</span>
-    </button>
+    <div class="actions">
+      <AuthButton
+        v-if="AUTH_ENABLED"
+        @open-login="emit('open-login')"
+        @open-menu="emit('open-palette')"
+      />
+      <button class="cmd-pill" type="button" @click="emit('open-palette')" aria-label="Command palette öffnen">
+        <kbd>⌘K</kbd>
+        <span class="sep" aria-hidden="true">·</span>
+        <span class="cd num">{{ countdownShort }}</span>
+      </button>
+    </div>
   </header>
 </template>
 
@@ -48,6 +60,12 @@ onUnmounted(() => window.removeEventListener('keydown', onKey))
   align-items: center;
   gap: 14px;
   padding: 4px 4px;
+}
+.actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
 }
 .logo {
   width: 40px;

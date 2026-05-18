@@ -15,6 +15,9 @@ import MetricsRow from './components/MetricsRow.vue'
 import BurnControls from './components/BurnControls.vue'
 import CommandPalette from './components/CommandPalette.vue'
 import UpdateToast from './components/UpdateToast.vue'
+import LoginDialog from './components/LoginDialog.vue'
+import { useGitHubAuth } from './composables/useGitHubAuth'
+import { useGistSync } from './composables/useGistSync'
 import type { Mode } from './types/burn'
 
 const burn = useBurnState()
@@ -117,10 +120,27 @@ watch(() => c.status.value.mode, async (mode: Mode, old: Mode | undefined) => {
   }
 })
 
+// Auth + sync
+const auth = useGitHubAuth()
+const sync = useGistSync()
+const loginOpen = ref(false)
+function openLogin(): void { loginOpen.value = true }
+function closeLogin(): void { loginOpen.value = false }
+
 // Command Palette
 const paletteOpen = ref(false)
 function openPalette(): void { paletteOpen.value = true }
 function closePalette(): void { paletteOpen.value = false }
+
+watch(() => auth.phase.value, (p) => {
+  if (p === 'success') pushToast(`Eingeloggt als @${auth.user.value?.login ?? ''}`, 'celebrate')
+})
+watch(() => sync.status.value, (s, was) => {
+  if (s === 'error') pushToast(sync.errorMessage.value ?? 'Sync-Fehler')
+  if (s === 'idle' && was === 'syncing') {
+    /* silent success — pill already reflects it */
+  }
+})
 
 async function shareBurnRate(): Promise<void> {
   const text = `🔋 ${burn.usagePercent.value}% used · ${c.timePercent.value}% time · ${c.delta.value >= 0 ? '+' : ''}${c.delta.value}% headroom · Reset in ${c.countdown.value.days}d ${c.countdown.value.hours}h`
@@ -163,6 +183,7 @@ const modeClass = computed(() => `mode-${c.status.value.mode}`)
     <BurnHeader
       :countdown="c.countdown.value"
       @open-palette="openPalette"
+      @open-login="openLogin"
     />
 
     <PreWeekBanner
@@ -207,12 +228,18 @@ const modeClass = computed(() => `mode-${c.status.value.mode}`)
 
     <CommandPalette
       :open="paletteOpen"
+      :authenticated="auth.isAuthenticated.value"
       @close="closePalette"
       @share="shareBurnRate"
       @snap="() => { burn.snapResetToSevenDays(); pushToast('Reset auf 7 Tage gesetzt') }"
       @sync="() => { burn.usagePercent.value = c.timePercent.value; pushToast('Usage = Zeit') }"
       @new-week="() => { burn.resetWeek(); pushToast('Neue Woche — Usage zurückgesetzt') }"
+      @sign-in="openLogin"
+      @sync-now="() => { void sync.pushNow(); pushToast('Synchronisiere…') }"
+      @logout="() => { auth.logout(); pushToast('Abgemeldet') }"
     />
+
+    <LoginDialog :open="loginOpen" @close="closeLogin" />
 
     <UpdateToast />
 

@@ -36,6 +36,8 @@ jobs:
         run: bun run build
         env:
           VITE_BASE: /claude-week-burn/
+          VITE_GITHUB_CLIENT_ID: ${{ secrets.VITE_GITHUB_CLIENT_ID }}
+          VITE_GH_PROXY_URL: ${{ vars.VITE_GH_PROXY_URL || 'https://burn-rate-gh-proxy.shroomlife.workers.dev' }}
 
       - name: Setup Pages
         uses: actions/configure-pages@v5

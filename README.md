@@ -130,6 +130,51 @@ Workflow: [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml). Setzt 
 
 ---
 
+## Optional: GitHub Login + Gist Sync
+
+Wenn du Cross-Device-Sync willst, kannst du den optionalen Sign-In aktivieren. Dein State landet dann in einem privaten GitHub-Gist (nur du hast Lesezugriff). Komplett ohne DB, ohne Account-Anlage, ohne Server-State.
+
+**Architektur:**
+- **Cloudflare Worker** `burn-rate-gh-proxy.shroomlife.workers.dev` proxied GitHubs OAuth Device-Flow Endpoints mit CORS-Headers (notwendig weil github.com/login/* keine CORS-Headers sendet). Stateless, ~50 Zeilen. Free tier covers 100k req/Tag.
+- **GitHub Device Flow** ohne client_secret. App holt einen 8-stelligen Code, du bestätigst auf github.com, App pollt bis Token kommt.
+- **Token** liegt lokal in deinem `localStorage` (Schlüssel `burnRate:gh:token`). Nur `gist`-Scope — kein Repo-Access, kein User-Write.
+- **Gist** namens `claude-burn-rate-state.json` wird beim ersten Login angelegt (privat). Push debounced 3s nach State-Änderung, Pull on init + visibilitychange.
+
+### Setup
+
+1. **OAuth App registrieren** auf https://github.com/settings/developers:
+   - Application name: `Claude Burn Rate`
+   - Homepage URL: `https://shroomlife.github.io/claude-week-burn/`
+   - Authorization callback URL: `https://shroomlife.github.io/claude-week-burn/` (wird beim Device Flow nicht verwendet, ist aber Pflichtfeld)
+   - **Checkbox "Enable Device Flow" aktivieren** — ohne das geht's nicht
+   - Auf "Register application" klicken
+
+2. **Client ID** kopieren (sieht aus wie `Iv23liXXXXXXXXXXXXXX`).
+
+3. **In GH-Actions als Secret hinterlegen**:
+   ```bash
+   gh secret set VITE_GITHUB_CLIENT_ID --body "Iv23liXXXXXXXXXXXXXX"
+   ```
+
+4. **Re-Deploy** triggern: leeren Commit auf main pushen oder Actions-Workflow manuell starten.
+
+Nach dem nächsten Deploy taucht im Header eine "Sign in"-Pill auf. Klick → Code wird angezeigt → "Auf GitHub bestätigen" → einloggen → fertig.
+
+### Worker fork
+
+Falls du das ganze auf deinem eigenen Account betreiben willst:
+
+```bash
+cd worker
+bun install -g wrangler
+wrangler login
+wrangler deploy
+```
+
+Dann `VITE_GH_PROXY_URL` auf deine Worker-URL setzen.
+
+---
+
 ## License
 
 MIT — bau dir deine eigene Burn-Rate-App damit. ✨

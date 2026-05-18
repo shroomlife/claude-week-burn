@@ -5,18 +5,25 @@ import IconCalendar from '~icons/ph/calendar-plus'
 import IconEqual from '~icons/ph/equals'
 import IconRefresh from '~icons/ph/arrows-clockwise'
 import IconShare from '~icons/ph/share-network'
+import IconCloudUp from '~icons/ph/cloud-arrow-up'
+import IconSignout from '~icons/ph/sign-out'
+import IconSignin from '~icons/ph/sign-in'
+import { AUTH_ENABLED } from '../config/auth'
 
-const props = defineProps<{ open: boolean }>()
+const props = defineProps<{ open: boolean; authenticated: boolean }>()
 const emit = defineEmits<{
   (e: 'close'): void
   (e: 'share'): void
   (e: 'snap'): void
   (e: 'sync'): void
   (e: 'new-week'): void
+  (e: 'sync-now'): void
+  (e: 'logout'): void
+  (e: 'sign-in'): void
 }>()
 
 interface Action {
-  id: 'snap' | 'sync' | 'share' | 'new-week'
+  id: 'snap' | 'sync' | 'share' | 'new-week' | 'sync-now' | 'logout' | 'sign-in'
   icon: Component
   title: string
   hint: string
@@ -24,7 +31,7 @@ interface Action {
   emit: () => void
 }
 
-const actions: Action[] = [
+const baseActions: Action[] = [
   {
     id: 'snap',
     icon: IconCalendar,
@@ -59,14 +66,50 @@ const actions: Action[] = [
   },
 ]
 
+const authActions = computed<Action[]>(() => {
+  if (!AUTH_ENABLED) return []
+  if (props.authenticated) {
+    return [
+      {
+        id: 'sync-now',
+        icon: IconCloudUp,
+        title: 'Jetzt synchronisieren',
+        hint: 'Push deinen aktuellen State sofort in deinen Sync-Gist.',
+        keys: '',
+        emit: () => emit('sync-now'),
+      },
+      {
+        id: 'logout',
+        icon: IconSignout,
+        title: 'Abmelden',
+        hint: 'GitHub-Token lokal löschen. Sync stoppt; localStorage bleibt.',
+        keys: '',
+        emit: () => emit('logout'),
+      },
+    ]
+  }
+  return [
+    {
+      id: 'sign-in',
+      icon: IconSignin,
+      title: 'Mit GitHub anmelden',
+      hint: 'Aktiviert Cross-Device-Sync via privatem Gist (scope: gist).',
+      keys: '',
+      emit: () => emit('sign-in'),
+    },
+  ]
+})
+
+const actions = computed<Action[]>(() => [...baseActions, ...authActions.value])
+
 const query = ref('')
 const selectedIndex = ref(0)
 const inputEl = ref<HTMLInputElement | null>(null)
 
 const filtered = computed(() => {
   const q = query.value.trim().toLowerCase()
-  if (!q) return actions
-  return actions.filter((a) =>
+  if (!q) return actions.value
+  return actions.value.filter((a) =>
     a.title.toLowerCase().includes(q) || a.hint.toLowerCase().includes(q),
   )
 })
