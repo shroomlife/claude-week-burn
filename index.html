@@ -4,6 +4,14 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 
+    <!-- Content Security Policy — pin allowed origins, deny inline scripts -->
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: https://avatars.githubusercontent.com; connect-src 'self' https://api.github.com https://burn-rate-gh-proxy.shroomlife.workers.dev; frame-ancestors 'none'; base-uri 'self'; form-action 'none'; object-src 'none'; upgrade-insecure-requests"
+    />
+    <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
+
     <!-- Primary Meta -->
     <title>Claude Burn Rate — Live Pace Tracker für deine wöchentliche Claude-Quota</title>
     <meta name="description" content="Tracke deine Claude Code Usage gegen das rolling 7-Tage-Limit. Wie viel Quota hast du noch? Reichts bis zum Reset? Open-Source Vue 3 PWA, läuft lokal — kein Account, keine Tracker." />
