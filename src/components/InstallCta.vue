@@ -52,7 +52,7 @@ const label = computed(() =>
   flex-direction: column;
   align-items: center;
   gap: 12px;
-  padding: 32px 18px 40px;
+  padding: 56px 18px 40px;
 }
 
 .rainbow-btn {
@@ -149,7 +149,7 @@ const label = computed(() =>
 }
 
 @media (max-width: 480px) {
-  .install-cta-wrap { padding: 24px 14px 32px; }
+  .install-cta-wrap { padding: 44px 14px 32px; }
   .rainbow-inner { padding: 12px 22px; font-size: 14px; }
 }
 </style>
