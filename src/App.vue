@@ -187,56 +187,59 @@ const modeClass = computed(() => `mode-${c.status.value.mode}`)
       @show-ios-install="showIosInstall"
     />
 
-    <OnboardingCard
-      v-if="!burn.setupComplete.value"
-      :reset-date="burn.resetDate.value"
-      :usage-percent="burn.usagePercent.value"
-      @update:reset-date="burn.resetDate.value = $event"
-      @update:usage-percent="burn.usagePercent.value = $event"
-      @complete="burn.completeSetup"
-    />
-
-    <template v-else>
-      <PreWeekBanner
-        v-if="c.preWeek.value"
-        :days="c.daysUntilWeekStart.value"
-        :week-start-label="c.weekStartLabel.value"
-        @snap="burn.snapResetToSevenDays"
-      />
-
-      <PaceBar
-        :time-percent="c.timePercent.value"
+    <transition name="boot" mode="out-in" appear>
+      <OnboardingCard
+        v-if="!burn.setupComplete.value"
+        key="onb"
+        :reset-date="burn.resetDate.value"
         :usage-percent="burn.usagePercent.value"
-        :delta="c.delta.value"
-        :status="c.status.value"
-        :week-start="c.weekStart.value"
-        :ms-per-percent="c.msPerPercent.value"
+        @update:reset-date="burn.resetDate.value = $event"
+        @update:usage-percent="burn.usagePercent.value = $event"
+        @complete="burn.completeSetup"
       />
 
-      <InsightCard
-        :sentence="c.tomorrowSentence.value"
-        :projected-end="c.forecast.value.projectedEndUsage"
-        :reliable="c.forecastReliable.value"
-        :time-percent="c.timePercent.value"
-        :usage-percent="burn.usagePercent.value"
-        :ghost-usage="c.ghostUsage.value"
-        :delta="c.delta.value"
-      />
+      <div v-else key="main" class="main-cards">
+        <PreWeekBanner
+          v-if="c.preWeek.value"
+          :days="c.daysUntilWeekStart.value"
+          :week-start-label="c.weekStartLabel.value"
+          @snap="burn.snapResetToSevenDays"
+        />
 
-      <MetricsRow
-        :countdown="c.countdown.value"
-        :daily-budget="c.dailyBudget.value"
-        :remaining-percent="c.remainingPercent.value"
-      />
+        <PaceBar
+          :time-percent="c.timePercent.value"
+          :usage-percent="burn.usagePercent.value"
+          :delta="c.delta.value"
+          :status="c.status.value"
+          :week-start="c.weekStart.value"
+          :ms-per-percent="c.msPerPercent.value"
+        />
 
-      <BurnControls
-        v-model:usage-percent="burn.usagePercent.value"
-        v-model:reset-date="burn.resetDate.value"
-        :time-percent="c.timePercent.value"
-        :timezone-label="c.timezoneLabel.value"
-        :week-start-label="c.weekStartLabel.value"
-      />
-    </template>
+        <InsightCard
+          :sentence="c.tomorrowSentence.value"
+          :projected-end="c.forecast.value.projectedEndUsage"
+          :reliable="c.forecastReliable.value"
+          :time-percent="c.timePercent.value"
+          :usage-percent="burn.usagePercent.value"
+          :ghost-usage="c.ghostUsage.value"
+          :delta="c.delta.value"
+        />
+
+        <MetricsRow
+          :countdown="c.countdown.value"
+          :daily-budget="c.dailyBudget.value"
+          :remaining-percent="c.remainingPercent.value"
+        />
+
+        <BurnControls
+          v-model:usage-percent="burn.usagePercent.value"
+          v-model:reset-date="burn.resetDate.value"
+          :time-percent="c.timePercent.value"
+          :timezone-label="c.timezoneLabel.value"
+          :week-start-label="c.weekStartLabel.value"
+        />
+      </div>
+    </transition>
 
     <CommandPalette
       :open="paletteOpen"
@@ -321,6 +324,58 @@ main {
   gap: 14px;
   align-content: start;
   position: relative;
+}
+
+/* The main cards group is its own inner grid so we can transition the whole
+   block as one and stagger entry per-card via nth-child. */
+.main-cards {
+  display: grid;
+  gap: 14px;
+}
+
+/* === Onboarding ⇄ main transition ===================================
+   Onboarding fades out, then main cards slide up with a staggered cascade.
+   mode="out-in" guarantees no overlap, so the screen never shows two layers. */
+.boot-enter-active {
+  transition: opacity 360ms ease, transform 440ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.boot-leave-active {
+  transition: opacity 220ms ease, transform 260ms ease;
+}
+.boot-enter-from {
+  opacity: 0;
+  transform: translateY(14px);
+}
+.boot-leave-to {
+  opacity: 0;
+  transform: translateY(-6px);
+}
+
+/* Per-card cascade INSIDE the main grid when it enters (after onboarding
+   completes or on cold load). Each card animates from below with a
+   stagger; the parent .boot-enter-* fade still wraps them. */
+.main-cards.boot-enter-active > * {
+  animation: card-slide-in 520ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
+}
+.main-cards.boot-enter-active > *:nth-child(1) { animation-delay: 0ms; }
+.main-cards.boot-enter-active > *:nth-child(2) { animation-delay: 70ms; }
+.main-cards.boot-enter-active > *:nth-child(3) { animation-delay: 140ms; }
+.main-cards.boot-enter-active > *:nth-child(4) { animation-delay: 210ms; }
+.main-cards.boot-enter-active > *:nth-child(5) { animation-delay: 280ms; }
+
+@keyframes card-slide-in {
+  from { opacity: 0; transform: translateY(18px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .boot-enter-active, .boot-leave-active {
+    transition: opacity 200ms ease;
+    transform: none !important;
+  }
+  .main-cards.boot-enter-active > * {
+    animation: none;
+  }
 }
 
 .about {

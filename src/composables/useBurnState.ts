@@ -42,10 +42,10 @@ function validate(value: PersistedDataV1): PersistedDataV1 | null {
   const resetDate = typeof value.resetDate === 'string' ? value.resetDate : defaultResetDate()
   const usagePercent = clampPercent(value.usagePercent)
   const lastSeen = typeof value.lastSeen === 'string' ? value.lastSeen : new Date().toISOString()
-  // Existing localStorage from before the onboarding gate landed has no
-  // setupComplete field — treat those users as already-onboarded so we don't
-  // force them back through the intro.
-  const setupComplete = typeof value.setupComplete === 'boolean' ? value.setupComplete : true
+  // No setupComplete field in storage → treat as fresh state. Forces a one-time
+  // pass through the onboarding card. Acceptable because the intro confirms
+  // values the user can already see in the same UI; nothing destructive.
+  const setupComplete = typeof value.setupComplete === 'boolean' ? value.setupComplete : false
   return { resetDate, usagePercent, lastSeen, setupComplete }
 }
 

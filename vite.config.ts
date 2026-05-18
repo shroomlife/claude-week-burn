@@ -33,7 +33,11 @@ export default defineConfig({
         ],
       },
       workbox: {
-        globPatterns: ['**/*.{js,css,html,svg,png,woff2,webmanifest}'],
+        // Precache only the small, must-have shell — JS, CSS, HTML, icons,
+        // manifest. Fonts (woff2, ~250KB across weights/subsets) are skipped
+        // so the SW install is lean; the browser's HTTP cache covers them
+        // after first load.
+        globPatterns: ['**/*.{js,css,html,svg,png,webmanifest,ico}'],
         navigateFallback: 'index.html',
         cleanupOutdatedCaches: true,
         clientsClaim: true,
