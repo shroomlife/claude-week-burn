@@ -141,7 +141,7 @@ function closeIosInstall(): void { iosInstallOpen.value = false }
 const resetOpen = ref(false)
 function openReset(): void { resetOpen.value = true }
 function cancelReset(): void { resetOpen.value = false }
-function performReset(): void {
+async function performReset(): Promise<void> {
   auth.logout()
   // Nuke every burnRate:* key — covers main state, gist pointer, last-synced,
   // any future UI prefs we might add. Other origins' storage is untouched.
@@ -157,8 +157,29 @@ function performReset(): void {
     sessionStorage.removeItem('burnRate:gh:pkce_verifier')
     sessionStorage.removeItem('burnRate:gh:oauth_state')
   } catch { /* noop */ }
+  // Critical: unregister the Service Worker and nuke its caches. Without this
+  // a stale precached shell can serve the previous JS bundle, re-initialise
+  // setupComplete=true from the old validate(), and the user never lands in
+  // the onboarding empty state we just engineered.
+  try {
+    if ('serviceWorker' in navigator) {
+      const regs = await navigator.serviceWorker.getRegistrations()
+      await Promise.all(regs.map((r) => r.unregister()))
+    }
+    if ('caches' in window) {
+      const names = await caches.keys()
+      await Promise.all(names.map((n) => caches.delete(n)))
+    }
+  } catch { /* noop */ }
+  // Best-effort: clear the homescreen badge so the installed PWA doesn't
+  // show a stale percent until the user reopens it.
+  try {
+    const nav = navigator as Navigator & { clearAppBadge?: () => Promise<void> }
+    if (typeof nav.clearAppBadge === 'function') await nav.clearAppBadge()
+  } catch { /* noop */ }
   resetOpen.value = false
-  // Full reload so module-level singletons re-init from a clean slate.
+  // Full reload so module-level singletons re-init from a clean slate AND
+  // the next page load fetches fresh assets from the network (no SW left).
   window.location.reload()
 }
 
@@ -286,7 +307,7 @@ const modeClass = computed(() => `mode-${c.status.value.mode}`)
       :logged-in="auth.isAuthenticated.value"
       :login="auth.user.value ? auth.user.value.login : null"
       @cancel="cancelReset"
-      @confirm="performReset"
+      @confirm="() => { void performReset() }"
     />
 
     <UpdateToast />
