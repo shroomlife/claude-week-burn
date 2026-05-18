@@ -127,6 +127,9 @@ async function startLogin(): Promise<void> {
     return
   }
 
+  // allow_signup omitted on purpose — GitHub defaults to true, which is fine
+  // for a public tool. Setting it to 'false' just hides GitHub's signup CTA
+  // for unauthenticated visitors with no real security benefit.
   const params = new URLSearchParams({
     client_id: GH_CLIENT_ID,
     redirect_uri: redirectUri(),
@@ -134,7 +137,6 @@ async function startLogin(): Promise<void> {
     state,
     code_challenge: challenge,
     code_challenge_method: 'S256',
-    allow_signup: 'false',
   })
 
   window.location.assign(`https://github.com/login/oauth/authorize?${params.toString()}`)
@@ -178,7 +180,16 @@ async function handleCallbackOnce(): Promise<void> {
   const oauthError = search.get('error')
 
   if (oauthError) {
-    errorMessage.value = oauthError
+    // GitHub authorize-side errors (docs: troubleshooting-authorization-request-errors)
+    if (oauthError === 'application_suspended') {
+      errorMessage.value = 'Diese OAuth-App ist gesperrt. Wende dich an support@github.com.'
+    } else if (oauthError === 'redirect_uri_mismatch') {
+      errorMessage.value = 'Callback-URL stimmt nicht mit der OAuth-App-Konfiguration überein.'
+    } else if (oauthError === 'access_denied') {
+      errorMessage.value = 'Zugriff verweigert.'
+    } else {
+      errorMessage.value = search.get('error_description') || oauthError
+    }
     phase.value = 'error'
     cleanCallbackParams()
     return
