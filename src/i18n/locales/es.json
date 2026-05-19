@@ -198,6 +198,7 @@
   "toast": {
     "updateAvailable": "Nueva versión disponible ✨",
     "reload": "Recargar",
+    "updating": "Cargando actualización…",
     "loggedIn": "Conectado como @{login}",
     "syncError": "Error de sincronización",
     "resetSet": "Reset puesto a 7 días",

@@ -71,12 +71,37 @@ onBeforeUnmount(() => {
   }
 })
 
+const reloading = ref(false)
+
 async function reload(): Promise<void> {
-  if (updateSW) {
-    // updateSW(true) sends SKIP_WAITING + reloads when controllerchange fires.
+  if (reloading.value) return
+  reloading.value = true
+  console.info('[burn-rate] reload clicked — activating new SW…')
+
+  // Fail-safe: updateSW(true) waits for the new SW's statechange → activated
+  // → window.location.reload(). If activation hangs (network, bad install,
+  // already-claimed by old SW), the click would silently do nothing. Guarantee
+  // *something* happens within 3s by hard-reloading anyway.
+  const failsafe = window.setTimeout(() => {
+    console.warn('[burn-rate] SW activation timed out — hard reloading')
+    window.location.reload()
+  }, 3000)
+
+  if (!updateSW) {
+    clearTimeout(failsafe)
+    window.location.reload()
+    return
+  }
+
+  try {
     await updateSW(true)
-  } else {
-    // Fallback if registration failed: force-reload the page.
+    // If updateSW resolves without reload (shouldn't normally happen), fall
+    // through and force reload manually so the spinner doesn't sit forever.
+    clearTimeout(failsafe)
+    window.location.reload()
+  } catch (err) {
+    console.warn('[burn-rate] updateSW threw — hard reloading', err)
+    clearTimeout(failsafe)
     window.location.reload()
   }
 }
@@ -88,9 +113,17 @@ defineExpose({ checkForUpdate })
 <template>
   <div class="sw-area" aria-live="polite">
     <transition name="slide">
-      <div v-if="showRefresh" class="sw-toast">
-        <span>{{ $t('toast.updateAvailable') }}</span>
-        <button type="button" @click="reload">{{ $t('toast.reload') }}</button>
+      <div v-if="showRefresh" class="sw-toast" :class="{ updating: reloading }">
+        <span v-if="reloading" class="spinner" aria-hidden="true" />
+        <span class="msg">{{ reloading ? $t('toast.updating') : $t('toast.updateAvailable') }}</span>
+        <button
+          type="button"
+          class="reload-btn"
+          :disabled="reloading"
+          @click="reload"
+        >
+          {{ reloading ? '…' : $t('toast.reload') }}
+        </button>
       </div>
     </transition>
   </div>
@@ -109,7 +142,7 @@ defineExpose({ checkForUpdate })
 .sw-toast {
   display: inline-flex;
   align-items: center;
-  gap: 14px;
+  gap: 12px;
   padding: 11px 14px 11px 18px;
   border-radius: var(--r-pill);
   background: rgba(15, 23, 42, 0.92);
@@ -117,18 +150,48 @@ defineExpose({ checkForUpdate })
   font-size: 13px;
   font-weight: 600;
   box-shadow: 0 16px 40px -16px rgba(15, 23, 42, 0.5);
+  transition: background 0.2s ease;
 }
-.sw-toast button {
+.sw-toast.updating {
+  background: linear-gradient(135deg, #ea580c, #c2410c);
+}
+.sw-toast .msg { letter-spacing: -0.005em; }
+
+.sw-toast .reload-btn {
   font-size: 12px;
   font-weight: 700;
-  padding: 5px 10px;
+  padding: 5px 12px;
   border-radius: var(--r-pill);
   background: white;
   color: #0f172a;
   cursor: pointer;
-  transition: transform 0.15s var(--ease-spring);
+  border: 0;
+  transition: transform 0.15s var(--ease-spring), opacity 0.15s ease;
+  min-width: 56px;
 }
-.sw-toast button:hover { transform: translateY(-1px); }
+.sw-toast .reload-btn:hover:not(:disabled) { transform: translateY(-1px); }
+.sw-toast .reload-btn:disabled {
+  cursor: progress;
+  opacity: 0.6;
+}
+
+/* Spinner — small inline ring next to the message. */
+.sw-toast .spinner {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  animation: sw-spin 0.9s linear infinite;
+  flex-shrink: 0;
+}
+@keyframes sw-spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sw-toast .spinner { animation: none; border-top-color: rgba(255, 255, 255, 0.6); }
+}
 
 .slide-enter-active,
 .slide-leave-active {
