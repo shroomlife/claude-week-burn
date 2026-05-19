@@ -45,10 +45,17 @@ export default defineConfig({
         orientation: 'portrait',
         background_color: '#fbfbfd',
         theme_color: '#ea580c',
+        // Every pwa-{N}.png is full-bleed gradient with the bolt centered
+        // inside the 80% safe zone, so each one qualifies as both 'any'
+        // (regular use) AND 'maskable' (adaptive icon). Declaring 'any
+        // maskable' tells Android to use it as a maskable icon EVEN for
+        // plain home-screen shortcuts — Chrome was otherwise wrapping the
+        // 'any'-purpose PNG in a white launcher tile, giving a visible
+        // border around the gradient on the home screen.
         icons: [
-          { src: `${base}pwa-64x64.png`, sizes: '64x64', type: 'image/png' },
-          { src: `${base}pwa-192x192.png`, sizes: '192x192', type: 'image/png' },
-          { src: `${base}pwa-512x512.png`, sizes: '512x512', type: 'image/png' },
+          { src: `${base}pwa-64x64.png`, sizes: '64x64', type: 'image/png', purpose: 'any maskable' },
+          { src: `${base}pwa-192x192.png`, sizes: '192x192', type: 'image/png', purpose: 'any maskable' },
+          { src: `${base}pwa-512x512.png`, sizes: '512x512', type: 'image/png', purpose: 'any maskable' },
           { src: `${base}maskable-icon-512x512.png`, sizes: '512x512', type: 'image/png', purpose: 'maskable' },
         ],
       },
