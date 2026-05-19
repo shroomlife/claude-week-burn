@@ -292,7 +292,15 @@
   },
   "share": {
     "title": "Claude Burn Rate",
-    "text": "🔋 {usage}% used · {time}% time · {sign}{delta}% headroom · Reset in {d}d {h}h"
+    "text": "🔋 {usage}% used · {time}% time · {sign}{delta}% headroom · Reset in {d}d {h}h",
+    "modalTitle": "Your state, ready to share",
+    "modalSubtitle": "Save it or share it.",
+    "download": "Download",
+    "shareNative": "Share",
+    "copy": "Copy",
+    "copied": "Image copied to clipboard ✨",
+    "generating": "Generating image…",
+    "close": "Close"
   },
   "about": {
     "heading": "About the app",

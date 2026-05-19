@@ -292,7 +292,15 @@
   },
   "share": {
     "title": "Claude Burn Rate",
-    "text": "🔋 {usage}% usado · {time}% tiempo · {sign}{delta}% margen · Reset en {d}d {h}h"
+    "text": "🔋 {usage}% usado · {time}% tiempo · {sign}{delta}% margen · Reset en {d}d {h}h",
+    "modalTitle": "Tu estado, listo para compartir",
+    "modalSubtitle": "Descárgalo o compártelo.",
+    "download": "Descargar",
+    "shareNative": "Compartir",
+    "copy": "Copiar",
+    "copied": "Imagen copiada al portapapeles ✨",
+    "generating": "Generando imagen…",
+    "close": "Cerrar"
   },
   "about": {
     "heading": "Sobre la app",

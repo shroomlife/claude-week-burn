@@ -22,11 +22,12 @@ import OnboardingCard from './components/OnboardingCard.vue'
 import InitialSyncCard from './components/InitialSyncCard.vue'
 import AccountModal from './components/AccountModal.vue'
 import ExhaustedCard from './components/ExhaustedCard.vue'
+import ShareModal from './components/ShareModal.vue'
 import ResetDialog from './components/ResetDialog.vue'
 import { useGitHubAuth } from './composables/useGitHubAuth'
 import { useGistSync } from './composables/useGistSync'
 import { disablePersistedWrites } from './composables/usePersistedState'
-import { buildShareCardBlob, shareOrDownload } from './composables/useShareImage'
+import { buildShareCardBlob } from './composables/useShareImage'
 import type { Mode } from './types/burn'
 
 const { t, locale } = useI18n()
@@ -243,8 +244,17 @@ async function onSyncNow(): Promise<void> {
   }
 }
 
+// Share Modal state
+const shareModalOpen = ref(false)
+const shareBlob = ref<Blob | null>(null)
+const shareCaption = ref('')
+
 async function shareBurnRate(): Promise<void> {
-  const caption = t('share.text', {
+  // Build caption + open the modal immediately. Image generation runs in
+  // the background; the modal shows its 'generating…' placeholder until
+  // the blob lands, then swaps in the preview. This is way nicer than
+  // silently waiting for the download to drop.
+  shareCaption.value = t('share.text', {
     usage: burn.usagePercent.value,
     time: c.timePercent.value,
     sign: c.delta.value >= 0 ? '+' : '',
@@ -252,9 +262,10 @@ async function shareBurnRate(): Promise<void> {
     d: c.countdown.value.days,
     h: c.countdown.value.hours,
   })
+  shareBlob.value = null
+  shareModalOpen.value = true
+
   try {
-    // Ensure brand fonts are loaded so the canvas renders Outfit/JetBrains
-    // instead of system fallbacks.
     if (typeof document !== 'undefined' && document.fonts?.ready) {
       await document.fonts.ready
     }
@@ -272,16 +283,20 @@ async function shareBurnRate(): Promise<void> {
       url: 'shroomlife.github.io/claude-week-burn',
       locale: locale.value,
     })
-    const fileName = `claude-burn-rate-${burn.usagePercent.value}pct.png`
-    const result = await shareOrDownload(blob, fileName, caption)
-    pushToast(result === 'shared' ? t('toast.shared') : t('toast.downloaded'), 'celebrate')
+    shareBlob.value = blob
   } catch (err) {
-    console.warn('[share] image failed, falling back to text', err)
+    console.warn('[share] image failed, falling back to text copy', err)
+    shareModalOpen.value = false
     if (typeof navigator !== 'undefined' && navigator.clipboard) {
-      await navigator.clipboard.writeText(caption)
+      await navigator.clipboard.writeText(shareCaption.value)
       pushToast(t('toast.copiedClipboard'))
     }
   }
+}
+
+function closeShareModal(): void {
+  shareModalOpen.value = false
+  shareBlob.value = null
 }
 
 // App badge — debounced so a slider drag doesn't fire 30+ async calls/second
@@ -407,6 +422,14 @@ const modeClass = computed(() => `mode-${c.status.value.mode}`)
       @close="closeAccount"
       @logout="() => { auth.logout(); pushToast(t('toast.loggedOut')) }"
       @sync-now="onSyncNow"
+    />
+
+    <ShareModal
+      :open="shareModalOpen"
+      :blob="shareBlob"
+      :caption="shareCaption"
+      @close="closeShareModal"
+      @copied="pushToast(t('share.copied'), 'celebrate')"
     />
 
     <ResetDialog
