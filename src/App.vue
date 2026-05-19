@@ -228,6 +228,21 @@ watch(() => sync.status.value, (s) => {
   if (s === 'error') pushToast(sync.errorMessage.value ?? t('toast.syncError'))
 })
 
+async function onSyncNow(): Promise<void> {
+  pushToast(t('toast.syncStarted'))
+  try {
+    await sync.pushNow()
+    // Don't second-toast on failure — useGistSync already pushes
+    // a sync-error toast via its own status watch.
+    if (sync.status.value !== 'error') {
+      pushToast(t('toast.syncDone'), 'celebrate')
+    }
+  } catch (err) {
+    console.warn('[sync] pushNow rejected', err)
+    pushToast(t('toast.syncFailed'))
+  }
+}
+
 async function shareBurnRate(): Promise<void> {
   const caption = t('share.text', {
     usage: burn.usagePercent.value,
@@ -382,7 +397,7 @@ const modeClass = computed(() => `mode-${c.status.value.mode}`)
       @sync="() => { burn.usagePercent.value = c.timePercent.value; pushToast(t('toast.usageEqualsTime')) }"
       @new-week="() => { burn.resetWeek(); pushToast(t('toast.newWeekStarted')) }"
       @sign-in="() => { void auth.startLogin() }"
-      @sync-now="() => { void sync.pushNow(); pushToast(t('toast.syncStarted')) }"
+      @sync-now="onSyncNow"
       @logout="() => { auth.logout(); pushToast(t('toast.loggedOut')) }"
       @reset-app="openReset"
     />
@@ -391,7 +406,7 @@ const modeClass = computed(() => `mode-${c.status.value.mode}`)
       :open="accountOpen"
       @close="closeAccount"
       @logout="() => { auth.logout(); pushToast(t('toast.loggedOut')) }"
-      @sync-now="() => { void sync.pushNow(); pushToast(t('toast.syncStarted')) }"
+      @sync-now="onSyncNow"
     />
 
     <ResetDialog

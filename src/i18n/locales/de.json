@@ -25,14 +25,14 @@
   },
   "onboarding": {
     "title": "Willkommen bei Claude Burn Rate",
-    "intro": "Zwei kurze Sachen brauchst du noch, dann läuft alles — ohne Account, alles bleibt lokal. Wenn du auf einem anderen Gerät schon eingeloggt warst, kannst du oben rechts auch direkt mit GitHub anmelden — dann ziehen wir deinen Stand rüber.",
+    "intro": "Zwei kurze Sachen, dann läuft's. Du brauchst keinen Account, alles bleibt lokal. Falls du auf einem anderen Gerät schon mit GitHub angemeldet warst: einfach oben rechts Sign in, dann ziehen wir deinen Stand rüber.",
     "step1": {
       "title": "Wann ist dein Weekly Reset?",
-      "hint": "Das Datum, an dem deine wöchentliche Quota wieder bei 0% startet."
+      "hint": "Wann deine Quota wieder bei 0 ist."
     },
     "step2": {
       "title": "Wie viel hast du diese Woche schon verbraucht?",
-      "hint": "In Prozent. Auf den meisten Plänen siehst du das im Claude Code Status."
+      "hint": "In Prozent. Steht bei den meisten Plänen im Claude Code Status."
     },
     "cta": "Los geht's"
   },
@@ -43,15 +43,15 @@
       "error": "Sync fehlgeschlagen"
     },
     "subtitle": {
-      "connecting": "Einen Moment — wir authentifizieren dich…",
+      "connecting": "Moment, wir loggen dich ein…",
       "fetching": "Wir ziehen deine letzten Werte aus deinem privaten Gist rüber.",
-      "error": "Verbindung zu GitHub nicht möglich."
+      "error": "Kein Connect zu GitHub."
     },
     "retry": "Erneut versuchen"
   },
   "preWeek": {
     "title": "Dein Reset ist {days} Tage entfernt — passt das?",
-    "explanation": "Claude nutzt ein rolling 7-Tage-Fenster. Mit deinem Datum würde die Woche erst am {date} starten — bis dahin bleibt „Zeit verstrichen\" bei 0% und der Vergleich kippt unrealistisch ins Rot.",
+    "explanation": "Claude rechnet in einem rollenden 7-Tage-Fenster. Mit deinem Datum startet die Woche erst am {date}. Bis dahin steht „Zeit verstrichen\" auf 0% und die Pace sieht unfair rot aus.",
     "snap": "📅 Reset auf 7 Tage ab jetzt setzen"
   },
   "pace": {
@@ -167,7 +167,7 @@
   "reset": {
     "title": "App zurücksetzen?",
     "close": "Schließen",
-    "lead": "Wir löschen alle lokalen Daten auf diesem Gerät. Die App startet danach wieder im Onboarding — wie beim ersten Besuch.",
+    "lead": "Alle lokalen Daten auf diesem Gerät werden gelöscht. Danach startet die App wieder im Onboarding, wie beim ersten Besuch.",
     "items": {
       "resetDate": "Reset-Datum",
       "usage": "Aktueller Usage-Stand",
@@ -185,7 +185,7 @@
     "ariaApp": "App installieren",
     "ios": {
       "title": "Auf iPhone hinzufügen",
-      "lead": "So legst du Claude Burn Rate wie eine echte App auf deinen Home-Bildschirm — schneller Zugriff, eigenes Icon, läuft offline.",
+      "lead": "So landet Claude Burn Rate als echte App auf deinem Home-Bildschirm. Schneller Zugriff, eigenes Icon, läuft offline.",
       "step1Text": "Tippe in Safari unten auf das Teilen-Symbol",
       "step1Hint": "(Quadrat mit Pfeil nach oben)",
       "step2Text": "Wähle „Zum Home-Bildschirm\"",
@@ -205,6 +205,8 @@
     "usageEqualsTime": "Usage = Zeit",
     "newWeekStarted": "Neue Woche — Usage zurückgesetzt",
     "syncStarted": "Synchronisiere…",
+    "syncDone": "Synchronisiert ✨",
+    "syncFailed": "Sync fehlgeschlagen",
     "loggedOut": "Abgemeldet",
     "copiedClipboard": "In Zwischenablage kopiert",
     "rolloverSimple": "Frische Woche — Quota auf 0 zurückgesetzt",
@@ -214,10 +216,10 @@
   },
   "exhausted": {
     "title": "Quota leer 🪫",
-    "subtitle": "Du hast deine wöchentliche Claude-Quota voll ausgereizt.",
+    "subtitle": "Wöchentliche Claude-Quota voll ausgereizt.",
     "countdownLabel": "Reset in",
     "footnote": "Bis dahin macht Claude Code Pause auf deinem Account.",
-    "subFootnote": "Tipp: Reset-Tag {date} um {time} ist deine Refresh-Linie."
+    "subFootnote": "Reset-Tag {date} um {time} ist deine Refresh-Linie."
   },
   "account": {
     "title": "Account",
@@ -248,7 +250,7 @@
   },
   "quickSet": {
     "title": "Usage auf {target}% setzen?",
-    "body": "Du überschreibst den aktuellen Stand ({current}%) mit {target}%. Sicher?",
+    "body": "Aktueller Stand: {current}%. Wird mit {target}% überschrieben. Sicher?",
     "cancel": "Abbrechen",
     "confirm": "Setzen"
   },
@@ -266,7 +268,7 @@
   },
   "weekStart": {
     "title": "Wann startete diese Woche?",
-    "subtitle": "Verschiebt das Start-Datum der laufenden Woche, ohne das Reset-Datum zu ändern. Beim nächsten Reset wieder Auto-Logik.",
+    "subtitle": "Verschiebt nur den Start der aktuellen Woche, das Reset-Datum bleibt. Beim nächsten Reset zurück auf Auto.",
     "useAuto": "Auto (7 Tage vor Reset)",
     "autoNote": "Auto-Wert: {date}",
     "cancel": "Abbrechen",
@@ -294,8 +296,8 @@
   },
   "about": {
     "heading": "Über die App",
-    "intro": "{name} ist ein kostenloser Pace-Tracker für deine wöchentliche {claudeLink}-Quota. Du gibst dein Reset-Datum + deinen aktuellen Usage-Stand ein — die App zeigt dir live, wie viel Quota du übrig hast, wie dein Tagesbudget aussieht und ob du im aktuellen Tempo bis zum Wochenende durchhältst.",
-    "localNote": "Lokal-first: standardmäßig braucht's keinen Account, deine Werte leben nur in deinem localStorage, keine Tracker. Optional kannst du dich mit GitHub anmelden — dann syncen wir deinen Stand zwischen Geräten in einen privaten Gist auf deinem GitHub-Konto. Installierbar als PWA — auf Mobile direkt im Homescreen.",
+    "intro": "{name} trackt deine wöchentliche {claudeLink}-Quota. Reset-Datum und aktueller Usage rein, dann siehst du live, wie viel noch übrig ist, was dein Tagesbudget bei deiner Pace ist, und ob du bis zum Wochenende durchkommst. Kostenlos.",
+    "localNote": "Lokal-first. Standardmäßig kein Account nötig, deine Werte leben nur in deinem localStorage, kein Tracker. Wenn du Cross-Device-Sync willst, kannst du dich mit GitHub anmelden; dein Stand landet dann in einem privaten Gist auf deinem GitHub-Konto. Als PWA installierbar, auf Mobile direkt im Homescreen.",
     "keywords": {
       "tracker": "Claude Code Usage Tracker",
       "weekly": "Claude Pro Weekly Limit",

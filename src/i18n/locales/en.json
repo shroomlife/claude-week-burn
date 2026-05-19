@@ -25,10 +25,10 @@
   },
   "onboarding": {
     "title": "Welcome to Claude Burn Rate",
-    "intro": "Two quick things and you're set — no account, everything stays local. If you've already signed in on another device, just hit Sign in up top — we'll pull your state over.",
+    "intro": "Two quick things and you're set. No account needed, everything stays local. Already signed in on another device? Hit Sign in up top and we'll pull your state over.",
     "step1": {
       "title": "When does your weekly reset?",
-      "hint": "The date when your weekly quota resets back to 0%."
+      "hint": "When your quota resets back to 0."
     },
     "step2": {
       "title": "How much have you burned this week?",
@@ -43,7 +43,7 @@
       "error": "Sync failed"
     },
     "subtitle": {
-      "connecting": "One moment — authenticating you…",
+      "connecting": "Hold on, signing you in…",
       "fetching": "Pulling your latest values from your private gist.",
       "error": "Couldn't reach GitHub."
     },
@@ -51,7 +51,7 @@
   },
   "preWeek": {
     "title": "Your reset is {days} days away — does that look right?",
-    "explanation": "Claude uses a rolling 7-day window. With your date, the week wouldn't even start until {date} — until then \"time elapsed\" sits at 0% and the comparison tips unrealistically into the red.",
+    "explanation": "Claude works on a rolling 7-day window. With your date the week starts on {date}. Until then \"time elapsed\" is stuck at 0% and the pace looks unfairly red.",
     "snap": "📅 Set reset to 7 days from now"
   },
   "pace": {
@@ -167,7 +167,7 @@
   "reset": {
     "title": "Reset app?",
     "close": "Close",
-    "lead": "We'll delete all local data on this device. The app starts fresh in onboarding — like your first visit.",
+    "lead": "All local data on this device gets deleted. The app then restarts in onboarding, like your first visit.",
     "items": {
       "resetDate": "Reset date",
       "usage": "Current usage",
@@ -185,7 +185,7 @@
     "ariaApp": "Install app",
     "ios": {
       "title": "Add to iPhone",
-      "lead": "How to add Claude Burn Rate to your home screen like a real app — quick access, own icon, works offline.",
+      "lead": "Add Claude Burn Rate to your home screen and it behaves like a real app. Quick access, its own icon, works offline.",
       "step1Text": "In Safari, tap the Share icon at the bottom",
       "step1Hint": "(square with arrow pointing up)",
       "step2Text": "Choose \"Add to Home Screen\"",
@@ -205,6 +205,8 @@
     "usageEqualsTime": "Usage = Time",
     "newWeekStarted": "New week — usage reset",
     "syncStarted": "Syncing…",
+    "syncDone": "Synced ✨",
+    "syncFailed": "Sync failed",
     "loggedOut": "Signed out",
     "copiedClipboard": "Copied to clipboard",
     "rolloverSimple": "Fresh week — quota reset to 0",
@@ -214,10 +216,10 @@
   },
   "exhausted": {
     "title": "Quota empty 🪫",
-    "subtitle": "You've fully maxed out your weekly Claude quota.",
+    "subtitle": "Weekly Claude quota fully maxed.",
     "countdownLabel": "Reset in",
     "footnote": "Claude Code is paused on your account until then.",
-    "subFootnote": "Heads up: reset day {date} at {time} is your refresh line."
+    "subFootnote": "Reset day {date} at {time} is your refresh line."
   },
   "account": {
     "title": "Account",
@@ -248,7 +250,7 @@
   },
   "quickSet": {
     "title": "Set usage to {target}%?",
-    "body": "You're overwriting the current value ({current}%) with {target}%. Sure?",
+    "body": "Current value: {current}%. Will be overwritten with {target}%. Sure?",
     "cancel": "Cancel",
     "confirm": "Set"
   },
@@ -266,7 +268,7 @@
   },
   "weekStart": {
     "title": "When did this week start?",
-    "subtitle": "Shifts the current week's start without moving the reset date. The next rollover restores the automatic relationship.",
+    "subtitle": "Moves the current week's start without touching the reset date. Auto behavior comes back on the next rollover.",
     "useAuto": "Auto (7 days before reset)",
     "autoNote": "Auto value: {date}",
     "cancel": "Cancel",
@@ -294,8 +296,8 @@
   },
   "about": {
     "heading": "About the app",
-    "intro": "{name} is a free pace tracker for your weekly {claudeLink} quota. You enter your reset date and current usage — the app shows you live how much quota you have left, what your daily budget looks like, and whether you'll make it to the weekend at your current pace.",
-    "localNote": "Local-first: no account required by default, your values only live in your localStorage, no trackers. Optionally sign in with GitHub to sync your state across devices into a private gist on your own GitHub account. Installable as a PWA — straight to your homescreen on mobile.",
+    "intro": "{name} tracks your weekly {claudeLink} quota. Drop in your reset date and current usage, then watch live how much you've got left, what your daily budget looks like at this pace, and whether you'll make it to the weekend. Free.",
+    "localNote": "Local-first. No account required by default, your values only live in your localStorage, no trackers. Want cross-device sync? Sign in with GitHub and your state lands in a private gist on your own GitHub account. Installable as a PWA, straight to your homescreen on mobile.",
     "keywords": {
       "tracker": "Claude Code Usage Tracker",
       "weekly": "Claude Pro Weekly Limit",
