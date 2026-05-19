@@ -8,7 +8,8 @@
     "build": "vue-tsc -b && vite build",
     "preview": "vite preview",
     "typecheck": "vue-tsc --noEmit",
-    "generate-pwa-assets": "pwa-assets-generator"
+    "generate-pwa-assets": "pwa-assets-generator",
+    "screenshots": "node scripts/screenshots.mjs"
   },
   "dependencies": {
     "@fontsource-variable/jetbrains-mono": "^5.1.2",
@@ -25,6 +26,7 @@
     "@vite-pwa/assets-generator": "^0.2.6",
     "@vitejs/plugin-vue": "^5.2.1",
     "canvas-confetti": "^1.9.3",
+    "playwright": "^1.60.0",
     "typescript": "~5.7.2",
     "unplugin-icons": "^23.0.1",
     "vite": "^6.0.7",
