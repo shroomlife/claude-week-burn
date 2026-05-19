@@ -121,10 +121,12 @@ async function onOpenFocus(): Promise<void> {
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  padding: 5px 10px 5px 5px;
+  height: var(--pill-h);
+  padding: 0 10px 0 5px;
   background: var(--c-surface);
   border: 1px solid var(--c-hair);
   border-radius: var(--r-pill);
+  box-sizing: border-box;
   font-size: 12px;
   font-weight: 500;
   color: var(--c-ink);
@@ -168,6 +170,7 @@ async function onOpenFocus(): Promise<void> {
   border-radius: 12px;
   box-shadow: 0 18px 40px -16px rgba(15, 23, 42, 0.28);
   min-width: 178px;
+  max-width: calc(100vw - 24px);
   z-index: 50;
 }
 
@@ -220,8 +223,14 @@ async function onOpenFocus(): Promise<void> {
 }
 
 @media (max-width: 560px) {
-  .lang-pill { padding: 5px 8px 5px 4px; gap: 6px; }
+  .lang-pill { padding: 0 8px 0 4px; gap: 6px; }
   .lang-pill .code { font-size: 11px; }
   .flag-current { width: 16px; height: 16px; }
+  /* On mobile the pill sits leftmost in a right-aligned actions row.
+     Anchoring the menu `right: 0` (its desktop default) would push it
+     so far left it overflows the viewport — switch to opening rightward
+     from the pill's left edge instead. */
+  .menu { left: 0; right: auto; transform-origin: top left; }
+  .pop-enter-from, .pop-leave-to { transform-origin: top left; }
 }
 </style>

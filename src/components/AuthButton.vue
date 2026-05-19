@@ -85,10 +85,12 @@ const statusTitle = computed(() => {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 5px 10px 5px 6px;
+  height: var(--pill-h);
+  padding: 0 10px 0 4px;
   background: var(--c-surface);
   border: 1px solid var(--c-hair);
   border-radius: var(--r-pill);
+  box-sizing: border-box;
   font-size: 12px;
   color: var(--c-ink);
   font-weight: 500;
@@ -99,14 +101,14 @@ const statusTitle = computed(() => {
 .auth-pill:hover { background: rgba(15, 23, 42, 0.03); transform: translateY(-1px); }
 
 .auth-signin {
-  padding: 6px 12px;
+  padding: 0 12px;
   gap: 6px;
 }
 .auth-signin :deep(svg) { width: 14px; height: 14px; color: var(--c-ink); }
 
 .avatar {
-  width: 22px;
-  height: 22px;
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
   flex-shrink: 0;
   border: 1px solid var(--c-hair);

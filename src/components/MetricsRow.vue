@@ -101,11 +101,17 @@ const showSeconds = computed(() => props.countdown.days === 0 && props.countdown
 }
 
 @media (max-width: 720px) {
-  .metrics { grid-template-columns: 1fr 1fr; }
+  .metrics { grid-template-columns: 1fr 1fr; gap: 10px; }
+  /* Reset spans both columns — countdown needs the width. Tagesbudget +
+     Quota übrig sit side-by-side. Previously we collapsed to a single
+     column at 440px, but that left a huge empty right half on each card. */
   .metric:first-child { grid-column: 1 / -1; }
+  .metric { padding: 16px 18px; }
 }
-@media (max-width: 440px) {
-  .metrics { grid-template-columns: 1fr; }
-  .metric:first-child { grid-column: auto; }
+
+@media (max-width: 380px) {
+  .metric { padding: 14px 16px; gap: 8px; }
+  .cd-num { font-size: 22px; }
+  .metric-value { font-size: 24px; }
 }
 </style>

@@ -58,6 +58,10 @@
   --gap: 16px;
   --gap-lg: 22px;
   --gap-xl: 32px;
+
+  /* Pill height — all action pills in the header must agree on this so
+     they line up exactly regardless of internal padding / icon size. */
+  --pill-h: 34px;
 }
 
 /* Mode bindings — used as accent stripe + status dot, not glows */

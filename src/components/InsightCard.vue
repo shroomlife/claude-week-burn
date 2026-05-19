@@ -144,7 +144,17 @@ const projectedTone = computed(() => {
   .line { font-size: 20px; }
 }
 
-@media (max-width: 420px) {
-  .body { grid-template-columns: 1fr; justify-items: start; gap: 12px; }
+@media (max-width: 480px) {
+  /* Ring stacked above sentence, both centered. The earlier `justify-items:
+     start` left a fat gap to the right of the ring on narrow screens — now
+     it's a balanced vertical column. */
+  .body {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    text-align: center;
+    gap: 14px;
+  }
+  .signature :deep(.ring-wrap) { width: 144px; height: 144px; }
+  .line { font-size: 19px; }
 }
 </style>

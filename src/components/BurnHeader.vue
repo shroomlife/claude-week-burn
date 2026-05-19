@@ -118,10 +118,12 @@ onUnmounted(() => window.removeEventListener('keydown', onKey))
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 7px 12px;
+  height: var(--pill-h);
+  padding: 0 12px;
   background: var(--c-surface);
   border: 1px solid var(--c-hair);
   border-radius: var(--r-pill);
+  box-sizing: border-box;
   font-size: 12px;
   color: var(--c-mute);
   transition: background 0.18s ease, transform 0.18s ease;
@@ -153,7 +155,11 @@ onUnmounted(() => window.removeEventListener('keydown', onKey))
     gap: 12px;
   }
   .brand-row { gap: 12px; }
-  .actions { justify-content: flex-end; gap: 6px; }
+  /* `align-self: flex-end` overrides the parent's `align-items: stretch`
+     and pushes the actions inline-flex block to the right edge of the
+     header. Without this, the pills bunched at the left and the language
+     dropdown (anchored `right: 0`) opened off-screen to the left. */
+  .actions { align-self: flex-end; gap: 6px; }
   .logo { width: 38px; height: 38px; }
   .name { font-size: 17px; }
   .tag { font-size: 12px; }
@@ -162,7 +168,7 @@ onUnmounted(() => window.removeEventListener('keydown', onKey))
 @media (max-width: 380px) {
   /* Super narrow — drop the kbd hint from cmd-pill and tighten padding
      so all three pills still fit on the second row without wrapping. */
-  .cmd-pill { padding: 6px 10px; gap: 6px; }
+  .cmd-pill { padding: 0 10px; gap: 6px; }
   .cmd-pill kbd { display: none; }
   .cmd-pill .sep { display: none; }
   .tag { font-size: 11.5px; }
