@@ -93,16 +93,23 @@ async function loadUserOnce(): Promise<void> {
 }
 
 function logout(): void {
+  console.info('[auth] logout')
+  // 1. Flip in-memory state — reactivity propagates to UI immediately.
   token.value = null
   user.value = null
   userFetched = false
   phase.value = 'idle'
   errorMessage.value = null
   justLoggedIn.value = false
+  // 2. Belt + suspenders: synchronously remove the token from localStorage.
+  //    Without this, the debounced write fires ~400ms later — if the user
+  //    closes the tab in the window, we relied on the pagehide flush to
+  //    write null. With this, the entry is gone IMMEDIATELY.
   try {
+    localStorage.removeItem(TOKEN_STORAGE_KEY)
     sessionStorage.removeItem(SESSION_VERIFIER_KEY)
     sessionStorage.removeItem(SESSION_STATE_KEY)
-  } catch { /* sessionStorage may be unavailable */ }
+  } catch { /* storage may be unavailable */ }
 }
 
 async function startLogin(): Promise<void> {

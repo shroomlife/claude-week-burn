@@ -1,16 +1,24 @@
 <script setup lang="ts">
 import { onBeforeUnmount, onMounted, ref } from 'vue'
+import { useEventListener } from '@vueuse/core'
 
 const showRefresh = ref(false)
 let updateSW: ((reload?: boolean) => Promise<void>) | null = null
 let pollTimer: number | null = null
+let registration: ServiceWorkerRegistration | null = null
 
-// Re-check for SW updates every 30 min while the tab is open. The browser
-// only checks on navigation by default, so a long-lived PWA tab can miss a
-// deploy until manually reloaded. This nudges it.
+// Background poll every 30 min for long-lived PWAs. On top of that we also
+// check on visibility-resume + online — those cover the realistic "user
+// switched tab to ours / came back from a flaky network" cases without
+// burning network when the tab is idle.
 const UPDATE_POLL_MS = 30 * 60 * 1000
 
 async function checkForUpdate(): Promise<void> {
+  if (registration) {
+    try { await registration.update() } catch { /* harmless */ }
+    return
+  }
+  // Fallback if the registration ref isn't populated yet.
   if (!('serviceWorker' in navigator)) return
   try {
     const regs = await navigator.serviceWorker.getRegistrations()
@@ -36,10 +44,11 @@ onMounted(async () => {
         console.info('[burn-rate] new version available — waiting for user reload')
         showRefresh.value = true
       },
-      onRegisteredSW: (_url, registration) => {
-        if (!registration) return
+      onRegisteredSW: (_url, reg) => {
+        if (!reg) return
+        registration = reg
         pollTimer = window.setInterval(() => {
-          void registration.update()
+          void reg.update()
         }, UPDATE_POLL_MS)
       },
     })
@@ -47,6 +56,13 @@ onMounted(async () => {
     // dev / unsupported — virtual module isn't there, nothing to register.
   }
 })
+
+// Extra update triggers — more reliable than just the background poll.
+useEventListener(document, 'visibilitychange', () => {
+  if (!document.hidden) void checkForUpdate()
+})
+useEventListener(window, 'online', () => { void checkForUpdate() })
+useEventListener(window, 'focus', () => { void checkForUpdate() })
 
 onBeforeUnmount(() => {
   if (pollTimer !== null) {

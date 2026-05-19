@@ -285,7 +285,17 @@ function teardown(): void {
   lastSyncedHash.value = null
   isDirty.value = false
   errorMessage.value = null
-  log('teardown')
+  // Belt + suspenders: synchronously remove the sync keys from localStorage,
+  // matching the auth-token cleanup in useGitHubAuth.logout(). Otherwise a
+  // tab close in the debounced-write window leaves the gist pointer + hash
+  // in storage, and the next page load briefly resumes a stale sync.
+  try {
+    localStorage.removeItem(GIST_KEY_ID)
+    localStorage.removeItem(GIST_KEY_SYNCED_AT)
+    localStorage.removeItem(GIST_KEY_SYNCED_HASH)
+    localStorage.removeItem(GIST_KEY_DIRTY)
+  } catch { /* storage may be unavailable */ }
+  log('teardown — sync keys wiped')
 }
 
 /**
