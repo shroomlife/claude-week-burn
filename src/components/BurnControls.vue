@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import DatePicker from './DatePicker.vue'
 import UsageStepper from './UsageStepper.vue'
+import QuickSetConfirm from './QuickSetConfirm.vue'
 
 const props = defineProps<{
   usagePercent: number
@@ -42,6 +43,28 @@ function setUsage(n: number): void {
   if (typeof navigator !== 'undefined' && typeof navigator.vibrate === 'function') {
     navigator.vibrate(4)
   }
+}
+
+// Quick-set chips (0/25/50/75) now go through a confirm dialog instead of
+// blowing away the current usage value with one tap. Easy to fat-finger
+// otherwise — especially on mobile.
+const confirmOpen = ref(false)
+const pendingValue = ref(0)
+
+function askSetUsage(n: number): void {
+  const target = clampPct(n)
+  if (target === props.usagePercent) return // no-op, don't show dialog
+  pendingValue.value = target
+  confirmOpen.value = true
+}
+
+function confirmQuickSet(): void {
+  setUsage(pendingValue.value)
+  confirmOpen.value = false
+}
+
+function cancelQuickSet(): void {
+  confirmOpen.value = false
 }
 
 const sliderStyle = computed(() => ({ '--val': `${props.usagePercent}%` }))
@@ -88,16 +111,22 @@ const sliderStyle = computed(() => ({ '--val': `${props.usagePercent}%` }))
         @touchend="onSliderPointerUp"
       />
       <div class="chips">
-        <button class="chip" type="button" @click="setUsage(0)">0</button>
-        <button class="chip" type="button" @click="setUsage(25)">25</button>
-        <button class="chip" type="button" @click="setUsage(50)">50</button>
-        <button class="chip" type="button" @click="setUsage(75)">75</button>
-        <button class="chip chip-sync" type="button" @click="setUsage(timePercent)">
-          {{ $t('controls.equalsTime', { n: timePercent }) }}
-        </button>
+        <button class="chip" type="button" @click="askSetUsage(0)">0</button>
+        <button class="chip" type="button" @click="askSetUsage(25)">25</button>
+        <button class="chip" type="button" @click="askSetUsage(50)">50</button>
+        <button class="chip" type="button" @click="askSetUsage(75)">75</button>
+        <button class="chip" type="button" @click="askSetUsage(100)">100</button>
       </div>
     </div>
   </section>
+
+  <QuickSetConfirm
+    :open="confirmOpen"
+    :current="usagePercent"
+    :target="pendingValue"
+    @cancel="cancelQuickSet"
+    @confirm="confirmQuickSet"
+  />
 </template>
 
 <style scoped>
@@ -179,15 +208,6 @@ const sliderStyle = computed(() => ({ '--val': `${props.usagePercent}%` }))
   background: rgba(15, 23, 42, 0.08);
   color: var(--c-ink);
   transform: translateY(-1px);
-}
-.chip-sync {
-  border: 1px dashed rgba(234, 88, 12, 0.35);
-  background: transparent;
-  color: var(--c-flame-2);
-}
-.chip-sync:hover {
-  background: rgba(234, 88, 12, 0.08);
-  color: var(--c-flame-2);
 }
 
 .meta {

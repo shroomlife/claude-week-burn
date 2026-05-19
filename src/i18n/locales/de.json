@@ -244,6 +244,12 @@
     "minusAria": "Usage minus 1",
     "plusAria": "Usage plus 1"
   },
+  "quickSet": {
+    "title": "Usage auf {target}% setzen?",
+    "body": "Du überschreibst den aktuellen Stand ({current}%) mit {target}%. Sicher?",
+    "cancel": "Abbrechen",
+    "confirm": "Setzen"
+  },
   "datepicker": {
     "ariaLabel": "Datum & Zeit auswählen",
     "presets": {
@@ -265,8 +271,8 @@
   },
   "about": {
     "heading": "Über die App",
-    "intro": "{name} ist ein kostenloser, lokaler Pace-Tracker für deine wöchentliche {claudeLink}-Quota. Du gibst dein Reset-Datum + deinen aktuellen Usage-Stand ein — die App zeigt dir live, wie viel Quota du übrig hast, wie dein Daily Budget aussieht und ob du im aktuellen Tempo bis zum Wochenende durchhältst.",
-    "localNote": "Funktioniert komplett lokal: kein Account, kein Server, keine Tracker. Alle Werte leben in deinem localStorage. Installierbar als PWA — auf Mobile direkt im Homescreen.",
+    "intro": "{name} ist ein kostenloser Pace-Tracker für deine wöchentliche {claudeLink}-Quota. Du gibst dein Reset-Datum + deinen aktuellen Usage-Stand ein — die App zeigt dir live, wie viel Quota du übrig hast, wie dein Tagesbudget aussieht und ob du im aktuellen Tempo bis zum Wochenende durchhältst.",
+    "localNote": "Lokal-first: standardmäßig braucht's keinen Account, deine Werte leben nur in deinem localStorage, keine Tracker. Optional kannst du dich mit GitHub anmelden — dann syncen wir deinen Stand zwischen Geräten in einen privaten Gist auf deinem GitHub-Konto. Installierbar als PWA — auf Mobile direkt im Homescreen.",
     "keywords": {
       "tracker": "Claude Code Usage Tracker",
       "weekly": "Claude Pro Weekly Limit",
