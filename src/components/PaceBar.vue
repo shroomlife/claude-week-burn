@@ -37,13 +37,19 @@ const deltaSign = computed(() => (props.delta >= 0 ? '+' : '−'))
     </div>
 
     <div class="bar" role="img" :aria-label="$t('pace.ariaBar', { usage: usagePercent, time: timePercent })">
-      <div class="track"></div>
-      <div
-        class="delta-zone"
-        :class="ahead ? 'delta-ahead' : 'delta-behind'"
-        :style="{ left: `${minPct}%`, width: `${deltaWidth}%` }"
-      ></div>
-      <div class="fill" :style="{ width: `${usagePercent}%` }"></div>
+      <!-- Clipping wrapper: pill-rounded + overflow hidden so every fill /
+           delta-zone layer abuts cleanly without each one carrying its own
+           border-radius that collides at the seam. The tick lives OUTSIDE
+           this wrapper so its small overshoot top/bottom isn't clipped. -->
+      <div class="bar-clip">
+        <div class="track"></div>
+        <div
+          class="delta-zone"
+          :class="ahead ? 'delta-ahead' : 'delta-behind'"
+          :style="{ left: `${minPct}%`, width: `${deltaWidth}%` }"
+        ></div>
+        <div class="fill" :style="{ width: `${usagePercent}%` }"></div>
+      </div>
       <div class="tick" :style="{ left: `${tickLeft}%` }">
         <div class="tick-line"></div>
       </div>
@@ -117,17 +123,21 @@ const deltaSign = computed(() => (props.delta >= 0 ? '+' : '−'))
   position: relative;
   height: 14px;
 }
+.bar-clip {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--r-pill);
+  overflow: hidden;
+}
 .track {
   position: absolute;
   inset: 0;
   background: var(--c-pace-track);
-  border-radius: var(--r-pill);
 }
 .delta-zone {
   position: absolute;
   top: 0;
   bottom: 0;
-  border-radius: 4px;
   transition: left 320ms var(--ease-out-quint), width 320ms var(--ease-out-quint);
   z-index: 1;
 }
@@ -142,12 +152,14 @@ const deltaSign = computed(() => (props.delta >= 0 ? '+' : '−'))
   top: 0;
   bottom: 0;
   left: 0;
-  border-radius: var(--r-pill);
   background: linear-gradient(90deg, var(--c-flame-1), var(--c-flame-2));
   transition: width 320ms var(--ease-out-quint);
   z-index: 2;
 }
 .tick {
+  /* Tick sits OUTSIDE the clipped bar so it can extend a few px top/bottom.
+     z-index is still useful even though it's a sibling of .bar — we want
+     it above any neighboring strips drawn after. */
   position: absolute;
   top: -6px;
   bottom: -6px;
