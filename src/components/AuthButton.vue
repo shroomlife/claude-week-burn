@@ -8,7 +8,10 @@ import IconSyncing from '~icons/ph/arrows-clockwise'
 import { useGitHubAuth } from '../composables/useGitHubAuth'
 import { useGistSync } from '../composables/useGistSync'
 
-const emit = defineEmits<{ (e: 'open-menu'): void }>()
+const emit = defineEmits<{
+  (e: 'open-menu'): void
+  (e: 'open-account'): void
+}>()
 
 const { t, locale } = useI18n()
 const auth = useGitHubAuth()
@@ -67,7 +70,7 @@ const statusTitle = computed(() => {
     type="button"
     :title="statusTitle"
     :data-status="sync.status.value"
-    @click="emit('open-menu')"
+    @click="emit('open-account')"
   >
     <img v-if="auth.user.value" :src="auth.user.value.avatar_url" :alt="auth.user.value.login" class="avatar" />
     <span class="login">{{ auth.user.value && auth.user.value.login }}</span>

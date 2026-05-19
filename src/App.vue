@@ -20,6 +20,8 @@ import InstallIosModal from './components/InstallIosModal.vue'
 import InstallCta from './components/InstallCta.vue'
 import OnboardingCard from './components/OnboardingCard.vue'
 import InitialSyncCard from './components/InitialSyncCard.vue'
+import AccountModal from './components/AccountModal.vue'
+import ExhaustedCard from './components/ExhaustedCard.vue'
 import ResetDialog from './components/ResetDialog.vue'
 import { useGitHubAuth } from './composables/useGitHubAuth'
 import { useGistSync } from './composables/useGistSync'
@@ -156,6 +158,11 @@ const paletteOpen = ref(false)
 function openPalette(): void { paletteOpen.value = true }
 function closePalette(): void { paletteOpen.value = false }
 
+// Account Modal — opened by clicking the user pill in the header.
+const accountOpen = ref(false)
+function openAccount(): void { accountOpen.value = true }
+function closeAccount(): void { accountOpen.value = false }
+
 // iOS Install Modal
 const iosInstallOpen = ref(false)
 function showIosInstall(): void { iosInstallOpen.value = true }
@@ -268,6 +275,7 @@ const modeClass = computed(() => `mode-${c.status.value.mode}`)
     <BurnHeader
       :countdown="c.countdown.value"
       @open-palette="openPalette"
+      @open-account="openAccount"
     />
 
     <transition name="boot" mode="out-in" appear>
@@ -298,24 +306,35 @@ const modeClass = computed(() => `mode-${c.status.value.mode}`)
           @snap="burn.snapResetToSevenDays"
         />
 
-        <PaceBar
-          :time-percent="c.timePercent.value"
-          :usage-percent="burn.usagePercent.value"
-          :delta="c.delta.value"
-          :status="c.status.value"
-          :week-start="c.weekStart.value"
-          :ms-per-percent="c.msPerPercent.value"
+        <!-- 100% reached: hero countdown swaps in for PaceBar + InsightCard.
+             BurnControls stays below so the user can drop usage back down if
+             Claude refreshes early or they typo'd. -->
+        <ExhaustedCard
+          v-if="burn.usagePercent.value >= 100"
+          :countdown="c.countdown.value"
+          :reset-date="burn.resetDate.value"
         />
 
-        <InsightCard
-          :sentence="c.tomorrowSentence.value"
-          :projected-end="c.forecast.value.projectedEndUsage"
-          :reliable="c.forecastReliable.value"
-          :time-percent="c.timePercent.value"
-          :usage-percent="burn.usagePercent.value"
-          :ghost-usage="c.ghostUsage.value"
-          :delta="c.delta.value"
-        />
+        <template v-else>
+          <PaceBar
+            :time-percent="c.timePercent.value"
+            :usage-percent="burn.usagePercent.value"
+            :delta="c.delta.value"
+            :status="c.status.value"
+            :week-start="c.weekStart.value"
+            :ms-per-percent="c.msPerPercent.value"
+          />
+
+          <InsightCard
+            :sentence="c.tomorrowSentence.value"
+            :projected-end="c.forecast.value.projectedEndUsage"
+            :reliable="c.forecastReliable.value"
+            :time-percent="c.timePercent.value"
+            :usage-percent="burn.usagePercent.value"
+            :ghost-usage="c.ghostUsage.value"
+            :delta="c.delta.value"
+          />
+        </template>
 
         <MetricsRow
           :countdown="c.countdown.value"
@@ -345,6 +364,13 @@ const modeClass = computed(() => `mode-${c.status.value.mode}`)
       @sync-now="() => { void sync.pushNow(); pushToast(t('toast.syncStarted')) }"
       @logout="() => { auth.logout(); pushToast(t('toast.loggedOut')) }"
       @reset-app="openReset"
+    />
+
+    <AccountModal
+      :open="accountOpen"
+      @close="closeAccount"
+      @logout="() => { auth.logout(); pushToast(t('toast.loggedOut')) }"
+      @sync-now="() => { void sync.pushNow(); pushToast(t('toast.syncStarted')) }"
     />
 
     <ResetDialog

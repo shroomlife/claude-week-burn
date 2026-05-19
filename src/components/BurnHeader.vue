@@ -7,7 +7,10 @@ import { AUTH_ENABLED } from '../config/auth'
 import type { Countdown } from '../types/burn'
 
 const props = defineProps<{ countdown: Countdown }>()
-const emit = defineEmits<{ (e: 'open-palette'): void }>()
+const emit = defineEmits<{
+  (e: 'open-palette'): void
+  (e: 'open-account'): void
+}>()
 
 const countdownShort = computed(() => {
   const { days, hours, minutes } = props.countdown
@@ -42,6 +45,7 @@ onUnmounted(() => window.removeEventListener('keydown', onKey))
       <AuthButton
         v-if="AUTH_ENABLED"
         @open-menu="emit('open-palette')"
+        @open-account="emit('open-account')"
       />
       <button class="cmd-pill" type="button" :aria-label="$t('header.openPalette')" @click="emit('open-palette')">
         <kbd>⌘K</kbd>

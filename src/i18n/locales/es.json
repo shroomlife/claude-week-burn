@@ -216,6 +216,28 @@
     "footnote": "Claude Code está en pausa en tu cuenta hasta entonces.",
     "subFootnote": "Atento: el {date} a las {time} es tu línea de refresh."
   },
+  "account": {
+    "title": "Cuenta",
+    "connectedAs": "Conectado como",
+    "profileLink": "Perfil en GitHub",
+    "gistLink": "Ver gist de sync",
+    "lastSync": "Última sync",
+    "lastSyncNever": "Aún no sincronizado",
+    "syncNow": "Sincronizar ahora",
+    "logout": "Cerrar sesión",
+    "close": "Cerrar",
+    "status": {
+      "off": "Sin conexión",
+      "bootstrapping": "Conectando…",
+      "pulling": "Cargando estado…",
+      "pushing": "Guardando…",
+      "idle": "Conexión en vivo",
+      "error": "Error de sincronización"
+    },
+    "device": "Dispositivo",
+    "deviceLocalOnly": "Este dispositivo muestra tu estado local hasta la próxima sync.",
+    "dirtyNotice": "Los cambios locales se van a sincronizar…"
+  },
   "stepper": {
     "groupAria": "Ajustar uso",
     "minusAria": "Uso menos 1",

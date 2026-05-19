@@ -216,6 +216,28 @@
     "footnote": "Claude Code is paused on your account until then.",
     "subFootnote": "Heads up: reset day {date} at {time} is your refresh line."
   },
+  "account": {
+    "title": "Account",
+    "connectedAs": "Connected as",
+    "profileLink": "Profile on GitHub",
+    "gistLink": "Open sync gist",
+    "lastSync": "Last sync",
+    "lastSyncNever": "Not synced yet",
+    "syncNow": "Sync now",
+    "logout": "Sign out",
+    "close": "Close",
+    "status": {
+      "off": "Not connected",
+      "bootstrapping": "Connecting…",
+      "pulling": "Fetching state…",
+      "pushing": "Saving…",
+      "idle": "Live connection",
+      "error": "Sync error"
+    },
+    "device": "Device",
+    "deviceLocalOnly": "This device shows your local state until the next sync.",
+    "dirtyNotice": "Local changes are about to sync…"
+  },
   "stepper": {
     "groupAria": "Adjust usage",
     "minusAria": "Usage minus 1",

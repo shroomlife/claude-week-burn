@@ -216,6 +216,28 @@
     "footnote": "Bis dahin macht Claude Code Pause auf deinem Account.",
     "subFootnote": "Tipp: Reset-Tag {date} um {time} ist deine Refresh-Linie."
   },
+  "account": {
+    "title": "Account",
+    "connectedAs": "Verbunden als",
+    "profileLink": "Profil auf GitHub",
+    "gistLink": "Sync-Gist anzeigen",
+    "lastSync": "Letzter Sync",
+    "lastSyncNever": "Noch nicht synchronisiert",
+    "syncNow": "Jetzt synchronisieren",
+    "logout": "Abmelden",
+    "close": "Schließen",
+    "status": {
+      "off": "Nicht verbunden",
+      "bootstrapping": "Verbinde…",
+      "pulling": "Lade Stand…",
+      "pushing": "Speichere…",
+      "idle": "Live verbunden",
+      "error": "Sync-Fehler"
+    },
+    "device": "Gerät",
+    "deviceLocalOnly": "Dieses Gerät zeigt deinen lokalen Stand bis zum nächsten Sync.",
+    "dirtyNotice": "Lokale Änderungen werden gleich gesynced…"
+  },
   "stepper": {
     "groupAria": "Usage anpassen",
     "minusAria": "Usage minus 1",
