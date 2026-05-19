@@ -15,6 +15,20 @@ export interface PersistedStateOptions<T> {
   storage?: Storage
 }
 
+/**
+ * Module-level kill switch for ALL persisted-state writes. Set to true right
+ * before a destructive operation that needs localStorage to stay empty across
+ * the page unload + next-page-init (most importantly: App Reset). Without
+ * this, the `pagehide` flush fires AFTER `localStorage.removeItem(...)` and
+ * before reload, restoring the in-memory state — meaning reset effectively
+ * does nothing on the next page.
+ */
+let writesDisabled = false
+
+export function disablePersistedWrites(): void {
+  writesDisabled = true
+}
+
 function readEnvelope(storage: Storage, key: string): { v: number; d: unknown } | null {
   try {
     const raw = storage.getItem(key)
@@ -71,6 +85,7 @@ export function usePersistedState<T>(
   const state = ref(initial) as Ref<T>
 
   const write = (): void => {
+    if (writesDisabled) return
     if (!storage) return
     try {
       const envelope: Envelope<T> = { v: options.version, d: state.value }

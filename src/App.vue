@@ -22,6 +22,7 @@ import InitialSyncCard from './components/InitialSyncCard.vue'
 import ResetDialog from './components/ResetDialog.vue'
 import { useGitHubAuth } from './composables/useGitHubAuth'
 import { useGistSync } from './composables/useGistSync'
+import { disablePersistedWrites } from './composables/usePersistedState'
 import type { Mode } from './types/burn'
 
 const burn = useBurnState()
@@ -163,6 +164,11 @@ const resetOpen = ref(false)
 function openReset(): void { resetOpen.value = true }
 function cancelReset(): void { resetOpen.value = false }
 async function performReset(): Promise<void> {
+  // CRITICAL ORDER: disable persisted-state writes FIRST. Without this, the
+  // pagehide flush in usePersistedState fires after we remove the keys but
+  // before reload, restoring the in-memory state to localStorage — meaning
+  // the next page load sees the old state and skips onboarding.
+  disablePersistedWrites()
   auth.logout()
   // Nuke every burnRate:* key — covers main state, gist pointer, last-synced,
   // any future UI prefs we might add. Other origins' storage is untouched.
