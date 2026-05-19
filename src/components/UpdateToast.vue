@@ -76,64 +76,48 @@ const reloading = ref(false)
 async function reload(): Promise<void> {
   if (reloading.value) return
   reloading.value = true
-  console.info('[burn-rate] reload clicked — waiting for controllerchange…')
+  console.info('[burn-rate] reload clicked — full SW nuke + hard reload')
 
-  // Guarantee exactly ONE reload. The earlier version awaited updateSW(true)
-  // (which reloads internally) AND then called reload() again, racing two
-  // navigations against each other — that's what was leaving the tab blank.
+  // BULLETPROOF reload strategy. Earlier attempts coordinated SKIP_WAITING
+  // + controllerchange + a failsafe timer, but the user kept landing on a
+  // blank page because:
+  //   - With clientsClaim:false, controllerchange never fires for the
+  //     current tab. The failsafe eventually triggered, but during the
+  //     gap the old SW served stale chunks from a half-cleaned cache
+  //     after the new SW's activate() ran cleanupOutdatedCaches.
+  //   - With clientsClaim:true, the new SW grabs the tab mid-flight and
+  //     the in-memory JS doesn't match the freshly-served HTML.
   //
-  // New strategy:
-  //   1. Subscribe to navigator.serviceWorker.controllerchange ONCE.
-  //   2. Send SKIP_WAITING via updateSW(false) — false = don't reload itself.
-  //   3. When the new SW takes control, controllerchange fires, we reload.
-  //   4. A 5s failsafe hard-reloads if controllerchange never fires.
-  //   5. A single `reloaded` flag short-circuits whichever fires second.
-  let reloaded = false
-  function doReload(): void {
-    if (reloaded) return
-    reloaded = true
+  // The reliable fix: don't try to swap SWs in place. Unregister every
+  // SW, delete every cache, then hard-reload. The next navigation goes
+  // straight to network (no SW interception), pulls the new HTML + JS
+  // fresh, and a new SW registers cleanly on the new page. Costs an
+  // extra few hundred KB of fetches once per update — worth it for a
+  // 'click button = see new version' guarantee.
+  //
+  // The 8s failsafe wraps the SW/cache cleanup in case it hangs on a
+  // weird permission edge — we hard-reload anyway and the worst case
+  // is the next page still has SW remnants, but at least it loads.
+  const failsafe = window.setTimeout(() => {
+    console.warn('[burn-rate] SW cleanup timed out — forcing reload')
     window.location.reload()
-  }
-
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.addEventListener('controllerchange', () => {
-      console.info('[burn-rate] controllerchange — reloading')
-      doReload()
-    }, { once: true })
-  }
-
-  // Failsafe: if neither updateSW nor controllerchange fires within 5s,
-  // hard-reload anyway. 5s is enough for slow networks, short enough that
-  // a stuck spinner doesn't feel broken.
-  window.setTimeout(() => {
-    if (!reloaded) {
-      console.warn('[burn-rate] SW activation timed out — hard reloading')
-      doReload()
-    }
-  }, 5000)
-
-  if (!updateSW) {
-    // virtual:pwa-register wasn't loaded (dev mode / unsupported) —
-    // straight hard-reload.
-    doReload()
-    return
-  }
+  }, 8000)
 
   try {
-    // false = do NOT reload internally. We own the reload via controllerchange.
-    await updateSW(false)
-    // updateSW(false) resolves after the new SW finishes activating. If we
-    // already reloaded from the listener, this is a noop. If for some reason
-    // no controllerchange fired (e.g. fresh install with no prior controller),
-    // reload manually here.
-    if (!reloaded) {
-      console.info('[burn-rate] updateSW resolved without controllerchange — reloading')
-      doReload()
+    if ('serviceWorker' in navigator) {
+      const regs = await navigator.serviceWorker.getRegistrations()
+      await Promise.all(regs.map((r) => r.unregister()))
+    }
+    if ('caches' in window) {
+      const names = await caches.keys()
+      await Promise.all(names.map((n) => caches.delete(n)))
     }
   } catch (err) {
-    console.warn('[burn-rate] updateSW threw — hard reloading', err)
-    doReload()
+    console.warn('[burn-rate] SW/cache cleanup partial failure', err)
   }
+
+  clearTimeout(failsafe)
+  window.location.reload()
 }
 
 // Expose a manual recheck for the command palette / debug.
