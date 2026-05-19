@@ -28,11 +28,13 @@ export default defineConfig({
     vue(),
     Icons({ compiler: 'vue3', defaultStyle: 'display: inline-block; vertical-align: middle;' }),
     VitePWA({
-      // 'prompt' (not autoUpdate) so the new SW stays in 'waiting' until the
-      // user clicks Reload in UpdateToast. Combined with skipWaiting=false /
-      // clientsClaim=false this avoids the foot-gun where a half-loaded tab
-      // mixes old JS with a freshly-activated SW serving new assets.
-      registerType: 'prompt',
+      // Auto-update + NetworkFirst runtime caching: the SW always tries the
+      // network first and only falls back to cache when offline. New deploys
+      // land on the next reload without any "Neue Version" prompt-and-reload
+      // dance. skipWaiting + clientsClaim ensure the new SW takes over the
+      // tab as soon as the user navigates, with no stale-asset mixing
+      // because NetworkFirst pulls fresh anyway.
+      registerType: 'autoUpdate',
       includeAssets: ['favicon.svg', 'favicon.ico', 'apple-touch-icon-180x180.png'],
       manifest: {
         name: 'Claude Burn Rate',
@@ -60,15 +62,59 @@ export default defineConfig({
         ],
       },
       workbox: {
-        // Lean shell precache — JS/CSS/HTML/icons/manifest. Fonts (woff2)
-        // stay on the HTTP cache after first load to keep SW install small.
-        globPatterns: ['**/*.{js,css,html,svg,png,webmanifest,ico}'],
+        // Minimal precache — just the offline shell. Everything else goes
+        // through NetworkFirst runtime caching below, so users always see
+        // the freshest content on reload but still have a fallback if
+        // they're on a flaky train or in airplane mode.
+        globPatterns: ['**/*.{html,svg,ico,webmanifest}'],
         navigateFallback: 'index.html',
         cleanupOutdatedCaches: true,
-        // Keep false: the SW waits in 'installed' until UpdateToast calls
-        // updateSW(true), then reloads. Prevents old-tab/new-SW asset mismatch.
-        clientsClaim: false,
-        skipWaiting: false,
+        // Auto-takeover: new SW activates + claims the page right away.
+        // Safe with NetworkFirst because the new SW won't be serving
+        // mismatched stale chunks — it'll just fetch the fresh ones.
+        clientsClaim: true,
+        skipWaiting: true,
+        runtimeCaching: [
+          {
+            // Page navigations: always try the network first (3s timeout),
+            // fall back to cached HTML when offline.
+            urlPattern: ({ request }) => request.mode === 'navigate',
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'pages',
+              networkTimeoutSeconds: 3,
+              expiration: { maxEntries: 20, maxAgeSeconds: 60 * 60 * 24 * 30 },
+            },
+          },
+          {
+            // JS + CSS + workers: network-first too. Assets are content-
+            // hashed by Vite so a cached old file under the same URL is
+            // never a problem; this just keeps the SW from serving the
+            // previous build's JS over a fresh-looking shell.
+            urlPattern: ({ request }) =>
+              request.destination === 'script' ||
+              request.destination === 'style' ||
+              request.destination === 'worker',
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'assets',
+              networkTimeoutSeconds: 5,
+              expiration: { maxEntries: 60, maxAgeSeconds: 60 * 60 * 24 * 30 },
+            },
+          },
+          {
+            // Images + fonts: stale-while-revalidate. They rarely change
+            // and the SWR strategy keeps loads instant while the SW
+            // quietly re-fetches in the background.
+            urlPattern: ({ request }) =>
+              request.destination === 'image' || request.destination === 'font',
+            handler: 'StaleWhileRevalidate',
+            options: {
+              cacheName: 'media',
+              expiration: { maxEntries: 80, maxAgeSeconds: 60 * 60 * 24 * 90 },
+            },
+          },
+        ],
       },
       devOptions: {
         enabled: false,
