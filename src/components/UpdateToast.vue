@@ -76,33 +76,63 @@ const reloading = ref(false)
 async function reload(): Promise<void> {
   if (reloading.value) return
   reloading.value = true
-  console.info('[burn-rate] reload clicked — activating new SW…')
+  console.info('[burn-rate] reload clicked — waiting for controllerchange…')
 
-  // Fail-safe: updateSW(true) waits for the new SW's statechange → activated
-  // → window.location.reload(). If activation hangs (network, bad install,
-  // already-claimed by old SW), the click would silently do nothing. Guarantee
-  // *something* happens within 3s by hard-reloading anyway.
-  const failsafe = window.setTimeout(() => {
-    console.warn('[burn-rate] SW activation timed out — hard reloading')
+  // Guarantee exactly ONE reload. The earlier version awaited updateSW(true)
+  // (which reloads internally) AND then called reload() again, racing two
+  // navigations against each other — that's what was leaving the tab blank.
+  //
+  // New strategy:
+  //   1. Subscribe to navigator.serviceWorker.controllerchange ONCE.
+  //   2. Send SKIP_WAITING via updateSW(false) — false = don't reload itself.
+  //   3. When the new SW takes control, controllerchange fires, we reload.
+  //   4. A 5s failsafe hard-reloads if controllerchange never fires.
+  //   5. A single `reloaded` flag short-circuits whichever fires second.
+  let reloaded = false
+  function doReload(): void {
+    if (reloaded) return
+    reloaded = true
     window.location.reload()
-  }, 3000)
+  }
+
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      console.info('[burn-rate] controllerchange — reloading')
+      doReload()
+    }, { once: true })
+  }
+
+  // Failsafe: if neither updateSW nor controllerchange fires within 5s,
+  // hard-reload anyway. 5s is enough for slow networks, short enough that
+  // a stuck spinner doesn't feel broken.
+  window.setTimeout(() => {
+    if (!reloaded) {
+      console.warn('[burn-rate] SW activation timed out — hard reloading')
+      doReload()
+    }
+  }, 5000)
 
   if (!updateSW) {
-    clearTimeout(failsafe)
-    window.location.reload()
+    // virtual:pwa-register wasn't loaded (dev mode / unsupported) —
+    // straight hard-reload.
+    doReload()
     return
   }
 
   try {
-    await updateSW(true)
-    // If updateSW resolves without reload (shouldn't normally happen), fall
-    // through and force reload manually so the spinner doesn't sit forever.
-    clearTimeout(failsafe)
-    window.location.reload()
+    // false = do NOT reload internally. We own the reload via controllerchange.
+    await updateSW(false)
+    // updateSW(false) resolves after the new SW finishes activating. If we
+    // already reloaded from the listener, this is a noop. If for some reason
+    // no controllerchange fired (e.g. fresh install with no prior controller),
+    // reload manually here.
+    if (!reloaded) {
+      console.info('[burn-rate] updateSW resolved without controllerchange — reloading')
+      doReload()
+    }
   } catch (err) {
     console.warn('[burn-rate] updateSW threw — hard reloading', err)
-    clearTimeout(failsafe)
-    window.location.reload()
+    doReload()
   }
 }
 
