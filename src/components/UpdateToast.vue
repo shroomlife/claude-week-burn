@@ -3,7 +3,6 @@ import { onBeforeUnmount, onMounted, ref } from 'vue'
 import { useEventListener } from '@vueuse/core'
 
 const showRefresh = ref(false)
-let updateSW: ((reload?: boolean) => Promise<void>) | null = null
 let pollTimer: number | null = null
 let registration: ServiceWorkerRegistration | null = null
 
@@ -38,7 +37,12 @@ onMounted(async () => {
 
   try {
     const { registerSW } = await import('virtual:pwa-register')
-    updateSW = registerSW({
+    // Register only to get the onNeedRefresh signal + the registration ref
+    // for periodic update checks. We deliberately DON'T keep the updateSW
+    // handle — the Reload button does a full SW unregister + cache nuke +
+    // hard reload instead, which is more reliable than vite-plugin-pwa's
+    // SKIP_WAITING flow in our clientsClaim:false setup.
+    registerSW({
       immediate: true,
       onNeedRefresh: () => {
         console.info('[burn-rate] new version available — waiting for user reload')
