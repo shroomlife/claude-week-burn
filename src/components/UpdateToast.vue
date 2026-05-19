@@ -1,26 +1,72 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { onBeforeUnmount, onMounted, ref } from 'vue'
 
 const showRefresh = ref(false)
 let updateSW: ((reload?: boolean) => Promise<void>) | null = null
+let pollTimer: number | null = null
+
+// Re-check for SW updates every 30 min while the tab is open. The browser
+// only checks on navigation by default, so a long-lived PWA tab can miss a
+// deploy until manually reloaded. This nudges it.
+const UPDATE_POLL_MS = 30 * 60 * 1000
+
+async function checkForUpdate(): Promise<void> {
+  if (!('serviceWorker' in navigator)) return
+  try {
+    const regs = await navigator.serviceWorker.getRegistrations()
+    await Promise.all(regs.map((r) => r.update()))
+  } catch { /* network may be down — harmless */ }
+}
 
 onMounted(async () => {
+  // Log the running build so we can confirm what's actually live in the tab.
+  // Read from injected build constants via vite `define`. Defensive try/catch
+  // in case they are missing (e.g. in tests).
+  try {
+    const sha = typeof __BUILD_SHA__ === 'string' ? __BUILD_SHA__ : 'unknown'
+    const time = typeof __BUILD_TIME__ === 'string' ? __BUILD_TIME__ : 'unknown'
+    console.info(`%c[burn-rate] build ${sha} · ${time}`, 'color:#ea580c;font-weight:600;')
+  } catch { /* noop */ }
+
   try {
     const { registerSW } = await import('virtual:pwa-register')
     updateSW = registerSW({
       immediate: true,
-      onNeedRefresh: () => { showRefresh.value = true },
-      // Offline-ready toast removed intentionally — fires on every first
-      // visit per device and tells the user nothing actionable.
+      onNeedRefresh: () => {
+        console.info('[burn-rate] new version available — waiting for user reload')
+        showRefresh.value = true
+      },
+      onRegisteredSW: (_url, registration) => {
+        if (!registration) return
+        pollTimer = window.setInterval(() => {
+          void registration.update()
+        }, UPDATE_POLL_MS)
+      },
     })
   } catch {
-    // PWA virtual module is not available in dev — silently ignore.
+    // dev / unsupported — virtual module isn't there, nothing to register.
+  }
+})
+
+onBeforeUnmount(() => {
+  if (pollTimer !== null) {
+    clearInterval(pollTimer)
+    pollTimer = null
   }
 })
 
 async function reload(): Promise<void> {
-  if (updateSW) await updateSW(true)
+  if (updateSW) {
+    // updateSW(true) sends SKIP_WAITING + reloads when controllerchange fires.
+    await updateSW(true)
+  } else {
+    // Fallback if registration failed: force-reload the page.
+    window.location.reload()
+  }
 }
+
+// Expose a manual recheck for the command palette / debug.
+defineExpose({ checkForUpdate })
 </script>
 
 <template>
@@ -55,9 +101,6 @@ async function reload(): Promise<void> {
   font-size: 13px;
   font-weight: 600;
   box-shadow: 0 16px 40px -16px rgba(15, 23, 42, 0.5);
-}
-.sw-toast.soft {
-  background: linear-gradient(135deg, #22d3ee, #0891b2);
 }
 .sw-toast button {
   font-size: 12px;

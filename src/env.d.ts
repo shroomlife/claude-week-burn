@@ -8,3 +8,6 @@ declare module '*.vue' {
   const component: DefineComponent<Record<string, never>, Record<string, never>, unknown>
   export default component
 }
+
+declare const __BUILD_TIME__: string
+declare const __BUILD_SHA__: string
