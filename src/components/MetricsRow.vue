@@ -18,7 +18,7 @@ const showSeconds = computed(() => props.countdown.days === 0 && props.countdown
 <template>
   <section class="metrics">
     <div class="metric card">
-      <span class="eyebrow">Reset in</span>
+      <span class="eyebrow">{{ $t('metrics.resetIn') }}</span>
       <div class="cd">
         <span class="cd-pair"><span class="cd-num num">{{ countdown.days }}</span><span class="cd-unit">d</span></span>
         <span class="cd-pair"><span class="cd-num num">{{ pad(countdown.hours) }}</span><span class="cd-unit">h</span></span>
@@ -28,14 +28,14 @@ const showSeconds = computed(() => props.countdown.days === 0 && props.countdown
     </div>
 
     <div class="metric card">
-      <span class="eyebrow">Daily Budget</span>
+      <span class="eyebrow">{{ $t('metrics.dailyBudget') }}</span>
       <div class="metric-value">
-        <span class="num">{{ dailyBudget }}</span><span class="unit">% / Tag</span>
+        <span class="num">{{ dailyBudget }}</span><span class="unit">{{ $t('metrics.perDay') }}</span>
       </div>
     </div>
 
     <div class="metric card">
-      <span class="eyebrow">Quota übrig</span>
+      <span class="eyebrow">{{ $t('metrics.quotaLeft') }}</span>
       <div class="metric-value">
         <span class="num">{{ remainingPercent }}</span><span class="unit">%</span>
       </div>

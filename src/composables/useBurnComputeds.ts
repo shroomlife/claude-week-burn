@@ -1,77 +1,10 @@
 import { computed, type ComputedRef, type Ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useBurnState, burnConstants } from './useBurnState'
 import type { Countdown, Forecast, Status } from '../types/burn'
 
 const DAY_MS = 86_400_000
 const HOUR_MS = 3_600_000
-
-function buildStatus(delta: number, usage: number, preWeek: boolean, expired: boolean): Status {
-  if (usage >= 100) {
-    return {
-      mode: 'save',
-      emoji: '🚫',
-      label: 'AUSGESCHÖPFT',
-      message: 'Quota leer — bis Reset abwarten oder umsteigen.',
-    }
-  }
-  if (expired) {
-    return {
-      mode: 'cruise',
-      emoji: '🎉',
-      label: 'RESET DA',
-      message: 'Die Woche ist vorbei — frische Quota läuft an.',
-    }
-  }
-  if (preWeek) {
-    return {
-      mode: 'careful',
-      emoji: '🤔',
-      label: 'PRE-WEEK',
-      message: 'Woche hat noch nicht gestartet — Reset-Datum prüfen.',
-    }
-  }
-  if (delta >= 12) {
-    return {
-      mode: 'burn',
-      emoji: '🚀',
-      label: 'FEUER FREI',
-      message: 'Massig Headroom — Vollgas drücken, Bro!',
-    }
-  }
-  if (delta >= 0) {
-    return {
-      mode: 'cruise',
-      emoji: '🟢',
-      label: 'CHILL PACE',
-      message: 'Alles im Flow — pace passt perfekt.',
-    }
-  }
-  if (delta > -12) {
-    return {
-      mode: 'careful',
-      emoji: '⚠️',
-      label: 'AUGE DRAUF',
-      message: 'Bisschen flott — locker auf die Bremse treten.',
-    }
-  }
-  return {
-    mode: 'save',
-    emoji: '🔋',
-    label: 'SPARMODUS',
-    message: 'Du brennst zu schnell — jetzt clever sparen!',
-  }
-}
-
-const WEEKDAY_DE = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'] as const
-
-function formatGermanDay(d: Date): string {
-  return `${WEEKDAY_DE[d.getDay()]} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
-}
-
-function formatGermanShortDate(d: Date): string {
-  const day = WEEKDAY_DE[d.getDay()]?.slice(0, 2) ?? ''
-  return `${day} ${String(d.getDate()).padStart(2, '0')}.${String(d.getMonth() + 1).padStart(2, '0')}.`
-}
 
 export interface BurnComputeds {
   resetTs: ComputedRef<number>
@@ -98,10 +31,82 @@ export interface BurnComputeds {
 
 export function useBurnComputeds(now: Ref<number>): BurnComputeds {
   const { resetDate, usagePercent } = useBurnState()
+  const { t, locale } = useI18n()
+
+  /** Localised "Weekday HH:mm" — used inside tomorrow sentences. */
+  function formatDayWithTime(d: Date): string {
+    const day = new Intl.DateTimeFormat(locale.value, { weekday: 'long' }).format(d)
+    const hh = String(d.getHours()).padStart(2, '0')
+    const mm = String(d.getMinutes()).padStart(2, '0')
+    return `${day} ${hh}:${mm}`
+  }
+
+  /** Localised "WeekdayShort DD.MM." — last-safe-day marker. */
+  function formatShortDate(d: Date): string {
+    const day = new Intl.DateTimeFormat(locale.value, { weekday: 'short' }).format(d)
+    return `${day} ${String(d.getDate()).padStart(2, '0')}.${String(d.getMonth() + 1).padStart(2, '0')}.`
+  }
+
+  function buildStatus(delta: number, usage: number, preWeek: boolean, expired: boolean): Status {
+    if (usage >= 100) {
+      return {
+        mode: 'save',
+        emoji: '🚫',
+        label: t('status.exhausted.label'),
+        message: t('status.exhausted.message'),
+      }
+    }
+    if (expired) {
+      return {
+        mode: 'cruise',
+        emoji: '🎉',
+        label: t('status.resetNow.label'),
+        message: t('status.resetNow.message'),
+      }
+    }
+    if (preWeek) {
+      return {
+        mode: 'careful',
+        emoji: '🤔',
+        label: t('status.preWeek.label'),
+        message: t('status.preWeek.message'),
+      }
+    }
+    if (delta >= 12) {
+      return {
+        mode: 'burn',
+        emoji: '🚀',
+        label: t('status.burn.label'),
+        message: t('status.burn.message'),
+      }
+    }
+    if (delta >= 0) {
+      return {
+        mode: 'cruise',
+        emoji: '🟢',
+        label: t('status.cruise.label'),
+        message: t('status.cruise.message'),
+      }
+    }
+    if (delta > -12) {
+      return {
+        mode: 'careful',
+        emoji: '⚠️',
+        label: t('status.careful.label'),
+        message: t('status.careful.message'),
+      }
+    }
+    return {
+      mode: 'save',
+      emoji: '🔋',
+      label: t('status.save.label'),
+      message: t('status.save.message'),
+    }
+  }
 
   const resetTs = computed(() => {
-    const t = new Date(resetDate.value).getTime()
-    return Number.isFinite(t) ? t : now.value + burnConstants.WEEK_MS
+    const ts = new Date(resetDate.value).getTime()
+    return Number.isFinite(ts) ? ts : now.value + burnConstants.WEEK_MS
   })
 
   const weekStart = computed(() => resetTs.value - burnConstants.WEEK_MS)
@@ -177,36 +182,40 @@ export function useBurnComputeds(now: Ref<number>): BurnComputeds {
   const tomorrowSentence = computed(() => {
     const f = forecast.value
     const u = usagePercent.value
-    if (u >= 100) return 'Quota leer. Bis Reset chillen — oder Plan-Upgrade.'
-    if (u === 0) return 'Frische Woche, jungfräuliche Quota. Volle Power.'
+    if (u >= 100) return t('tomorrow.exhausted')
+    if (u === 0) return t('tomorrow.fresh')
     const elapsedDays = timeElapsedMs.value / DAY_MS
-    if (elapsedDays < 0.5) return 'Zu früh für ne ehrliche Prognose. Komm in ein paar Stunden wieder.'
+    if (elapsedDays < 0.5) return t('tomorrow.tooEarly')
     if (f.hits100At) {
-      const dayLabel = formatGermanDay(f.hits100At)
+      const day = formatDayWithTime(f.hits100At)
       if (f.lastSafeDay) {
-        const lastSafe = formatGermanShortDate(f.lastSafeDay)
-        return `Wenn du so weitermachst: 100% am ${dayLabel}. ${lastSafe} wäre dein letzter Vollgastag.`
+        const lastSafe = formatShortDate(f.lastSafeDay)
+        return t('tomorrow.hits100WithLastSafe', { day, lastSafe })
       }
-      return `Wenn du so weitermachst: 100% am ${dayLabel}.`
+      return t('tomorrow.hits100', { day })
     }
-    return `Bei aktueller Pace landest du bei ${f.projectedEndUsage}%. Die Quota reicht locker.`
+    return t('tomorrow.safe', { pct: f.projectedEndUsage })
   })
 
   const weekStartLabel = computed(() =>
-    new Date(weekStart.value).toLocaleString('de-DE', {
-      day: '2-digit', month: '2-digit', year: 'numeric',
-      hour: '2-digit', minute: '2-digit',
+    new Date(weekStart.value).toLocaleString(locale.value, {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
     }),
   )
 
   const timezoneLabel = computed(() => {
     try {
       const tz = Intl.DateTimeFormat().resolvedOptions().timeZone
-      const parts = new Date().toLocaleString('de-DE', { timeZoneName: 'short' }).split(' ')
+      const parts = new Date().toLocaleString(locale.value, { timeZoneName: 'short' }).split(' ')
       const abbr = parts[parts.length - 1] ?? ''
       return `${tz} · ${abbr}`
     } catch {
-      return 'Lokale Zeit'
+      // Intl unavailable — best-effort fallback to UTC.
+      return 'UTC'
     }
   })
 

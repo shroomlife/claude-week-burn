@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, nextTick, ref, watch, type Component } from 'vue'
+import { useI18n } from 'vue-i18n'
 import IconSearch from '~icons/ph/magnifying-glass'
 import IconCalendar from '~icons/ph/calendar-plus'
 import IconEqual from '~icons/ph/equals'
@@ -24,6 +25,8 @@ const emit = defineEmits<{
   (e: 'reset-app'): void
 }>()
 
+const { t } = useI18n()
+
 interface Action {
   id: 'snap' | 'sync' | 'share' | 'new-week' | 'sync-now' | 'logout' | 'sign-in' | 'reset-app'
   icon: Component
@@ -33,40 +36,41 @@ interface Action {
   emit: () => void
 }
 
-const baseActions: Action[] = [
+// Actions are computed so the labels update reactively when locale changes.
+const baseActions = computed<Action[]>(() => [
   {
     id: 'snap',
     icon: IconCalendar,
-    title: 'Reset auf 7 Tage ab jetzt',
-    hint: 'Verschiebt das Wochenende-Datum exakt 7 Tage in die Zukunft.',
+    title: t('palette.actions.snap.title'),
+    hint: t('palette.actions.snap.hint'),
     keys: 'R',
     emit: () => emit('snap'),
   },
   {
     id: 'sync',
     icon: IconEqual,
-    title: 'Usage = Zeit',
-    hint: 'Setzt den Usage-Slider auf die aktuell verstrichene Zeit.',
+    title: t('palette.actions.sync.title'),
+    hint: t('palette.actions.sync.hint'),
     keys: 'S',
     emit: () => emit('sync'),
   },
   {
     id: 'new-week',
     icon: IconRefresh,
-    title: 'Neue Woche starten',
-    hint: 'Setzt Usage auf 0%. Das Reset-Datum bleibt unverändert.',
+    title: t('palette.actions.newWeek.title'),
+    hint: t('palette.actions.newWeek.hint'),
     keys: 'N',
     emit: () => emit('new-week'),
   },
   {
     id: 'share',
     icon: IconShare,
-    title: 'Share Burn Rate',
-    hint: 'Teilt deinen aktuellen Stand als Text-Card.',
+    title: t('palette.actions.share.title'),
+    hint: t('palette.actions.share.hint'),
     keys: '⇧S',
     emit: () => emit('share'),
   },
-]
+])
 
 const authActions = computed<Action[]>(() => {
   if (!AUTH_ENABLED) return []
@@ -75,16 +79,16 @@ const authActions = computed<Action[]>(() => {
       {
         id: 'sync-now',
         icon: IconCloudUp,
-        title: 'Jetzt synchronisieren',
-        hint: 'Push deinen aktuellen State sofort in deinen Sync-Gist.',
+        title: t('palette.actions.syncNow.title'),
+        hint: t('palette.actions.syncNow.hint'),
         keys: '',
         emit: () => emit('sync-now'),
       },
       {
         id: 'logout',
         icon: IconSignout,
-        title: 'Abmelden',
-        hint: 'GitHub-Token lokal löschen. Sync stoppt; localStorage bleibt.',
+        title: t('palette.actions.logout.title'),
+        hint: t('palette.actions.logout.hint'),
         keys: '',
         emit: () => emit('logout'),
       },
@@ -94,24 +98,24 @@ const authActions = computed<Action[]>(() => {
     {
       id: 'sign-in',
       icon: IconSignin,
-      title: 'Mit GitHub anmelden',
-      hint: 'Aktiviert Cross-Device-Sync via privatem Gist (scope: gist).',
+      title: t('palette.actions.signIn.title'),
+      hint: t('palette.actions.signIn.hint'),
       keys: '',
       emit: () => emit('sign-in'),
     },
   ]
 })
 
-const resetAction: Action = {
+const resetAction = computed<Action>(() => ({
   id: 'reset-app',
   icon: IconTrash,
-  title: 'App zurücksetzen',
-  hint: 'Löscht alle lokalen Daten und startet wieder im Onboarding.',
+  title: t('palette.actions.reset.title'),
+  hint: t('palette.actions.reset.hint'),
   keys: '',
   emit: () => emit('reset-app'),
-}
+}))
 
-const actions = computed<Action[]>(() => [...baseActions, ...authActions.value, resetAction])
+const actions = computed<Action[]>(() => [...baseActions.value, ...authActions.value, resetAction.value])
 
 const query = ref('')
 const selectedIndex = ref(0)
@@ -164,14 +168,14 @@ function onKey(e: KeyboardEvent): void {
 <template>
   <transition name="fade">
     <div v-if="open" class="palette-backdrop" @click.self="close">
-      <div class="palette" role="dialog" aria-modal="true" aria-label="Command Palette" @keydown="onKey">
+      <div class="palette" role="dialog" aria-modal="true" :aria-label="$t('palette.ariaLabel')" @keydown="onKey">
         <div class="search-bar">
           <IconSearch />
           <input
             ref="inputEl"
             v-model="query"
             type="text"
-            placeholder="Action suchen…"
+            :placeholder="$t('palette.search')"
             spellcheck="false"
             autocomplete="off"
           />
@@ -194,12 +198,12 @@ function onKey(e: KeyboardEvent): void {
             </div>
             <kbd class="kbd">{{ a.keys }}</kbd>
           </li>
-          <li v-if="filtered.length === 0" class="empty">Keine Action gefunden.</li>
+          <li v-if="filtered.length === 0" class="empty">{{ $t('palette.empty') }}</li>
         </ul>
         <div class="palette-foot">
-          <span><kbd>↑↓</kbd> Navigieren</span>
-          <span><kbd>↵</kbd> Auswählen</span>
-          <span><kbd>ESC</kbd> Schließen</span>
+          <span><kbd>↑↓</kbd> {{ $t('palette.footNav') }}</span>
+          <span><kbd>↵</kbd> {{ $t('palette.footSelect') }}</span>
+          <span><kbd>ESC</kbd> {{ $t('palette.footClose') }}</span>
         </div>
       </div>
     </div>

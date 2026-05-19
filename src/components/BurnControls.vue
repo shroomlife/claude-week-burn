@@ -51,7 +51,7 @@ const sliderStyle = computed(() => ({ '--val': `${props.usagePercent}%` }))
   <section class="controls card">
     <div class="control">
       <div class="control-label">
-        <span class="eyebrow">Weekly Reset</span>
+        <span class="eyebrow">{{ $t('controls.weeklyReset') }}</span>
       </div>
       <DatePicker
         :model-value="resetDate"
@@ -59,13 +59,15 @@ const sliderStyle = computed(() => ({ '--val': `${props.usagePercent}%` }))
       />
       <div class="meta">
         <span class="meta-pill"><code>{{ timezoneLabel }}</code></span>
-        <span class="meta-pill">Woche ab <code>{{ weekStartLabel }}</code></span>
+        <i18n-t keypath="controls.weekFrom" tag="span" class="meta-pill" scope="global">
+          <template #date><code>{{ weekStartLabel }}</code></template>
+        </i18n-t>
       </div>
     </div>
 
     <div class="control">
       <div class="control-label">
-        <span class="eyebrow">Weekly Usage</span>
+        <span class="eyebrow">{{ $t('controls.weeklyUsage') }}</span>
       </div>
 
       <UsageStepper :value="usagePercent" :min="0" :max="100" @change="setUsage" />
@@ -78,12 +80,12 @@ const sliderStyle = computed(() => ({ '--val': `${props.usagePercent}%` }))
         :value="usagePercent"
         class="usage-slider"
         :style="sliderStyle"
+        :aria-label="$t('controls.sliderAria')"
         @input="onSliderInput"
         @pointerdown="onSliderPointerDown"
         @pointerup="onSliderPointerUp"
         @pointercancel="onSliderPointerUp"
         @touchend="onSliderPointerUp"
-        aria-label="Weekly Usage Prozent"
       />
       <div class="chips">
         <button class="chip" type="button" @click="setUsage(0)">0</button>
@@ -91,7 +93,7 @@ const sliderStyle = computed(() => ({ '--val': `${props.usagePercent}%` }))
         <button class="chip" type="button" @click="setUsage(50)">50</button>
         <button class="chip" type="button" @click="setUsage(75)">75</button>
         <button class="chip chip-sync" type="button" @click="setUsage(timePercent)">
-          = Zeit · {{ timePercent }}
+          {{ $t('controls.equalsTime', { n: timePercent }) }}
         </button>
       </div>
     </div>

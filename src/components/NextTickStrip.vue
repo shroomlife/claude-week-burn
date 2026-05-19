@@ -42,13 +42,13 @@ const countdownLabel = computed(() => {
 </script>
 
 <template>
-  <div class="strip" :title="`Nächster Pace +1% in ${countdownLabel}`">
+  <div class="strip" :title="$t('nextTick.title', { time: countdownLabel })">
     <div class="bar">
       <div class="fill" :style="{ width: `${progress * 100}%` }"></div>
     </div>
     <div class="meta">
-      <span class="label">Nächster Zeit-Tick</span>
-      <span class="count num">+1% in {{ countdownLabel }}</span>
+      <span class="label">{{ $t('nextTick.label') }}</span>
+      <span class="count num">{{ $t('nextTick.countdown', { time: countdownLabel }) }}</span>
     </div>
   </div>
 </template>

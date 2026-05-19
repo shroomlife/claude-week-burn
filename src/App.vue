@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useDebounceFn } from '@vueuse/core'
 import { useBurnState } from './composables/useBurnState'
 import { useBurnComputeds } from './composables/useBurnComputeds'
@@ -25,6 +26,7 @@ import { useGistSync } from './composables/useGistSync'
 import { disablePersistedWrites } from './composables/usePersistedState'
 import type { Mode } from './types/burn'
 
+const { t } = useI18n()
 const burn = useBurnState()
 const reduced = useReducedMotion()
 useVisibilityClass()
@@ -50,9 +52,9 @@ function pushToast(text: string, tone: Toast['tone'] = 'info'): void {
 
 useAutoRollover(now, ({ shiftedBy, hadGap }) => {
   if (hadGap && shiftedBy > 1) {
-    pushToast(`Du warst weg — ${shiftedBy} Wochen übersprungen, neue Quota läuft.`, 'celebrate')
+    pushToast(t('toast.rolloverGap', { weeks: shiftedBy }), 'celebrate')
   } else {
-    pushToast('Frische Woche — Quota auf 0 zurückgesetzt', 'celebrate')
+    pushToast(t('toast.rolloverSimple'), 'celebrate')
   }
 })
 
@@ -211,24 +213,31 @@ async function performReset(): Promise<void> {
 }
 
 watch(() => auth.phase.value, (p) => {
-  if (p === 'success') pushToast(`Eingeloggt als @${auth.user.value?.login ?? ''}`, 'celebrate')
+  if (p === 'success') pushToast(t('toast.loggedIn', { login: auth.user.value?.login ?? '' }), 'celebrate')
   if (p === 'error' && auth.errorMessage.value) pushToast(auth.errorMessage.value)
 })
 watch(() => sync.status.value, (s) => {
-  if (s === 'error') pushToast(sync.errorMessage.value ?? 'Sync-Fehler')
+  if (s === 'error') pushToast(sync.errorMessage.value ?? t('toast.syncError'))
 })
 
 async function shareBurnRate(): Promise<void> {
-  const text = `🔋 ${burn.usagePercent.value}% used · ${c.timePercent.value}% time · ${c.delta.value >= 0 ? '+' : ''}${c.delta.value}% headroom · Reset in ${c.countdown.value.days}d ${c.countdown.value.hours}h`
+  const text = t('share.text', {
+    usage: burn.usagePercent.value,
+    time: c.timePercent.value,
+    sign: c.delta.value >= 0 ? '+' : '',
+    delta: c.delta.value,
+    d: c.countdown.value.days,
+    h: c.countdown.value.hours,
+  })
   if (typeof navigator !== 'undefined' && 'share' in navigator && typeof navigator.share === 'function') {
     try {
-      await navigator.share({ title: 'Claude Burn Rate', text })
+      await navigator.share({ title: t('share.title'), text })
       return
     } catch { /* fall through to clipboard */ }
   }
   if (typeof navigator !== 'undefined' && navigator.clipboard) {
     await navigator.clipboard.writeText(text)
-    pushToast('In Zwischenablage kopiert')
+    pushToast(t('toast.copiedClipboard'))
   }
 }
 
@@ -329,12 +338,12 @@ const modeClass = computed(() => `mode-${c.status.value.mode}`)
       :authenticated="auth.isAuthenticated.value"
       @close="closePalette"
       @share="shareBurnRate"
-      @snap="() => { burn.snapResetToSevenDays(); pushToast('Reset auf 7 Tage gesetzt') }"
-      @sync="() => { burn.usagePercent.value = c.timePercent.value; pushToast('Usage = Zeit') }"
-      @new-week="() => { burn.resetWeek(); pushToast('Neue Woche — Usage zurückgesetzt') }"
+      @snap="() => { burn.snapResetToSevenDays(); pushToast(t('toast.resetSet')) }"
+      @sync="() => { burn.usagePercent.value = c.timePercent.value; pushToast(t('toast.usageEqualsTime')) }"
+      @new-week="() => { burn.resetWeek(); pushToast(t('toast.newWeekStarted')) }"
       @sign-in="() => { void auth.startLogin() }"
-      @sync-now="() => { void sync.pushNow(); pushToast('Synchronisiere…') }"
-      @logout="() => { auth.logout(); pushToast('Abgemeldet') }"
+      @sync-now="() => { void sync.pushNow(); pushToast(t('toast.syncStarted')) }"
+      @logout="() => { auth.logout(); pushToast(t('toast.loggedOut')) }"
       @reset-app="openReset"
     />
 
@@ -382,28 +391,25 @@ const modeClass = computed(() => `mode-${c.status.value.mode}`)
 
     <!-- SEO crawlable content (visible to readers + search engines) -->
     <section class="about">
-      <h2>Über die App</h2>
-      <p>
-        <strong>Claude Burn Rate</strong> ist ein kostenloser, lokaler Pace-Tracker für deine
-        wöchentliche <a href="https://www.anthropic.com/" rel="noopener noreferrer">Anthropic Claude</a>-Quota.
-        Du gibst dein Reset-Datum + deinen aktuellen Usage-Stand ein — die App zeigt dir live, wie viel Quota
-        du übrig hast, wie dein Daily Budget aussieht und ob du im aktuellen Tempo bis zum Wochenende durchhältst.
-      </p>
-      <p>
-        Funktioniert <em>komplett lokal</em>: kein Account, kein Server, keine Tracker. Alle Werte
-        leben in deinem <code>localStorage</code>. Installierbar als PWA — auf Mobile direkt im Homescreen.
-      </p>
+      <h2>{{ $t('about.heading') }}</h2>
+      <i18n-t keypath="about.intro" tag="p" scope="global">
+        <template #name><strong>Claude Burn Rate</strong></template>
+        <template #claudeLink>
+          <a href="https://www.anthropic.com/" rel="noopener noreferrer">Anthropic Claude</a>
+        </template>
+      </i18n-t>
+      <p>{{ $t('about.localNote') }}</p>
       <ul class="about-keywords">
-        <li>Claude Code Usage Tracker</li>
-        <li>Claude Pro Weekly Limit</li>
-        <li>Anthropic Quota Calculator</li>
-        <li>Rolling 7-Day Burn Rate</li>
-        <li>Open Source · MIT · Vue 3 PWA</li>
+        <li>{{ $t('about.keywords.tracker') }}</li>
+        <li>{{ $t('about.keywords.weekly') }}</li>
+        <li>{{ $t('about.keywords.calculator') }}</li>
+        <li>{{ $t('about.keywords.rolling') }}</li>
+        <li>{{ $t('about.keywords.openSource') }}</li>
       </ul>
       <p class="meta-row">
-        <a href="https://github.com/shroomlife/claude-week-burn" rel="noopener noreferrer">GitHub Repo</a>
-        · build by you · for you · shroomlife flavor
-        · <button type="button" class="reset-link" @click="openReset">App zurücksetzen</button>
+        <a href="https://github.com/shroomlife/claude-week-burn" rel="noopener noreferrer">{{ $t('about.repo') }}</a>
+        · {{ $t('about.meta') }}
+        · <button type="button" class="reset-link" @click="openReset">{{ $t('about.resetLink') }}</button>
       </p>
     </section>
   </main>

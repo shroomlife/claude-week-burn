@@ -10,12 +10,11 @@ defineEmits<{ (e: 'snap'): void }>()
   <section class="hint" role="status">
     <span class="hint-emoji" aria-hidden="true">🤔</span>
     <div>
-      <strong>Dein Reset ist {{ Math.ceil(days) }} Tage entfernt — passt das?</strong>
-      <p>
-        Claude nutzt ein rolling 7-Tage-Fenster. Mit deinem Datum würde die Woche erst am
-        <strong>{{ weekStartLabel }}</strong> starten — bis dahin bleibt „Zeit verstrichen" bei 0% und der Vergleich kippt unrealistisch ins Rot.
-      </p>
-      <button class="cta" type="button" @click="$emit('snap')">📅 Reset auf 7 Tage ab jetzt setzen</button>
+      <strong>{{ $t('preWeek.title', { days: Math.ceil(days) }) }}</strong>
+      <i18n-t keypath="preWeek.explanation" tag="p" scope="global">
+        <template #date><strong>{{ weekStartLabel }}</strong></template>
+      </i18n-t>
+      <button class="cta" type="button" @click="$emit('snap')">{{ $t('preWeek.snap') }}</button>
     </div>
   </section>
 </template>

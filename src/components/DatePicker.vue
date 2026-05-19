@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { onClickOutside, useEventListener } from '@vueuse/core'
+import { useI18n } from 'vue-i18n'
 import IconCalendar from '~icons/ph/calendar-blank'
 import IconChevronLeft from '~icons/ph/caret-left-bold'
 import IconChevronRight from '~icons/ph/caret-right-bold'
@@ -10,6 +11,8 @@ const props = defineProps<{
   modelValue: string
 }>()
 const emit = defineEmits<{ (e: 'update:modelValue', v: string): void }>()
+
+const { locale } = useI18n()
 
 function pad(n: number): string {
   return String(n).padStart(2, '0')
@@ -86,8 +89,15 @@ function commit(d: Date): void {
 
 const triggerLabel = computed(() => {
   const d = current.value
-  const weekday = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'][d.getDay()]
-  return `${weekday}, ${pad(d.getDate())}.${pad(d.getMonth() + 1)}.${d.getFullYear()} · ${pad(d.getHours())}:${pad(d.getMinutes())}`
+  // Use Intl with the current locale for the weekday + date — no more
+  // hardcoded German abbreviations.
+  const weekday = new Intl.DateTimeFormat(locale.value, { weekday: 'short' }).format(d)
+  const date = new Intl.DateTimeFormat(locale.value, {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  }).format(d)
+  return `${weekday}, ${date} · ${pad(d.getHours())}:${pad(d.getMinutes())}`
 })
 
 function setRelative(offsetDays: number, hour = 22, minute = 0): void {
@@ -136,7 +146,7 @@ const cells = computed<Cell[]>(() => {
 
 const monthLabel = computed(() => {
   const { y, m } = viewMonth.value
-  return new Date(y, m, 1).toLocaleString('de-DE', { month: 'long', year: 'numeric' })
+  return new Date(y, m, 1).toLocaleString(locale.value, { month: 'long', year: 'numeric' })
 })
 
 function shiftMonth(delta: number): void {
@@ -173,7 +183,17 @@ const TIME_PRESETS: { label: string; h: number; m: number }[] = [
   { label: '22:00', h: 22, m: 0 },
 ]
 
-const WEEKDAYS = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So']
+// Localised short weekday names, Monday-start. Uses a fixed reference week
+// (Jan 2024 — Jan 1 was a Monday) so Intl gives us the abbreviation per locale.
+const WEEKDAYS = computed(() => {
+  const fmt = new Intl.DateTimeFormat(locale.value, { weekday: 'short' })
+  const ref = new Date(2024, 0, 1) // Monday 2024-01-01
+  return Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(ref)
+    d.setDate(ref.getDate() + i)
+    return fmt.format(d)
+  })
+})
 </script>
 
 <template>
@@ -192,21 +212,21 @@ const WEEKDAYS = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So']
           :style="popStyle"
           tabindex="-1"
           role="dialog"
-          aria-label="Datum & Zeit auswählen"
+          :aria-label="$t('datepicker.ariaLabel')"
         >
           <div class="chips-row">
-            <button class="chip" type="button" @click="setRelative(0, 22, 0)">Heute 22:00</button>
-            <button class="chip" type="button" @click="setRelative(1, 9, 0)">Morgen 09:00</button>
-            <button class="chip" type="button" @click="setNextWeekday(1, 9, 0)">Nächster Mo</button>
-            <button class="chip" type="button" @click="setRelative(7, current.getHours(), current.getMinutes())">In 7 Tagen</button>
+            <button class="chip" type="button" @click="setRelative(0, 22, 0)">{{ $t('datepicker.presets.today22') }}</button>
+            <button class="chip" type="button" @click="setRelative(1, 9, 0)">{{ $t('datepicker.presets.tomorrow9') }}</button>
+            <button class="chip" type="button" @click="setNextWeekday(1, 9, 0)">{{ $t('datepicker.presets.nextMonday') }}</button>
+            <button class="chip" type="button" @click="setRelative(7, current.getHours(), current.getMinutes())">{{ $t('datepicker.presets.in7days') }}</button>
           </div>
 
           <div class="cal-head">
-            <button class="nav" type="button" aria-label="Vorheriger Monat" @click="shiftMonth(-1)">
+            <button class="nav" type="button" :aria-label="$t('datepicker.prevMonth')" @click="shiftMonth(-1)">
               <IconChevronLeft />
             </button>
             <span class="cal-month">{{ monthLabel }}</span>
-            <button class="nav" type="button" aria-label="Nächster Monat" @click="shiftMonth(1)">
+            <button class="nav" type="button" :aria-label="$t('datepicker.nextMonth')" @click="shiftMonth(1)">
               <IconChevronRight />
             </button>
           </div>
@@ -232,13 +252,13 @@ const WEEKDAYS = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So']
           <div class="time-row">
             <div class="time-controls">
               <div class="time-stepper">
-                <button type="button" class="step" aria-label="Stunde -1" @click="nudgeHour(-1)">−</button>
+                <button type="button" class="step" :aria-label="$t('datepicker.hourMinus')" @click="nudgeHour(-1)">−</button>
                 <span class="time-readout num">{{ pad(hour) }}:{{ pad(minute) }}</span>
-                <button type="button" class="step" aria-label="Stunde +1" @click="nudgeHour(1)">+</button>
+                <button type="button" class="step" :aria-label="$t('datepicker.hourPlus')" @click="nudgeHour(1)">+</button>
               </div>
               <div class="minute-stepper">
-                <button type="button" class="step small" aria-label="Minute -15" @click="nudgeMinute(-1)">−15m</button>
-                <button type="button" class="step small" aria-label="Minute +15" @click="nudgeMinute(1)">+15m</button>
+                <button type="button" class="step small" :aria-label="$t('datepicker.minuteMinus')" @click="nudgeMinute(-1)">−15m</button>
+                <button type="button" class="step small" :aria-label="$t('datepicker.minutePlus')" @click="nudgeMinute(1)">+15m</button>
               </div>
             </div>
             <div class="time-presets">

@@ -89,8 +89,8 @@ defineExpose({ checkForUpdate })
   <div class="sw-area" aria-live="polite">
     <transition name="slide">
       <div v-if="showRefresh" class="sw-toast">
-        <span>Neue Version verfügbar ✨</span>
-        <button type="button" @click="reload">Reload</button>
+        <span>{{ $t('toast.updateAvailable') }}</span>
+        <button type="button" @click="reload">{{ $t('toast.reload') }}</button>
       </div>
     </transition>
   </div>

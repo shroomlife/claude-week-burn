@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import IconCloudDown from '~icons/ph/cloud-arrow-down-fill'
 import IconGithub from '~icons/ph/github-logo'
 import IconWarn from '~icons/ph/warning-fill'
@@ -13,16 +14,13 @@ const props = defineProps<{
 
 defineEmits<{ (e: 'retry'): void }>()
 
-const title = computed(() => {
-  if (props.phase === 'error') return 'Sync fehlgeschlagen'
-  if (props.phase === 'connecting') return 'Mit GitHub verbinden'
-  return 'Hole deinen Stand'
-})
+const { t } = useI18n()
+
+const title = computed(() => t(`initialSync.title.${props.phase}`))
 
 const subtitle = computed(() => {
-  if (props.phase === 'error') return props.error ?? 'Verbindung zu GitHub nicht möglich.'
-  if (props.phase === 'connecting') return 'Einen Moment — wir authentifizieren dich…'
-  return 'Wir ziehen deine letzten Werte aus deinem privaten Gist rüber.'
+  if (props.phase === 'error') return props.error ?? t('initialSync.subtitle.error')
+  return t(`initialSync.subtitle.${props.phase}`)
 })
 </script>
 
@@ -50,7 +48,7 @@ const subtitle = computed(() => {
 
       <div class="indicator" aria-hidden="true">
         <template v-if="phase === 'error'">
-          <button type="button" class="retry" @click="$emit('retry')">Erneut versuchen</button>
+          <button type="button" class="retry" @click="$emit('retry')">{{ $t('initialSync.retry') }}</button>
         </template>
         <template v-else>
           <span class="dot" />

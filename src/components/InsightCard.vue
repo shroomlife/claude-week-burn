@@ -23,14 +23,14 @@ const projectedTone = computed(() => {
 <template>
   <section class="insight card">
     <header class="head">
-      <span class="eyebrow">Tomorrow Robin · Forecast</span>
+      <span class="eyebrow">{{ $t('insight.eyebrow') }}</span>
       <span class="proj" :class="`proj-${projectedTone}`">
         <template v-if="reliable">
-          <span class="proj-label">Reicht bis</span>
+          <span class="proj-label">{{ $t('insight.reichtBis') }}</span>
           <span class="num">{{ projectedEnd }}%</span>
         </template>
         <template v-else>
-          <span class="proj-label">Forecast</span>
+          <span class="proj-label">{{ $t('insight.forecast') }}</span>
           <span class="num">—</span>
         </template>
       </span>

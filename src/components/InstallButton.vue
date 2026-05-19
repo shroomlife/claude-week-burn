@@ -27,8 +27,8 @@ const visible = computed(() => {
     v-if="visible"
     type="button"
     class="install-pill"
-    :title="installer.canInstall.value ? 'App installieren' : 'Auf iPhone hinzufügen'"
-    aria-label="App installieren"
+    :title="installer.canInstall.value ? $t('install.ctaApp') : $t('install.ctaIos')"
+    :aria-label="$t('install.ariaApp')"
     @click="onClick"
   >
     <IconDownload />

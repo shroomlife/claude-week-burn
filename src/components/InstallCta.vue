@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import IconDownload from '~icons/ph/download-simple-bold'
 import { useInstallPrompt } from '../composables/useInstallPrompt'
 
 const emit = defineEmits<{ (e: 'show-ios'): void }>()
+const { t } = useI18n()
 const installer = useInstallPrompt()
 
 async function onClick(): Promise<void> {
@@ -22,19 +24,19 @@ const visible = computed(() => {
 })
 
 const label = computed(() =>
-  installer.canInstall.value ? 'Als App installieren' : 'Auf iPhone hinzufügen',
+  installer.canInstall.value ? t('install.ctaApp') : t('install.ctaIos'),
 )
 </script>
 
 <template>
-  <div v-if="visible" class="install-cta-wrap" role="region" aria-label="App installieren">
+  <div v-if="visible" class="install-cta-wrap" role="region" :aria-label="$t('install.ariaApp')">
     <button class="rainbow-btn" type="button" :aria-label="label" @click="onClick">
       <span class="rainbow-inner">
         <IconDownload class="ico" />
         <span class="lbl">{{ label }}</span>
       </span>
     </button>
-    <p class="sub">Schnellzugriff vom Homescreen · funktioniert offline · keine Tracker</p>
+    <p class="sub">{{ $t('install.subline') }}</p>
   </div>
 </template>
 

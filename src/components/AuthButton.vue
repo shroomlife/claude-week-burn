@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import IconGithub from '~icons/ph/github-logo'
 import IconCloud from '~icons/ph/cloud-check'
 import IconCloudWarn from '~icons/ph/cloud-warning'
@@ -9,6 +10,7 @@ import { useGistSync } from '../composables/useGistSync'
 
 const emit = defineEmits<{ (e: 'open-menu'): void }>()
 
+const { t, locale } = useI18n()
 const auth = useGitHubAuth()
 const sync = useGistSync()
 
@@ -29,15 +31,20 @@ const statusIcon = computed(() => {
 })
 
 const statusTitle = computed(() => {
-  if (sync.status.value === 'bootstrapping') return 'Verbinde…'
-  if (sync.status.value === 'pulling') return 'Lade Stand…'
-  if (sync.status.value === 'pushing') return 'Speichere…'
-  if (sync.status.value === 'error') return sync.errorMessage.value ?? 'Sync-Fehler'
-  if (sync.isDirty.value) return 'Änderungen werden gesynced…'
+  const s = sync.status.value
+  if (s === 'bootstrapping') return t('auth.tooltip.bootstrapping')
+  if (s === 'pulling') return t('auth.tooltip.pulling')
+  if (s === 'pushing') return t('auth.tooltip.pushing')
+  if (s === 'error') return sync.errorMessage.value ?? t('auth.tooltip.error')
+  if (sync.isDirty.value) return t('auth.tooltip.dirty')
   if (sync.lastSyncedAt.value) {
-    return `Letzter Sync: ${new Date(sync.lastSyncedAt.value).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}`
+    const time = new Date(sync.lastSyncedAt.value).toLocaleTimeString(locale.value, {
+      hour: '2-digit',
+      minute: '2-digit',
+    })
+    return t('auth.tooltip.lastSync', { time })
   }
-  return 'Synced'
+  return t('auth.tooltip.synced')
 })
 </script>
 
@@ -47,11 +54,11 @@ const statusTitle = computed(() => {
     class="auth-pill auth-signin"
     type="button"
     :disabled="auth.phase.value === 'redirecting' || auth.phase.value === 'exchanging'"
+    :aria-label="$t('auth.ariaSignIn')"
     @click="signIn"
-    aria-label="Mit GitHub anmelden"
   >
     <IconGithub />
-    <span>{{ auth.phase.value === 'exchanging' ? 'Logge ein…' : 'Sign in' }}</span>
+    <span>{{ auth.phase.value === 'exchanging' ? $t('auth.signingIn') : $t('auth.signIn') }}</span>
   </button>
 
   <button

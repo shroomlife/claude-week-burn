@@ -29,13 +29,8 @@ function onConfirm(): void {
     <div class="hero">
       <div class="logo" aria-hidden="true"><IconLightning /></div>
       <div class="text">
-        <h1>Willkommen bei Claude Burn Rate</h1>
-        <p>
-          Zwei kurze Sachen brauchst du noch, dann läuft alles —
-          ohne Account, alles bleibt lokal. Wenn du auf einem anderen Gerät
-          schon eingeloggt warst, kannst du oben rechts auch direkt mit GitHub
-          anmelden — dann ziehen wir deinen Stand rüber.
-        </p>
+        <h1>{{ $t('onboarding.title') }}</h1>
+        <p>{{ $t('onboarding.intro') }}</p>
       </div>
     </div>
 
@@ -44,8 +39,8 @@ function onConfirm(): void {
         <div class="step-head">
           <span class="num">1</span>
           <div>
-            <h2>Wann ist dein Weekly Reset?</h2>
-            <p>Das Datum, an dem deine wöchentliche Quota wieder bei 0% startet.</p>
+            <h2>{{ $t('onboarding.step1.title') }}</h2>
+            <p>{{ $t('onboarding.step1.hint') }}</p>
           </div>
         </div>
         <div class="step-body">
@@ -60,8 +55,8 @@ function onConfirm(): void {
         <div class="step-head">
           <span class="num">2</span>
           <div>
-            <h2>Wie viel hast du diese Woche schon verbraucht?</h2>
-            <p>In Prozent. Auf den meisten Plänen siehst du das im Claude Code Status.</p>
+            <h2>{{ $t('onboarding.step2.title') }}</h2>
+            <p>{{ $t('onboarding.step2.hint') }}</p>
           </div>
         </div>
         <div class="step-body">
@@ -76,7 +71,7 @@ function onConfirm(): void {
     </ol>
 
     <button class="cta" type="button" :disabled="!canStart" @click="onConfirm">
-      Los geht's <IconArrow />
+      {{ $t('onboarding.cta') }} <IconArrow />
     </button>
   </section>
 </template>

@@ -2,6 +2,7 @@
 import { computed, onMounted, onUnmounted } from 'vue'
 import IconLightning from '~icons/ph/lightning-fill'
 import AuthButton from './AuthButton.vue'
+import LanguageSwitcher from './LanguageSwitcher.vue'
 import { AUTH_ENABLED } from '../config/auth'
 import type { Countdown } from '../types/burn'
 
@@ -32,16 +33,17 @@ onUnmounted(() => window.removeEventListener('keydown', onKey))
       <IconLightning />
     </div>
     <div class="text">
-      <div class="name">claude burn rate</div>
-      <div class="tag">live weekly pace tracker</div>
+      <div class="name">{{ $t('app.name') }}</div>
+      <div class="tag">{{ $t('app.tagline') }}</div>
     </div>
 
     <div class="actions">
+      <LanguageSwitcher />
       <AuthButton
         v-if="AUTH_ENABLED"
         @open-menu="emit('open-palette')"
       />
-      <button class="cmd-pill" type="button" @click="emit('open-palette')" aria-label="Command palette öffnen">
+      <button class="cmd-pill" type="button" :aria-label="$t('header.openPalette')" @click="emit('open-palette')">
         <kbd>⌘K</kbd>
         <span class="sep" aria-hidden="true">·</span>
         <span class="cd num">{{ countdownShort }}</span>

@@ -24,19 +24,19 @@ const deltaSign = computed(() => (props.delta >= 0 ? '+' : '−'))
     <div class="rail">
       <span class="rail-tip rail-tip-left">
         <span class="dot dot-usage" aria-hidden="true"></span>
-        Usage <span class="num">{{ usagePercent }}%</span>
+        {{ $t('pace.usage') }} <span class="num">{{ usagePercent }}%</span>
       </span>
       <span class="rail-verdict" :class="ahead ? 'is-ahead' : 'is-behind'">
         <span class="sign">{{ deltaSign }}</span><span class="num">{{ Math.abs(delta) }}</span>%
-        <span class="word">{{ ahead ? 'Headroom' : 'Overshoot' }}</span>
+        <span class="word">{{ ahead ? $t('pace.headroom') : $t('pace.overshoot') }}</span>
       </span>
       <span class="rail-tip rail-tip-right">
-        Zeit <span class="num">{{ timePercent }}%</span>
+        {{ $t('pace.time') }} <span class="num">{{ timePercent }}%</span>
         <span class="dot dot-time" aria-hidden="true"></span>
       </span>
     </div>
 
-    <div class="bar" role="img" :aria-label="`Usage ${usagePercent}%, Zeit ${timePercent}%`">
+    <div class="bar" role="img" :aria-label="$t('pace.ariaBar', { usage: usagePercent, time: timePercent })">
       <div class="track"></div>
       <div
         class="delta-zone"

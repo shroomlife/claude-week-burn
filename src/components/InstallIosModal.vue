@@ -15,47 +15,42 @@ function close(): void { emit('close') }
     <div v-if="open" class="dlg-backdrop" @click.self="close">
       <div class="dlg" role="dialog" aria-modal="true" aria-labelledby="ios-dlg-title">
         <header class="dlg-head">
-          <h2 id="ios-dlg-title">Auf iPhone hinzufügen</h2>
-          <button type="button" class="close" @click="close" aria-label="Schließen">
+          <h2 id="ios-dlg-title">{{ $t('install.ios.title') }}</h2>
+          <button type="button" class="close" :aria-label="$t('reset.close')" @click="close">
             <IconClose />
           </button>
         </header>
 
-        <p class="lead">
-          So legst du <strong>Claude Burn Rate</strong> wie eine echte App auf deinen Home-Bildschirm —
-          schneller Zugriff, eigenes Icon, läuft offline.
-        </p>
+        <p class="lead">{{ $t('install.ios.lead') }}</p>
 
         <ol class="steps">
           <li>
             <span class="step-num">1</span>
             <span class="step-icon"><IconShare /></span>
             <span class="step-text">
-              Tippe in Safari unten auf das <strong>Teilen-Symbol</strong>
-              <span class="step-hint">(Quadrat mit Pfeil nach oben)</span>
+              {{ $t('install.ios.step1Text') }}
+              <span class="step-hint">{{ $t('install.ios.step1Hint') }}</span>
             </span>
           </li>
           <li>
             <span class="step-num">2</span>
             <span class="step-icon"><IconPlus /></span>
             <span class="step-text">
-              Wähle <strong>„Zum Home-Bildschirm"</strong>
-              <span class="step-hint">manchmal etwas weiter unten in der Liste</span>
+              {{ $t('install.ios.step2Text') }}
+              <span class="step-hint">{{ $t('install.ios.step2Hint') }}</span>
             </span>
           </li>
           <li>
             <span class="step-num">3</span>
             <span class="step-icon"><IconCheck /></span>
             <span class="step-text">
-              Tippe oben rechts auf <strong>„Hinzufügen"</strong>
-              <span class="step-hint">fertig — App liegt auf dem Home-Bildschirm</span>
+              {{ $t('install.ios.step3Text') }}
+              <span class="step-hint">{{ $t('install.ios.step3Hint') }}</span>
             </span>
           </li>
         </ol>
 
-        <p class="footnote">
-          Nur in <strong>Safari</strong> möglich. Chrome auf iOS unterstützt das nicht.
-        </p>
+        <p class="footnote">{{ $t('install.ios.footnote') }}</p>
       </div>
     </div>
   </transition>

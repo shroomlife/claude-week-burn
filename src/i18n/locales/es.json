@@ -1,0 +1,258 @@
+{
+  "app": {
+    "name": "claude burn rate",
+    "tagline": "ritmo semanal en vivo"
+  },
+  "header": {
+    "openPalette": "Abrir paleta de comandos"
+  },
+  "lang": {
+    "switcher": "Idioma"
+  },
+  "auth": {
+    "signIn": "Sign in",
+    "signingIn": "Entrando…",
+    "ariaSignIn": "Iniciar sesión con GitHub",
+    "tooltip": {
+      "bootstrapping": "Conectando…",
+      "pulling": "Cargando estado…",
+      "pushing": "Guardando…",
+      "error": "Error de sincronización",
+      "dirty": "Sincronizando cambios…",
+      "lastSync": "Última sync: {time}",
+      "synced": "Sincronizado"
+    }
+  },
+  "onboarding": {
+    "title": "Bienvenido a Claude Burn Rate",
+    "intro": "Dos cosas rápidas y listo — sin cuenta, todo se queda local. Si ya entraste en otro dispositivo, dale a Sign in arriba — traemos tu estado al instante.",
+    "step1": {
+      "title": "¿Cuándo es tu reset semanal?",
+      "hint": "La fecha en la que tu cuota semanal vuelve al 0%."
+    },
+    "step2": {
+      "title": "¿Cuánto has consumido esta semana?",
+      "hint": "En porcentaje. La mayoría de planes lo muestran en el estado de Claude Code."
+    },
+    "cta": "Vamos"
+  },
+  "initialSync": {
+    "title": {
+      "connecting": "Conectando con GitHub",
+      "fetching": "Cargando tu estado",
+      "error": "Falló la sincronización"
+    },
+    "subtitle": {
+      "connecting": "Un momento — te autenticamos…",
+      "fetching": "Estamos trayendo tus últimos valores desde tu gist privado.",
+      "error": "No pudimos contactar con GitHub."
+    },
+    "retry": "Reintentar"
+  },
+  "preWeek": {
+    "title": "Tu reset está a {days} días — ¿es correcto?",
+    "explanation": "Claude usa una ventana móvil de 7 días. Con tu fecha, la semana ni siquiera empezaría hasta el {date} — hasta entonces \"tiempo transcurrido\" se queda en 0% y la comparación se tiñe de rojo sin razón.",
+    "snap": "📅 Poner reset a 7 días desde ahora"
+  },
+  "pace": {
+    "usage": "Uso",
+    "time": "Tiempo",
+    "headroom": "Margen",
+    "overshoot": "Sobrepaso",
+    "ariaBar": "Uso {usage}%, Tiempo {time}%"
+  },
+  "insight": {
+    "eyebrow": "Tomorrow Robin · Pronóstico",
+    "reichtBis": "Llega a",
+    "forecast": "Pronóstico"
+  },
+  "metrics": {
+    "resetIn": "Reset en",
+    "dailyBudget": "Presupuesto diario",
+    "quotaLeft": "Cuota restante",
+    "perDay": "% / día"
+  },
+  "controls": {
+    "weeklyReset": "Reset semanal",
+    "weeklyUsage": "Uso semanal",
+    "weekFrom": "Semana desde {date}",
+    "equalsTime": "= Tiempo · {n}",
+    "sliderAria": "Porcentaje de uso semanal"
+  },
+  "nextTick": {
+    "label": "Próximo tick de tiempo",
+    "countdown": "+1% en {time}",
+    "title": "Próximo pace +1% en {time}"
+  },
+  "status": {
+    "exhausted": {
+      "label": "Agotado",
+      "message": "Cuota vacía — espera al reset o cambia de plan."
+    },
+    "resetNow": {
+      "label": "Reset activo",
+      "message": "La semana terminó — cuota fresca entrando."
+    },
+    "preWeek": {
+      "label": "Pre-semana",
+      "message": "La semana aún no empezó — revisa tu fecha de reset."
+    },
+    "burn": {
+      "label": "A tope",
+      "message": "Margen de sobra — ¡acelera, crack!"
+    },
+    "cruise": {
+      "label": "Ritmo chill",
+      "message": "Todo fluye — el ritmo encaja perfecto."
+    },
+    "careful": {
+      "label": "Cuidado",
+      "message": "Algo rápido — toca frenar un poquito."
+    },
+    "save": {
+      "label": "Modo ahorro",
+      "message": "Quemas demasiado rápido — ¡ahora a ahorrar con cabeza!"
+    }
+  },
+  "tomorrow": {
+    "exhausted": "Cuota vacía. Chill hasta el reset — o upgrade de plan.",
+    "fresh": "Semana fresca, cuota intacta. Full power.",
+    "tooEarly": "Demasiado pronto para un pronóstico honesto. Vuelve en unas horas.",
+    "hits100WithLastSafe": "Si sigues así: 100% el {day}. El {lastSafe} sería tu último día a tope.",
+    "hits100": "Si sigues así: 100% el {day}.",
+    "safe": "Al ritmo actual aterrizas en {pct}%. La cuota te llega de sobra."
+  },
+  "palette": {
+    "search": "Buscar acción…",
+    "empty": "Ninguna acción encontrada.",
+    "footNav": "Navegar",
+    "footSelect": "Elegir",
+    "footClose": "Cerrar",
+    "ariaLabel": "Paleta de comandos",
+    "actions": {
+      "snap": {
+        "title": "Poner reset a 7 días desde ahora",
+        "hint": "Mueve la fecha de fin de semana exactamente 7 días al futuro."
+      },
+      "sync": {
+        "title": "Uso = Tiempo",
+        "hint": "Pone el slider de uso al tiempo actualmente transcurrido."
+      },
+      "newWeek": {
+        "title": "Empezar nueva semana",
+        "hint": "Pone uso a 0%. La fecha de reset no cambia."
+      },
+      "share": {
+        "title": "Compartir burn rate",
+        "hint": "Comparte tu estado actual como tarjeta de texto."
+      },
+      "syncNow": {
+        "title": "Sincronizar ahora",
+        "hint": "Empuja tu estado actual a tu gist de sync al instante."
+      },
+      "logout": {
+        "title": "Cerrar sesión",
+        "hint": "Borra el token de GitHub local. Sync para; localStorage queda."
+      },
+      "signIn": {
+        "title": "Iniciar sesión con GitHub",
+        "hint": "Activa sync entre dispositivos vía gist privado (scope: gist)."
+      },
+      "reset": {
+        "title": "Resetear app",
+        "hint": "Borra todos los datos locales y vuelve al onboarding."
+      }
+    }
+  },
+  "reset": {
+    "title": "¿Resetear app?",
+    "close": "Cerrar",
+    "lead": "Borramos todos los datos locales de este dispositivo. La app vuelve a empezar en el onboarding — como en tu primera visita.",
+    "items": {
+      "resetDate": "Fecha de reset",
+      "usage": "Uso actual",
+      "onboarding": "Marca de onboarding",
+      "github": "Token de GitHub + enlace al gist"
+    },
+    "warn": "Estás como @{login}. Te cerramos sesión. Tu gist de sync en github.com se queda — puedes borrarlo manualmente si quieres.",
+    "cancel": "Cancelar",
+    "confirm": "Resetear"
+  },
+  "install": {
+    "ctaApp": "Instalar como app",
+    "ctaIos": "Añadir al iPhone",
+    "subline": "Acceso desde la home · funciona offline · sin trackers",
+    "ariaApp": "Instalar app",
+    "ios": {
+      "title": "Añadir al iPhone",
+      "lead": "Cómo añadir Claude Burn Rate a tu pantalla de inicio como una app real — acceso rápido, icono propio, funciona offline.",
+      "step1Text": "En Safari, pulsa el icono Compartir abajo",
+      "step1Hint": "(cuadrado con flecha hacia arriba)",
+      "step2Text": "Elige \"Añadir a pantalla de inicio\"",
+      "step2Hint": "a veces un poco más abajo en la lista",
+      "step3Text": "Pulsa \"Añadir\" arriba a la derecha",
+      "step3Hint": "listo — la app está en tu home",
+      "footnote": "Solo funciona en Safari. Chrome en iOS no lo soporta."
+    }
+  },
+  "toast": {
+    "updateAvailable": "Nueva versión disponible ✨",
+    "reload": "Recargar",
+    "loggedIn": "Conectado como @{login}",
+    "syncError": "Error de sincronización",
+    "resetSet": "Reset puesto a 7 días",
+    "usageEqualsTime": "Uso = Tiempo",
+    "newWeekStarted": "Nueva semana — uso reiniciado",
+    "syncStarted": "Sincronizando…",
+    "loggedOut": "Sesión cerrada",
+    "copiedClipboard": "Copiado al portapapeles",
+    "rolloverSimple": "Semana fresca — cuota a 0",
+    "rolloverGap": "Estuviste fuera — {weeks} semanas saltadas, cuota fresca activa."
+  },
+  "exhausted": {
+    "title": "Cuota vacía 🪫",
+    "subtitle": "Has agotado tu cuota semanal de Claude por completo.",
+    "countdownLabel": "Reset en",
+    "footnote": "Claude Code está en pausa en tu cuenta hasta entonces.",
+    "subFootnote": "Atento: el {date} a las {time} es tu línea de refresh."
+  },
+  "stepper": {
+    "groupAria": "Ajustar uso",
+    "minusAria": "Uso menos 1",
+    "plusAria": "Uso más 1"
+  },
+  "datepicker": {
+    "ariaLabel": "Elegir fecha y hora",
+    "presets": {
+      "today22": "Hoy 22:00",
+      "tomorrow9": "Mañana 09:00",
+      "nextMonday": "Próximo lun",
+      "in7days": "En 7 días"
+    },
+    "prevMonth": "Mes anterior",
+    "nextMonth": "Mes siguiente",
+    "hourMinus": "Hora -1",
+    "hourPlus": "Hora +1",
+    "minuteMinus": "Minuto -15",
+    "minutePlus": "Minuto +15"
+  },
+  "share": {
+    "title": "Claude Burn Rate",
+    "text": "🔋 {usage}% usado · {time}% tiempo · {sign}{delta}% margen · Reset en {d}d {h}h"
+  },
+  "about": {
+    "heading": "Sobre la app",
+    "intro": "{name} es un tracker de ritmo gratuito y local para tu cuota semanal de {claudeLink}. Introduces tu fecha de reset y tu uso actual — la app te muestra en vivo cuánta cuota te queda, cómo va tu presupuesto diario y si llegas al fin de semana al ritmo actual.",
+    "localNote": "Funciona 100% local: sin cuenta, sin servidor, sin trackers. Todos los valores viven en tu localStorage. Instalable como PWA — directo a tu home en móvil.",
+    "keywords": {
+      "tracker": "Claude Code Usage Tracker",
+      "weekly": "Claude Pro Weekly Limit",
+      "calculator": "Anthropic Quota Calculator",
+      "rolling": "Rolling 7-Day Burn Rate",
+      "openSource": "Open Source · MIT · Vue 3 PWA"
+    },
+    "meta": "build by you · for you · shroomlife flavor",
+    "resetLink": "Resetear app",
+    "repo": "GitHub Repo"
+  }
+}

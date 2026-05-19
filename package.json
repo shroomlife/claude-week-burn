@@ -15,7 +15,8 @@
     "@fontsource-variable/outfit": "^5.1.2",
     "@fontsource/instrument-serif": "^5.1.2",
     "@vueuse/core": "^12.4.0",
-    "vue": "^3.5.13"
+    "vue": "^3.5.13",
+    "vue-i18n": "10"
   },
   "devDependencies": {
     "@iconify-json/ph": "^1.2.2",

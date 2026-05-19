@@ -63,13 +63,13 @@ function onPointerUp(): void { stop() }
 </script>
 
 <template>
-  <div class="stepper" role="group" aria-label="Usage anpassen">
+  <div class="stepper" role="group" :aria-label="$t('stepper.groupAria')">
     <button
       type="button"
       class="btn btn-down"
       :class="{ active: holding === 'down' }"
       :disabled="value <= min"
-      aria-label="Usage minus 1"
+      :aria-label="$t('stepper.minusAria')"
       @pointerdown="onPointerDown('down', $event)"
       @pointerup="onPointerUp"
       @pointercancel="onPointerUp"
@@ -88,7 +88,7 @@ function onPointerUp(): void { stop() }
       class="btn btn-up"
       :class="{ active: holding === 'up' }"
       :disabled="value >= max"
-      aria-label="Usage plus 1"
+      :aria-label="$t('stepper.plusAria')"
       @pointerdown="onPointerDown('up', $event)"
       @pointerup="onPointerUp"
       @pointercancel="onPointerUp"

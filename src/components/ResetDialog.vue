@@ -15,35 +15,28 @@ function confirm(): void { emit('confirm') }
       <div class="dlg" role="dialog" aria-modal="true" aria-labelledby="reset-dlg-title">
         <header class="dlg-head">
           <span class="icon-wrap" aria-hidden="true"><IconWarning /></span>
-          <h2 id="reset-dlg-title">App zurücksetzen?</h2>
-          <button type="button" class="close" @click="cancel" aria-label="Schließen">
+          <h2 id="reset-dlg-title">{{ $t('reset.title') }}</h2>
+          <button type="button" class="close" :aria-label="$t('reset.close')" @click="cancel">
             <IconClose />
           </button>
         </header>
 
         <div class="body">
-          <p class="lead">
-            Wir löschen alle lokalen Daten auf diesem Gerät. Die App startet danach
-            wieder im Onboarding — wie beim ersten Besuch.
-          </p>
+          <p class="lead">{{ $t('reset.lead') }}</p>
 
           <ul class="list">
-            <li>Reset-Datum</li>
-            <li>Aktueller Usage-Stand</li>
-            <li>Onboarding-Markierung</li>
-            <li v-if="loggedIn">GitHub-Token + Gist-Verknüpfung</li>
+            <li>{{ $t('reset.items.resetDate') }}</li>
+            <li>{{ $t('reset.items.usage') }}</li>
+            <li>{{ $t('reset.items.onboarding') }}</li>
+            <li v-if="loggedIn">{{ $t('reset.items.github') }}</li>
           </ul>
 
-          <div v-if="loggedIn" class="warn">
-            <strong>Du bist als <code>@{{ login }}</code> eingeloggt.</strong>
-            Wir loggen dich aus. <strong>Dein Sync-Gist auf github.com bleibt
-            erhalten</strong> — du kannst ihn dort manuell löschen, wenn du willst.
-          </div>
+          <p v-if="loggedIn" class="warn">{{ $t('reset.warn', { login: login ?? '' }) }}</p>
         </div>
 
         <footer class="dlg-foot">
-          <button type="button" class="btn ghost" @click="cancel">Abbrechen</button>
-          <button type="button" class="btn danger" @click="confirm">Zurücksetzen</button>
+          <button type="button" class="btn ghost" @click="cancel">{{ $t('reset.cancel') }}</button>
+          <button type="button" class="btn danger" @click="confirm">{{ $t('reset.confirm') }}</button>
         </footer>
       </div>
     </div>
