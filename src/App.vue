@@ -612,7 +612,10 @@ main {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  z-index: 50;
+  /* Sit ABOVE every modal (modals are 110). Toasts are the highest-priority
+     UI layer — they have to be visible even while a dialog is open
+     (e.g. 'Synchronisiere…' from AccountModal's sync-now action). */
+  z-index: 200;
   pointer-events: none;
 }
 .toast {

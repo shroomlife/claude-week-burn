@@ -164,7 +164,9 @@ defineExpose({ checkForUpdate })
   position: fixed;
   top: 16px;
   right: 16px;
-  z-index: 60;
+  /* Above modals (110) — update toast must stay visible while any dialog
+     is open. Otherwise the backdrop blurs it and the user can't act on it. */
+  z-index: 200;
   display: flex;
   flex-direction: column;
   gap: 10px;
