@@ -12,20 +12,10 @@ import './styles/base.css'
 import App from './App.vue'
 import { i18n } from './i18n'
 
-const app = createApp(App).use(i18n)
-app.mount('#app')
+createApp(App).use(i18n).mount('#app')
 
-// Fade out the boot splash (declared inline in index.html) on the next
-// animation frame after Vue has mounted + the first paint settled. The
-// CSS in index.html handles the opacity transition + pointer-events
-// gate; once it finishes we drop the element from the DOM entirely so
-// it can't intercept anything.
-requestAnimationFrame(() => {
-  requestAnimationFrame(() => {
-    document.documentElement.classList.add('boot-ready')
-    window.setTimeout(() => {
-      const splash = document.getElementById('boot-splash')
-      splash?.remove()
-    }, 600)
-  })
-})
+// The boot skeleton (declared inline in index.html) is dismissed by
+// App.vue once the app is actually ready — see `markBootReady()` there.
+// We don't dismiss it from main.ts because then it'd flash away before
+// the initial sync finishes, leaving the user staring at the
+// half-loading state. App.vue knows when sync is done.

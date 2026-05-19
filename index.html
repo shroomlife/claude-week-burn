@@ -51,36 +51,102 @@
     <meta name="twitter:image" content="https://shroomlife.github.io/claude-week-burn/og-card.png" />
     <meta name="twitter:image:alt" content="Stylized glowing lightning bolt on a warm orange-to-magenta aurora gradient — Claude Burn Rate" />
 
-    <!-- Boot splash styles. Inline so they're parsed before any JS runs and
-         the user sees brand color the instant the document body paints,
-         never the white default page background. The splash fades out once
-         App.vue's onMounted handler adds `boot-ready` to <html>. -->
+    <!-- Boot skeleton. Inline so the page never shows a white flash between
+         body-paint and Vue mount. The boxes mirror the real card layout
+         (header pills, pace card, insight, metrics row, controls) so the
+         user sees the final visual rhythm before content fills in, no
+         layout shift when the app takes over. App.vue adds `boot-ready`
+         to <html> once the app is actually ready (mounted + sync done if
+         applicable); CSS handles the 200ms crossfade out. -->
     <style>
-      #boot-splash {
+      #boot-skeleton {
         position: fixed;
         inset: 0;
         z-index: 9999;
-        display: grid;
-        place-items: center;
-        background: linear-gradient(135deg, #fb923c 0%, #f43f5e 55%, #d946ef 100%);
-        transition: opacity 0.45s ease-out;
+        background: #fcfcfd;
+        overflow: hidden;
+        transition: opacity 0.22s ease-out;
       }
-      #boot-splash .boot-bolt {
-        width: 96px;
-        height: 96px;
-        animation: boot-breathe 1.6s ease-in-out infinite;
-        filter: drop-shadow(0 10px 28px rgba(15, 23, 42, 0.22));
+      #boot-skeleton .sk-container {
+        max-width: 940px;
+        margin: 0 auto;
+        padding: 24px 18px;
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
       }
-      @keyframes boot-breathe {
-        0%, 100% { transform: scale(1); opacity: 0.92; }
-        50%      { transform: scale(1.06); opacity: 1; }
+      #boot-skeleton .sk-header {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 4px 4px 6px;
       }
-      html.boot-ready #boot-splash {
+      #boot-skeleton .sk-logo {
+        width: 40px;
+        height: 40px;
+        border-radius: 12px;
+        flex-shrink: 0;
+        background: linear-gradient(135deg, #fb923c, #f43f5e, #d946ef);
+      }
+      #boot-skeleton .sk-brand-text {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+      #boot-skeleton .sk-line { height: 12px; border-radius: 6px; background: rgba(15, 23, 42, 0.06); }
+      #boot-skeleton .sk-line.w70 { width: 70%; }
+      #boot-skeleton .sk-line.w40 { width: 40%; }
+      #boot-skeleton .sk-actions { display: inline-flex; gap: 8px; flex-shrink: 0; }
+      #boot-skeleton .sk-pill {
+        height: 34px;
+        border-radius: 999px;
+        background: rgba(15, 23, 42, 0.05);
+        box-sizing: border-box;
+      }
+      #boot-skeleton .sk-card {
+        background: rgba(15, 23, 42, 0.04);
+        border: 1px solid rgba(15, 23, 42, 0.06);
+        border-radius: 22px;
+        position: relative;
+        overflow: hidden;
+      }
+      /* Heights chosen to roughly match the real card heights at the
+         max-width=940 layout — gives the user the same vertical rhythm
+         the loaded app will have. */
+      #boot-skeleton .sk-pace      { height: 180px; }
+      #boot-skeleton .sk-insight   { height: 240px; }
+      #boot-skeleton .sk-metrics   { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+      #boot-skeleton .sk-metric    { height: 110px; }
+      #boot-skeleton .sk-controls  { height: 260px; }
+      /* Subtle shimmer sweep across each card to hint at activity. */
+      #boot-skeleton .sk-card::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.55), transparent);
+        transform: translateX(-100%);
+        animation: sk-shimmer 1.6s ease-in-out infinite;
+      }
+      @keyframes sk-shimmer {
+        0%   { transform: translateX(-100%); }
+        60%  { transform: translateX(100%); }
+        100% { transform: translateX(100%); }
+      }
+      html.boot-ready #boot-skeleton {
         opacity: 0;
         pointer-events: none;
       }
+      @media (max-width: 640px) {
+        #boot-skeleton .sk-header { flex-direction: column; align-items: stretch; gap: 12px; }
+        #boot-skeleton .sk-actions { align-self: flex-end; }
+        #boot-skeleton .sk-metrics { grid-template-columns: 1fr 1fr; }
+        #boot-skeleton .sk-metric:first-child { grid-column: 1 / -1; }
+        #boot-skeleton .sk-pace { height: 220px; }
+        #boot-skeleton .sk-insight { height: 280px; }
+      }
       @media (prefers-reduced-motion: reduce) {
-        #boot-splash .boot-bolt { animation: none; }
+        #boot-skeleton .sk-card::after { animation: none; }
       }
     </style>
 
@@ -113,15 +179,33 @@
   </head>
   <body>
     <div id="app"></div>
-    <!-- Boot splash: visible from the first body-paint until Vue mounts.
-         Inline SVG so it renders without a separate request. -->
-    <div id="boot-splash" aria-hidden="true">
-      <svg class="boot-bolt" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
-        <path
-          fill="#ffffff"
-          d="M597.333 192 L341.333 576 L469.333 576 L426.667 832 L682.667 448 L554.667 448 Z"
-        />
-      </svg>
+    <!-- Boot skeleton: mirrors the real card layout so users see the final
+         visual rhythm immediately, no layout shift when Vue takes over. -->
+    <div id="boot-skeleton" aria-hidden="true">
+      <div class="sk-container">
+        <div class="sk-header">
+          <div style="display: flex; align-items: center; gap: 14px; flex: 1;">
+            <div class="sk-logo"></div>
+            <div class="sk-brand-text">
+              <div class="sk-line w70"></div>
+              <div class="sk-line w40"></div>
+            </div>
+          </div>
+          <div class="sk-actions">
+            <div class="sk-pill" style="width: 64px;"></div>
+            <div class="sk-pill" style="width: 110px;"></div>
+            <div class="sk-pill" style="width: 88px;"></div>
+          </div>
+        </div>
+        <div class="sk-card sk-pace"></div>
+        <div class="sk-card sk-insight"></div>
+        <div class="sk-metrics">
+          <div class="sk-card sk-metric"></div>
+          <div class="sk-card sk-metric"></div>
+          <div class="sk-card sk-metric"></div>
+        </div>
+        <div class="sk-card sk-controls"></div>
+      </div>
     </div>
     <noscript>
       <p style="padding: 24px; font-family: system-ui; color: #475569;">

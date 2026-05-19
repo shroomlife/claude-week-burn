@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useDebounceFn } from '@vueuse/core'
 import { useBurnState } from './composables/useBurnState'
@@ -153,6 +153,40 @@ const initialSyncPhase = computed<'connecting' | 'fetching' | 'error'>(() => {
   if (auth.phase.value === 'exchanging') return 'connecting'
   if (auth.token.value && !auth.user.value) return 'connecting'
   return 'fetching'
+})
+
+// === Boot skeleton dismissal ===
+// The inline #boot-skeleton in index.html stays visible until the app is
+// truly ready to show its real UI. "Ready" means: Vue has mounted AND we
+// are not in an initial-sync loading state. For unauthenticated users
+// this is essentially the next animation frame after mount; for users
+// with a stored GitHub token it waits for the initial gist pull.
+//
+// A failsafe at 4s force-dismisses the skeleton no matter what, so a
+// hung sync can never lock the screen forever.
+let bootDismissed = false
+function dismissBoot(): void {
+  if (bootDismissed) return
+  bootDismissed = true
+  document.documentElement.classList.add('boot-ready')
+  window.setTimeout(() => {
+    document.getElementById('boot-skeleton')?.remove()
+  }, 280)
+}
+onMounted(() => {
+  // Failsafe: even if a sync hangs, drop the skeleton after 4s.
+  window.setTimeout(dismissBoot, 4000)
+  // Normal path: dismiss as soon as we're not waiting on initial sync.
+  // The double-RAF makes sure the first real paint settled before we fade.
+  watch(
+    showInitialSync,
+    (loading) => {
+      if (!loading) {
+        requestAnimationFrame(() => requestAnimationFrame(dismissBoot))
+      }
+    },
+    { immediate: true },
+  )
 })
 
 // Command Palette
@@ -507,34 +541,34 @@ main {
    Onboarding fades out, then main cards slide up with a staggered cascade.
    mode="out-in" guarantees no overlap, so the screen never shows two layers. */
 .boot-enter-active {
-  transition: opacity 360ms ease, transform 440ms cubic-bezier(0.22, 1, 0.36, 1);
+  transition: opacity 200ms ease, transform 240ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 .boot-leave-active {
-  transition: opacity 220ms ease, transform 260ms ease;
+  transition: opacity 140ms ease, transform 160ms ease;
 }
 .boot-enter-from {
   opacity: 0;
-  transform: translateY(14px);
+  transform: translateY(8px);
 }
 .boot-leave-to {
   opacity: 0;
-  transform: translateY(-6px);
+  transform: translateY(-4px);
 }
 
 /* Per-card cascade INSIDE the main grid when it enters (after onboarding
    completes or on cold load). Each card animates from below with a
    stagger; the parent .boot-enter-* fade still wraps them. */
 .main-cards.boot-enter-active > * {
-  animation: card-slide-in 520ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
+  animation: card-slide-in 260ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
 }
 .main-cards.boot-enter-active > *:nth-child(1) { animation-delay: 0ms; }
-.main-cards.boot-enter-active > *:nth-child(2) { animation-delay: 70ms; }
-.main-cards.boot-enter-active > *:nth-child(3) { animation-delay: 140ms; }
-.main-cards.boot-enter-active > *:nth-child(4) { animation-delay: 210ms; }
-.main-cards.boot-enter-active > *:nth-child(5) { animation-delay: 280ms; }
+.main-cards.boot-enter-active > *:nth-child(2) { animation-delay: 35ms; }
+.main-cards.boot-enter-active > *:nth-child(3) { animation-delay: 70ms; }
+.main-cards.boot-enter-active > *:nth-child(4) { animation-delay: 105ms; }
+.main-cards.boot-enter-active > *:nth-child(5) { animation-delay: 140ms; }
 
 @keyframes card-slide-in {
-  from { opacity: 0; transform: translateY(18px); }
+  from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
