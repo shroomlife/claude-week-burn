@@ -51,6 +51,39 @@
     <meta name="twitter:image" content="https://shroomlife.github.io/claude-week-burn/og-card.png" />
     <meta name="twitter:image:alt" content="Stylized glowing lightning bolt on a warm orange-to-magenta aurora gradient — Claude Burn Rate" />
 
+    <!-- Boot splash styles. Inline so they're parsed before any JS runs and
+         the user sees brand color the instant the document body paints,
+         never the white default page background. The splash fades out once
+         App.vue's onMounted handler adds `boot-ready` to <html>. -->
+    <style>
+      #boot-splash {
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        display: grid;
+        place-items: center;
+        background: linear-gradient(135deg, #fb923c 0%, #f43f5e 55%, #d946ef 100%);
+        transition: opacity 0.45s ease-out;
+      }
+      #boot-splash .boot-bolt {
+        width: 96px;
+        height: 96px;
+        animation: boot-breathe 1.6s ease-in-out infinite;
+        filter: drop-shadow(0 10px 28px rgba(15, 23, 42, 0.22));
+      }
+      @keyframes boot-breathe {
+        0%, 100% { transform: scale(1); opacity: 0.92; }
+        50%      { transform: scale(1.06); opacity: 1; }
+      }
+      html.boot-ready #boot-splash {
+        opacity: 0;
+        pointer-events: none;
+      }
+      @media (prefers-reduced-motion: reduce) {
+        #boot-splash .boot-bolt { animation: none; }
+      }
+    </style>
+
     <!-- JSON-LD: SoftwareApplication -->
     <script type="application/ld+json">
       {
@@ -80,6 +113,16 @@
   </head>
   <body>
     <div id="app"></div>
+    <!-- Boot splash: visible from the first body-paint until Vue mounts.
+         Inline SVG so it renders without a separate request. -->
+    <div id="boot-splash" aria-hidden="true">
+      <svg class="boot-bolt" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+        <path
+          fill="#ffffff"
+          d="M597.333 192 L341.333 576 L469.333 576 L426.667 832 L682.667 448 L554.667 448 Z"
+        />
+      </svg>
+    </div>
     <noscript>
       <p style="padding: 24px; font-family: system-ui; color: #475569;">
         Diese App braucht JavaScript. Aktiviere es in den Browser-Einstellungen, um deine Claude Burn Rate zu tracken.

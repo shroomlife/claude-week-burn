@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import IconDownload from '~icons/ph/download-simple-bold'
 import { useInstallPrompt } from '../composables/useInstallPrompt'
@@ -18,7 +18,17 @@ async function onClick(): Promise<void> {
   }
 }
 
+// Stabilizer: hold the CTA hidden for ~1.5s after mount so the install
+// signals have time to settle. Without this, the CTA can flash in then
+// immediately disappear when the install-prompt resolution arrives —
+// jarring on first load.
+const stabilized = ref(false)
+onMounted(() => {
+  window.setTimeout(() => { stabilized.value = true }, 1500)
+})
+
 const visible = computed(() => {
+  if (!stabilized.value) return false
   if (installer.isStandalone.value) return false
   return installer.canInstall.value || installer.needsIosInstructions.value
 })
@@ -29,15 +39,17 @@ const label = computed(() =>
 </script>
 
 <template>
-  <div v-if="visible" class="install-cta-wrap" role="region" :aria-label="$t('install.ariaApp')">
-    <button class="rainbow-btn" type="button" :aria-label="label" @click="onClick">
-      <span class="rainbow-inner">
-        <IconDownload class="ico" />
-        <span class="lbl">{{ label }}</span>
-      </span>
-    </button>
-    <p class="sub">{{ $t('install.subline') }}</p>
-  </div>
+  <transition name="cta-fade">
+    <div v-if="visible" class="install-cta-wrap" role="region" :aria-label="$t('install.ariaApp')">
+      <button class="rainbow-btn" type="button" :aria-label="label" @click="onClick">
+        <span class="rainbow-inner">
+          <IconDownload class="ico" />
+          <span class="lbl">{{ label }}</span>
+        </span>
+      </button>
+      <p class="sub">{{ $t('install.subline') }}</p>
+    </div>
+  </transition>
 </template>
 
 <style scoped>
@@ -148,6 +160,30 @@ const label = computed(() =>
 :global(body.is-hidden) .rainbow-btn,
 :global(body.is-hidden) .rainbow-btn::before {
   animation-play-state: paused;
+}
+
+/* Fade + slight rise when the CTA appears post-stabilizer. The longer
+   enter than leave is deliberate — appearing should feel calm, leaving
+   should feel quick. Matches Robin's preferred motion taste. */
+.cta-fade-enter-active {
+  transition: opacity 0.5s ease-out, transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.cta-fade-leave-active {
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+.cta-fade-enter-from {
+  opacity: 0;
+  transform: translateY(14px);
+}
+.cta-fade-leave-to {
+  opacity: 0;
+  transform: translateY(-6px);
+}
+@media (prefers-reduced-motion: reduce) {
+  .cta-fade-enter-active, .cta-fade-leave-active {
+    transition: opacity 0.2s ease;
+  }
+  .cta-fade-enter-from, .cta-fade-leave-to { transform: none; }
 }
 
 @media (max-width: 480px) {
