@@ -208,7 +208,9 @@
     "loggedOut": "Signed out",
     "copiedClipboard": "Copied to clipboard",
     "rolloverSimple": "Fresh week — quota reset to 0",
-    "rolloverGap": "You were away — {weeks} weeks skipped, fresh quota is live."
+    "rolloverGap": "You were away — {weeks} weeks skipped, fresh quota is live.",
+    "shared": "Shared ✨",
+    "downloaded": "Image downloaded ✨"
   },
   "exhausted": {
     "title": "Quota empty 🪫",

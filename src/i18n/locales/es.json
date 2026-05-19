@@ -208,7 +208,9 @@
     "loggedOut": "Sesión cerrada",
     "copiedClipboard": "Copiado al portapapeles",
     "rolloverSimple": "Semana fresca — cuota a 0",
-    "rolloverGap": "Estuviste fuera — {weeks} semanas saltadas, cuota fresca activa."
+    "rolloverGap": "Estuviste fuera — {weeks} semanas saltadas, cuota fresca activa.",
+    "shared": "Compartido ✨",
+    "downloaded": "Imagen descargada ✨"
   },
   "exhausted": {
     "title": "Cuota vacía 🪫",

@@ -208,7 +208,9 @@
     "loggedOut": "Abgemeldet",
     "copiedClipboard": "In Zwischenablage kopiert",
     "rolloverSimple": "Frische Woche — Quota auf 0 zurückgesetzt",
-    "rolloverGap": "Du warst weg — {weeks} Wochen übersprungen, neue Quota läuft."
+    "rolloverGap": "Du warst weg — {weeks} Wochen übersprungen, neue Quota läuft.",
+    "shared": "Geteilt ✨",
+    "downloaded": "Bild geladen ✨"
   },
   "exhausted": {
     "title": "Quota leer 🪫",

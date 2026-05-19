@@ -26,9 +26,10 @@ import ResetDialog from './components/ResetDialog.vue'
 import { useGitHubAuth } from './composables/useGitHubAuth'
 import { useGistSync } from './composables/useGistSync'
 import { disablePersistedWrites } from './composables/usePersistedState'
+import { buildShareCardBlob, shareOrDownload } from './composables/useShareImage'
 import type { Mode } from './types/burn'
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const burn = useBurnState()
 const reduced = useReducedMotion()
 useVisibilityClass()
@@ -228,7 +229,7 @@ watch(() => sync.status.value, (s) => {
 })
 
 async function shareBurnRate(): Promise<void> {
-  const text = t('share.text', {
+  const caption = t('share.text', {
     usage: burn.usagePercent.value,
     time: c.timePercent.value,
     sign: c.delta.value >= 0 ? '+' : '',
@@ -236,15 +237,35 @@ async function shareBurnRate(): Promise<void> {
     d: c.countdown.value.days,
     h: c.countdown.value.hours,
   })
-  if (typeof navigator !== 'undefined' && 'share' in navigator && typeof navigator.share === 'function') {
-    try {
-      await navigator.share({ title: t('share.title'), text })
-      return
-    } catch { /* fall through to clipboard */ }
-  }
-  if (typeof navigator !== 'undefined' && navigator.clipboard) {
-    await navigator.clipboard.writeText(text)
-    pushToast(t('toast.copiedClipboard'))
+  try {
+    // Ensure brand fonts are loaded so the canvas renders Outfit/JetBrains
+    // instead of system fallbacks.
+    if (typeof document !== 'undefined' && document.fonts?.ready) {
+      await document.fonts.ready
+    }
+    const blob = await buildShareCardBlob({
+      usagePercent: burn.usagePercent.value,
+      timePercent: c.timePercent.value,
+      delta: c.delta.value,
+      remainingPercent: c.remainingPercent.value,
+      dailyBudget: c.dailyBudget.value,
+      countdownDays: c.countdown.value.days,
+      countdownHours: c.countdown.value.hours,
+      statusLabel: c.status.value.label,
+      brand: t('app.name'),
+      tagline: t('app.tagline'),
+      url: 'shroomlife.github.io/claude-week-burn',
+      locale: locale.value,
+    })
+    const fileName = `claude-burn-rate-${burn.usagePercent.value}pct.png`
+    const result = await shareOrDownload(blob, fileName, caption)
+    pushToast(result === 'shared' ? t('toast.shared') : t('toast.downloaded'), 'celebrate')
+  } catch (err) {
+    console.warn('[share] image failed, falling back to text', err)
+    if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      await navigator.clipboard.writeText(caption)
+      pushToast(t('toast.copiedClipboard'))
+    }
   }
 }
 
