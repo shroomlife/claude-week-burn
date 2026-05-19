@@ -1,20 +1,37 @@
 <script setup lang="ts">
-import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
-import IconGlobe from '~icons/ph/globe'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, type Component } from 'vue'
 import IconCaretDown from '~icons/ph/caret-down-bold'
+import IconFlagDe from '~icons/circle-flags/de'
+import IconFlagGb from '~icons/circle-flags/gb'
+import IconFlagEs from '~icons/circle-flags/es'
 import { useLocale, LOCALES } from '../i18n'
 
 const { locale } = useLocale()
 
+/**
+ * Maps each locale's `flagCode` to its actual icon component. We import
+ * statically so the icons get tree-shaken into the bundle. Adding a fourth
+ * language: drop the new icon import here and a new entry — that's it.
+ */
+const FLAG_ICONS: Record<string, Component> = {
+  de: IconFlagDe,
+  gb: IconFlagGb,
+  es: IconFlagEs,
+}
+
 const open = ref(false)
 const rootEl = ref<HTMLDivElement | null>(null)
 
-// LOCALES is non-empty by design, so the fallback is a type-safe assertion
-// for vue-tsc — runtime always picks the matching entry or the first one.
 const currentDef = computed(
-  (): { code: string; label: string; flag: string } =>
+  (): { code: string; label: string; flagCode: string } =>
     LOCALES.find((l) => l.code === locale.value) ?? LOCALES[0]!,
 )
+
+const currentFlag = computed<Component>(() => FLAG_ICONS[currentDef.value.flagCode] ?? IconFlagGb)
+
+function flagFor(code: string): Component {
+  return FLAG_ICONS[code] ?? IconFlagGb
+}
 
 function toggle(): void { open.value = !open.value }
 function close(): void { open.value = false }
@@ -42,7 +59,6 @@ onBeforeUnmount(() => {
   document.removeEventListener('keydown', onKey)
 })
 
-// When the menu opens, focus the active item so keyboard nav makes sense.
 const menuEl = ref<HTMLUListElement | null>(null)
 async function onOpenFocus(): Promise<void> {
   await nextTick()
@@ -63,7 +79,7 @@ async function onOpenFocus(): Promise<void> {
       :aria-label="$t('lang.switcher')"
       @click="toggle(); open && onOpenFocus()"
     >
-      <IconGlobe class="globe" />
+      <component :is="currentFlag" class="flag-current" />
       <span class="code">{{ currentDef.code.toUpperCase() }}</span>
       <IconCaretDown class="caret" :class="{ open }" />
     </button>
@@ -85,7 +101,7 @@ async function onOpenFocus(): Promise<void> {
             :aria-selected="l.code === locale"
             @click="pick(l.code)"
           >
-            <span class="flag" aria-hidden="true">{{ l.flag }}</span>
+            <component :is="flagFor(l.flagCode)" class="flag-item" />
             <span class="label">{{ l.label }}</span>
             <span class="code-mono">{{ l.code.toUpperCase() }}</span>
           </button>
@@ -104,8 +120,8 @@ async function onOpenFocus(): Promise<void> {
 .lang-pill {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 6px 10px;
+  gap: 7px;
+  padding: 5px 10px 5px 5px;
   background: var(--c-surface);
   border: 1px solid var(--c-hair);
   border-radius: var(--r-pill);
@@ -117,7 +133,15 @@ async function onOpenFocus(): Promise<void> {
   transition: background 0.18s ease, transform 0.18s ease, border-color 0.18s ease;
 }
 .lang-pill:hover { background: rgba(15, 23, 42, 0.03); transform: translateY(-1px); }
-.lang-pill .globe { width: 13px; height: 13px; color: var(--c-mute); flex-shrink: 0; }
+
+.flag-current {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.08);
+}
+
 .lang-pill .code {
   font-family: var(--font-mono);
   font-size: 11.5px;
@@ -143,7 +167,7 @@ async function onOpenFocus(): Promise<void> {
   border: 1px solid var(--c-hair);
   border-radius: 12px;
   box-shadow: 0 18px 40px -16px rgba(15, 23, 42, 0.28);
-  min-width: 168px;
+  min-width: 178px;
   z-index: 50;
 }
 
@@ -170,7 +194,13 @@ async function onOpenFocus(): Promise<void> {
   background: rgba(234, 88, 12, 0.08);
   color: var(--c-flame-2);
 }
-.menu-item .flag { font-size: 16px; line-height: 1; }
+.flag-item {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.08);
+}
 .menu-item .label { font-weight: 500; letter-spacing: -0.005em; }
 .menu-item .code-mono {
   font-family: var(--font-mono);
@@ -190,7 +220,8 @@ async function onOpenFocus(): Promise<void> {
 }
 
 @media (max-width: 560px) {
-  .lang-pill { padding: 5px 8px; gap: 5px; }
+  .lang-pill { padding: 5px 8px 5px 4px; gap: 6px; }
   .lang-pill .code { font-size: 11px; }
+  .flag-current { width: 16px; height: 16px; }
 }
 </style>

@@ -1,6 +1,6 @@
 {
   "app": {
-    "name": "claude burn rate",
+    "name": "Claude Burn Rate",
     "tagline": "ritmo semanal en vivo"
   },
   "header": {
@@ -276,6 +276,7 @@
     },
     "meta": "build by you · for you · shroomlife flavor",
     "resetLink": "Resetear app",
-    "repo": "GitHub Repo"
+    "repo": "GitHub Repo",
+    "disclaimer": "No es un producto oficial de Anthropic. Proyecto personal de shroomlife — no estamos afiliados con Anthropic, PBC. \"Claude\" y \"Anthropic\" son marcas de Anthropic, PBC."
   }
 }

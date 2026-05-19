@@ -1,7 +1,7 @@
 {
   "app": {
-    "name": "claude burn rate",
-    "tagline": "live weekly pace tracker"
+    "name": "Claude Burn Rate",
+    "tagline": "Live-Tempo-Tracker für deine Woche"
   },
   "header": {
     "openPalette": "Command palette öffnen"
@@ -55,34 +55,34 @@
     "snap": "📅 Reset auf 7 Tage ab jetzt setzen"
   },
   "pace": {
-    "usage": "Usage",
+    "usage": "Nutzung",
     "time": "Zeit",
-    "headroom": "Headroom",
-    "overshoot": "Overshoot",
-    "ariaBar": "Usage {usage}%, Zeit {time}%"
+    "headroom": "Puffer",
+    "overshoot": "Überschuss",
+    "ariaBar": "Nutzung {usage}%, Zeit {time}%"
   },
   "insight": {
-    "eyebrow": "Tomorrow Robin · Forecast",
+    "eyebrow": "Tomorrow Robin · Prognose",
     "reichtBis": "Reicht bis",
-    "forecast": "Forecast"
+    "forecast": "Prognose"
   },
   "metrics": {
     "resetIn": "Reset in",
-    "dailyBudget": "Daily Budget",
+    "dailyBudget": "Tagesbudget",
     "quotaLeft": "Quota übrig",
     "perDay": "% / Tag"
   },
   "controls": {
-    "weeklyReset": "Weekly Reset",
-    "weeklyUsage": "Weekly Usage",
+    "weeklyReset": "Wöchentlicher Reset",
+    "weeklyUsage": "Wöchentliche Nutzung",
     "weekFrom": "Woche ab {date}",
     "equalsTime": "= Zeit · {n}",
-    "sliderAria": "Weekly Usage Prozent"
+    "sliderAria": "Wöchentliche Nutzung in Prozent"
   },
   "nextTick": {
     "label": "Nächster Zeit-Tick",
     "countdown": "+1% in {time}",
-    "title": "Nächster Pace +1% in {time}"
+    "title": "Nächster Schritt +1% in {time}"
   },
   "status": {
     "exhausted": {
@@ -94,16 +94,16 @@
       "message": "Die Woche ist vorbei — frische Quota läuft an."
     },
     "preWeek": {
-      "label": "Pre-Week",
+      "label": "Vorwoche",
       "message": "Woche hat noch nicht gestartet — Reset-Datum prüfen."
     },
     "burn": {
       "label": "Feuer frei",
-      "message": "Massig Headroom — Vollgas drücken, Bro!"
+      "message": "Massig Puffer — Vollgas drücken, Bro!"
     },
     "cruise": {
-      "label": "Chill Pace",
-      "message": "Alles im Flow — pace passt perfekt."
+      "label": "Entspannt",
+      "message": "Alles im Flow — Tempo passt perfekt."
     },
     "careful": {
       "label": "Auge drauf",
@@ -117,10 +117,10 @@
   "tomorrow": {
     "exhausted": "Quota leer. Bis Reset chillen — oder Plan-Upgrade.",
     "fresh": "Frische Woche, jungfräuliche Quota. Volle Power.",
-    "tooEarly": "Zu früh für ne ehrliche Prognose. Komm in ein paar Stunden wieder.",
+    "tooEarly": "Zu früh für eine ehrliche Prognose. Komm in ein paar Stunden wieder.",
     "hits100WithLastSafe": "Wenn du so weitermachst: 100% am {day}. {lastSafe} wäre dein letzter Vollgastag.",
     "hits100": "Wenn du so weitermachst: 100% am {day}.",
-    "safe": "Bei aktueller Pace landest du bei {pct}%. Die Quota reicht locker."
+    "safe": "Bei aktuellem Tempo landest du bei {pct}%. Die Quota reicht locker."
   },
   "palette": {
     "search": "Action suchen…",
@@ -276,6 +276,7 @@
     },
     "meta": "build by you · for you · shroomlife flavor",
     "resetLink": "App zurücksetzen",
-    "repo": "GitHub Repo"
+    "repo": "GitHub Repo",
+    "disclaimer": "Kein offizielles Anthropic-Produkt. Privates Hobby-Projekt von shroomlife — wir sind nicht mit Anthropic, PBC verbunden. „Claude\" und „Anthropic\" sind Marken von Anthropic, PBC."
   }
 }

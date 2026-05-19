@@ -14,13 +14,19 @@ import es from './locales/es.json'
 export interface LocaleDef {
   code: string
   label: string
-  flag: string
+  /**
+   * ISO 3166-1 alpha-2 country code that maps to a circle-flags icon
+   * (`~icons/circle-flags/<flagCode>`). The icon component itself is
+   * looked up in LanguageSwitcher.vue — this stays a string so locale
+   * data remains JSON-serialisable and easy to extend.
+   */
+  flagCode: string
 }
 
 export const LOCALES: readonly LocaleDef[] = [
-  { code: 'de', label: 'Deutsch', flag: '🇩🇪' },
-  { code: 'en', label: 'English', flag: '🇬🇧' },
-  { code: 'es', label: 'Español', flag: '🇪🇸' },
+  { code: 'de', label: 'Deutsch', flagCode: 'de' },
+  { code: 'en', label: 'English', flagCode: 'gb' },
+  { code: 'es', label: 'Español', flagCode: 'es' },
 ] as const
 
 const STORAGE_KEY = 'burnRate:locale'

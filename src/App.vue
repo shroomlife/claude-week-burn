@@ -437,6 +437,7 @@ const modeClass = computed(() => `mode-${c.status.value.mode}`)
         · {{ $t('about.meta') }}
         · <button type="button" class="reset-link" @click="openReset">{{ $t('about.resetLink') }}</button>
       </p>
+      <p class="disclaimer">{{ $t('about.disclaimer') }}</p>
     </section>
   </main>
 </template>
@@ -553,6 +554,18 @@ main {
   font-weight: 500;
 }
 .meta-row { font-size: 12px; opacity: 0.85; }
+.disclaimer {
+  margin: 14px 0 0;
+  padding: 10px 13px;
+  font-size: 11px;
+  line-height: 1.55;
+  color: var(--c-mute);
+  background: rgba(15, 23, 42, 0.025);
+  border: 1px solid var(--c-hair);
+  border-radius: var(--r-card-sm);
+  letter-spacing: -0.003em;
+  text-wrap: pretty;
+}
 .reset-link {
   background: transparent;
   border: 0;
