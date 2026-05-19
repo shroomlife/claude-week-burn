@@ -16,18 +16,24 @@ function signIn(): void {
   void auth.startLogin()
 }
 
+const isBusy = computed(() =>
+  sync.status.value === 'bootstrapping' ||
+  sync.status.value === 'pulling' ||
+  sync.status.value === 'pushing',
+)
+
 const statusIcon = computed(() => {
-  switch (sync.status.value) {
-    case 'syncing': return IconSyncing
-    case 'error': return IconCloudWarn
-    case 'idle': return IconCloud
-    default: return IconCloud
-  }
+  if (isBusy.value) return IconSyncing
+  if (sync.status.value === 'error') return IconCloudWarn
+  return IconCloud
 })
 
 const statusTitle = computed(() => {
-  if (sync.status.value === 'syncing') return 'Synchronisiere…'
+  if (sync.status.value === 'bootstrapping') return 'Verbinde…'
+  if (sync.status.value === 'pulling') return 'Lade Stand…'
+  if (sync.status.value === 'pushing') return 'Speichere…'
   if (sync.status.value === 'error') return sync.errorMessage.value ?? 'Sync-Fehler'
+  if (sync.isDirty.value) return 'Änderungen werden gesynced…'
   if (sync.lastSyncedAt.value) {
     return `Letzter Sync: ${new Date(sync.lastSyncedAt.value).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}`
   }
@@ -115,16 +121,20 @@ const statusTitle = computed(() => {
   flex-shrink: 0;
 }
 .status-ind :deep(svg) { width: 12px; height: 12px; }
-.status-idle    { color: var(--c-pace-ahead); }
-.status-syncing { color: var(--c-flame-2); animation: spin 1.4s linear infinite; }
-.status-error   { color: var(--c-pace-behind); }
-.status-off     { color: var(--c-line); }
+.status-idle          { color: var(--c-pace-ahead); }
+.status-bootstrapping,
+.status-pulling,
+.status-pushing       { color: var(--c-flame-2); animation: spin 1.4s linear infinite; }
+.status-error         { color: var(--c-pace-behind); }
+.status-off           { color: var(--c-line); }
 
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
 
-:global(body.is-hidden) .status-syncing { animation-play-state: paused; }
+:global(body.is-hidden) .status-pulling,
+:global(body.is-hidden) .status-pushing,
+:global(body.is-hidden) .status-bootstrapping { animation-play-state: paused; }
 
 @media (max-width: 560px) {
   .login { max-width: 80px; }
