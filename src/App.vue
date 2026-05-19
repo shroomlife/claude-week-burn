@@ -18,6 +18,7 @@ import UpdateToast from './components/UpdateToast.vue'
 import InstallIosModal from './components/InstallIosModal.vue'
 import InstallCta from './components/InstallCta.vue'
 import OnboardingCard from './components/OnboardingCard.vue'
+import InitialSyncCard from './components/InitialSyncCard.vue'
 import ResetDialog from './components/ResetDialog.vue'
 import { useGitHubAuth } from './composables/useGitHubAuth'
 import { useGistSync } from './composables/useGistSync'
@@ -127,6 +128,26 @@ watch(() => c.status.value.mode, async (mode: Mode, old: Mode | undefined) => {
 const auth = useGitHubAuth()
 const sync = useGistSync()
 
+// Show the Initial-Sync overlay while we're authenticating OR doing the first
+// pull. Triggers on:
+//   - OAuth callback exchange (auth.phase === 'exchanging')
+//   - Boot with stored token but user not fetched yet
+//   - Authenticated but initialPullDone === false
+// Suppressed once the initial pull is done — subsequent pulls are silent.
+const showInitialSync = computed(() => {
+  if (auth.phase.value === 'exchanging') return true
+  if (auth.token.value && !auth.user.value) return true
+  if (auth.isAuthenticated.value && !sync.initialPullDone.value) return true
+  return false
+})
+
+const initialSyncPhase = computed<'connecting' | 'fetching' | 'error'>(() => {
+  if (sync.status.value === 'error' && !sync.initialPullDone.value) return 'error'
+  if (auth.phase.value === 'exchanging') return 'connecting'
+  if (auth.token.value && !auth.user.value) return 'connecting'
+  return 'fetching'
+})
+
 // Command Palette
 const paletteOpen = ref(false)
 function openPalette(): void { paletteOpen.value = true }
@@ -235,8 +256,17 @@ const modeClass = computed(() => `mode-${c.status.value.mode}`)
     />
 
     <transition name="boot" mode="out-in" appear>
+      <InitialSyncCard
+        v-if="showInitialSync"
+        key="sync"
+        :phase="initialSyncPhase"
+        :user="auth.user.value"
+        :error="sync.errorMessage.value"
+        @retry="() => { void sync.pullNow() }"
+      />
+
       <OnboardingCard
-        v-if="!burn.setupComplete.value"
+        v-else-if="!burn.setupComplete.value"
         key="onb"
         :reset-date="burn.resetDate.value"
         :usage-percent="burn.usagePercent.value"
