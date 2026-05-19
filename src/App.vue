@@ -27,7 +27,7 @@ import ResetDialog from './components/ResetDialog.vue'
 import { useGitHubAuth } from './composables/useGitHubAuth'
 import { useGistSync } from './composables/useGistSync'
 import { disablePersistedWrites } from './composables/usePersistedState'
-import { buildShareCardBlob } from './composables/useShareImage'
+import type { ShareCardData } from './composables/useShareImage'
 import type { Mode } from './types/burn'
 
 const { t, locale } = useI18n()
@@ -244,16 +244,14 @@ async function onSyncNow(): Promise<void> {
   }
 }
 
-// Share Modal state
+// Share Modal state — modal owns the canvas rendering + palette shuffle.
+// We only pass the live data + caption; the modal builds the blob itself
+// so the shuffle button can regenerate locally without round-tripping.
 const shareModalOpen = ref(false)
-const shareBlob = ref<Blob | null>(null)
+const shareCardData = ref<ShareCardData | null>(null)
 const shareCaption = ref('')
 
-async function shareBurnRate(): Promise<void> {
-  // Build caption + open the modal immediately. Image generation runs in
-  // the background; the modal shows its 'generating…' placeholder until
-  // the blob lands, then swaps in the preview. This is way nicer than
-  // silently waiting for the download to drop.
+function shareBurnRate(): void {
   shareCaption.value = t('share.text', {
     usage: burn.usagePercent.value,
     time: c.timePercent.value,
@@ -262,41 +260,26 @@ async function shareBurnRate(): Promise<void> {
     d: c.countdown.value.days,
     h: c.countdown.value.hours,
   })
-  shareBlob.value = null
-  shareModalOpen.value = true
-
-  try {
-    if (typeof document !== 'undefined' && document.fonts?.ready) {
-      await document.fonts.ready
-    }
-    const blob = await buildShareCardBlob({
-      usagePercent: burn.usagePercent.value,
-      timePercent: c.timePercent.value,
-      delta: c.delta.value,
-      remainingPercent: c.remainingPercent.value,
-      dailyBudget: c.dailyBudget.value,
-      countdownDays: c.countdown.value.days,
-      countdownHours: c.countdown.value.hours,
-      statusLabel: c.status.value.label,
-      brand: t('app.name'),
-      tagline: t('app.tagline'),
-      url: 'shroomlife.github.io/claude-week-burn',
-      locale: locale.value,
-    })
-    shareBlob.value = blob
-  } catch (err) {
-    console.warn('[share] image failed, falling back to text copy', err)
-    shareModalOpen.value = false
-    if (typeof navigator !== 'undefined' && navigator.clipboard) {
-      await navigator.clipboard.writeText(shareCaption.value)
-      pushToast(t('toast.copiedClipboard'))
-    }
+  shareCardData.value = {
+    usagePercent: burn.usagePercent.value,
+    timePercent: c.timePercent.value,
+    delta: c.delta.value,
+    remainingPercent: c.remainingPercent.value,
+    dailyBudget: c.dailyBudget.value,
+    countdownDays: c.countdown.value.days,
+    countdownHours: c.countdown.value.hours,
+    statusLabel: c.status.value.label,
+    brand: t('app.name'),
+    tagline: t('app.tagline'),
+    url: 'shroomlife.github.io/claude-week-burn',
+    locale: locale.value,
   }
+  shareModalOpen.value = true
 }
 
 function closeShareModal(): void {
   shareModalOpen.value = false
-  shareBlob.value = null
+  shareCardData.value = null
 }
 
 // App badge — debounced so a slider drag doesn't fire 30+ async calls/second
@@ -426,7 +409,7 @@ const modeClass = computed(() => `mode-${c.status.value.mode}`)
 
     <ShareModal
       :open="shareModalOpen"
-      :blob="shareBlob"
+      :card-data="shareCardData"
       :caption="shareCaption"
       @close="closeShareModal"
       @copied="pushToast(t('share.copied'), 'celebrate')"

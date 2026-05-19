@@ -21,6 +21,107 @@ export interface ShareCardData {
   locale: string
 }
 
+export interface GradientPalette {
+  /** Stable id for analytics / persistence; not shown to the user. */
+  id: string
+  /** Display name (English, used in tooltips if needed). */
+  name: string
+  /** 3 hex stops, top-left → middle → bottom-right of the canvas. */
+  stops: [string, string, string]
+  /** Aurora-blob accent colors layered on top in 'screen' blend mode. */
+  blobs: [string, string, string]
+}
+
+/**
+ * Curated palettes — every entry was eyeballed at 1200×630 for readable
+ * white text + good visual energy. Order matters only as the first-render
+ * default; the shuffle button picks a different one at random each click.
+ */
+export const GRADIENT_PALETTES: readonly GradientPalette[] = [
+  {
+    id: 'brand',
+    name: 'Brand',
+    stops: ['#fb923c', '#f43f5e', '#d946ef'],
+    blobs: ['rgba(255, 220, 150, 0.55)', 'rgba(255, 180, 200, 0.45)', 'rgba(220, 150, 255, 0.5)'],
+  },
+  {
+    id: 'sunset',
+    name: 'Sunset',
+    stops: ['#fbbf24', '#fb923c', '#dc2626'],
+    blobs: ['rgba(255, 230, 120, 0.55)', 'rgba(255, 200, 100, 0.4)', 'rgba(255, 130, 110, 0.45)'],
+  },
+  {
+    id: 'aurora',
+    name: 'Aurora',
+    stops: ['#34d399', '#22d3ee', '#a78bfa'],
+    blobs: ['rgba(160, 255, 220, 0.5)', 'rgba(170, 230, 255, 0.45)', 'rgba(200, 180, 255, 0.5)'],
+  },
+  {
+    id: 'ocean',
+    name: 'Ocean',
+    stops: ['#22d3ee', '#0891b2', '#1e40af'],
+    blobs: ['rgba(160, 240, 255, 0.5)', 'rgba(140, 200, 240, 0.45)', 'rgba(140, 170, 230, 0.5)'],
+  },
+  {
+    id: 'twilight',
+    name: 'Twilight',
+    stops: ['#7e22ce', '#3b82f6', '#06b6d4'],
+    blobs: ['rgba(210, 170, 255, 0.45)', 'rgba(160, 190, 255, 0.5)', 'rgba(140, 220, 240, 0.5)'],
+  },
+  {
+    id: 'candy',
+    name: 'Candy',
+    stops: ['#ec4899', '#a78bfa', '#3b82f6'],
+    blobs: ['rgba(255, 180, 220, 0.5)', 'rgba(220, 190, 255, 0.45)', 'rgba(170, 200, 255, 0.5)'],
+  },
+  {
+    id: 'lime',
+    name: 'Lime',
+    stops: ['#84cc16', '#22c55e', '#0d9488'],
+    blobs: ['rgba(220, 255, 160, 0.5)', 'rgba(170, 240, 200, 0.45)', 'rgba(150, 230, 220, 0.5)'],
+  },
+  {
+    id: 'peach',
+    name: 'Peach',
+    stops: ['#fed7aa', '#fb923c', '#ef4444'],
+    blobs: ['rgba(255, 230, 200, 0.55)', 'rgba(255, 200, 160, 0.45)', 'rgba(255, 170, 160, 0.5)'],
+  },
+  {
+    id: 'rose',
+    name: 'Rose',
+    stops: ['#fda4af', '#f43f5e', '#9f1239'],
+    blobs: ['rgba(255, 200, 210, 0.55)', 'rgba(255, 170, 190, 0.45)', 'rgba(240, 150, 170, 0.5)'],
+  },
+  {
+    id: 'mint',
+    name: 'Mint',
+    stops: ['#5eead4', '#22d3ee', '#3b82f6'],
+    blobs: ['rgba(190, 255, 240, 0.5)', 'rgba(170, 240, 250, 0.45)', 'rgba(170, 200, 255, 0.5)'],
+  },
+  {
+    id: 'violet',
+    name: 'Violet',
+    stops: ['#a78bfa', '#8b5cf6', '#6366f1'],
+    blobs: ['rgba(220, 200, 255, 0.5)', 'rgba(200, 180, 255, 0.45)', 'rgba(180, 180, 255, 0.5)'],
+  },
+  {
+    id: 'fire',
+    name: 'Fire',
+    stops: ['#facc15', '#f97316', '#b91c1c'],
+    blobs: ['rgba(255, 240, 150, 0.55)', 'rgba(255, 190, 120, 0.45)', 'rgba(255, 130, 120, 0.5)'],
+  },
+] as const
+
+/** Pick a random palette that's NOT the one passed in. */
+export function nextPalette(current?: GradientPalette): GradientPalette {
+  if (GRADIENT_PALETTES.length <= 1) return GRADIENT_PALETTES[0]!
+  let pick = GRADIENT_PALETTES[Math.floor(Math.random() * GRADIENT_PALETTES.length)]!
+  while (current && pick.id === current.id) {
+    pick = GRADIENT_PALETTES[Math.floor(Math.random() * GRADIENT_PALETTES.length)]!
+  }
+  return pick
+}
+
 const CARD_W = 1200
 const CARD_H = 630
 
@@ -71,8 +172,15 @@ function roundedRect(
  * Draws a single share card and returns a PNG Blob. Caller is responsible
  * for awaiting document.fonts.ready before this if it wants the brand fonts
  * (Outfit / JetBrains Mono) rather than system-ui fallbacks.
+ *
+ * @param palette optional gradient palette; defaults to the brand palette
+ *                (orange → pink → magenta). Pass a value from
+ *                GRADIENT_PALETTES to render in a different vibe.
  */
-export async function buildShareCardBlob(data: ShareCardData): Promise<Blob> {
+export async function buildShareCardBlob(
+  data: ShareCardData,
+  palette: GradientPalette = GRADIENT_PALETTES[0]!,
+): Promise<Blob> {
   const canvas = document.createElement('canvas')
   canvas.width = CARD_W
   canvas.height = CARD_H
@@ -82,19 +190,19 @@ export async function buildShareCardBlob(data: ShareCardData): Promise<Blob> {
   // awaits below (TS loses control-flow narrowing across async boundaries).
   const ctx: CanvasRenderingContext2D = maybeCtx
 
-  // === Background — main warm gradient =================================
+  // === Background — main gradient from palette ==========================
   const bg = ctx.createLinearGradient(0, 0, CARD_W, CARD_H)
-  bg.addColorStop(0, '#fb923c')
-  bg.addColorStop(0.55, '#f43f5e')
-  bg.addColorStop(1, '#d946ef')
+  bg.addColorStop(0, palette.stops[0])
+  bg.addColorStop(0.55, palette.stops[1])
+  bg.addColorStop(1, palette.stops[2])
   ctx.fillStyle = bg
   ctx.fillRect(0, 0, CARD_W, CARD_H)
 
-  // Subtle aurora highlights for depth (screen blending).
+  // Subtle aurora highlights for depth (screen blending) — palette-aware.
   ctx.globalCompositeOperation = 'screen'
-  drawBlob(ctx, 180, 120, 320, 'rgba(255, 220, 150, 0.55)')
-  drawBlob(ctx, 1020, 80, 280, 'rgba(255, 180, 200, 0.45)')
-  drawBlob(ctx, 950, 540, 360, 'rgba(220, 150, 255, 0.5)')
+  drawBlob(ctx, 180, 120, 320, palette.blobs[0])
+  drawBlob(ctx, 1020, 80, 280, palette.blobs[1])
+  drawBlob(ctx, 950, 540, 360, palette.blobs[2])
   ctx.globalCompositeOperation = 'source-over'
 
   // === Logo + brand wordmark ==========================================
@@ -103,7 +211,19 @@ export async function buildShareCardBlob(data: ShareCardData): Promise<Blob> {
     const base = (typeof document !== 'undefined' ? document.baseURI : '/')
     const logoUrl = new URL('logo.svg', base).toString()
     const logo = await loadImage(logoUrl)
-    ctx.drawImage(logo, 60, 60, 88, 88)
+    // Clip to a rounded-square so the logo sits like a proper iOS-style
+    // app icon, regardless of any padding the source SVG happens to have
+    // (and matches the look we ship for PWA icons). Save/restore brackets
+    // keep the clip from leaking into later drawImage / fillText calls.
+    const logoX = 60
+    const logoY = 60
+    const logoSize = 88
+    const logoRadius = 22
+    ctx.save()
+    roundedRect(ctx, logoX, logoY, logoSize, logoSize, logoRadius)
+    ctx.clip()
+    ctx.drawImage(logo, logoX, logoY, logoSize, logoSize)
+    ctx.restore()
   } catch {
     // logo missing — skip silently. Wordmark + content carry the brand.
   }

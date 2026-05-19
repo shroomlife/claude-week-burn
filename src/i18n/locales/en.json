@@ -300,6 +300,7 @@
     "copy": "Copy",
     "copied": "Image copied to clipboard ✨",
     "generating": "Generating image…",
+    "shuffle": "Try another gradient",
     "close": "Close"
   },
   "about": {

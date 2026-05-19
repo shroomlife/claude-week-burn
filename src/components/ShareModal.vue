@@ -5,11 +5,19 @@ import IconDownload from '~icons/ph/download-simple-bold'
 import IconShare from '~icons/ph/share-network'
 import IconCopy from '~icons/ph/copy'
 import IconImage from '~icons/ph/image'
+import IconShuffle from '~icons/ph/shuffle-bold'
+import {
+  buildShareCardBlob,
+  GRADIENT_PALETTES,
+  nextPalette,
+  type ShareCardData,
+  type GradientPalette,
+} from '../composables/useShareImage'
 
 const props = defineProps<{
   open: boolean
-  /** Blob of the generated PNG. Null while it's still being built. */
-  blob: Blob | null
+  /** Live data the canvas drawer needs. Null when modal isn't actively open. */
+  cardData: ShareCardData | null
   /** Caption/text that goes with the image when sharing. */
   caption: string
 }>()
@@ -19,41 +27,62 @@ const emit = defineEmits<{
   (e: 'copied'): void
 }>()
 
+const blob = ref<Blob | null>(null)
 const previewUrl = ref<string | null>(null)
+const generating = ref(false)
+const palette = ref<GradientPalette>(GRADIENT_PALETTES[0]!)
 
-watch(
-  () => props.blob,
-  (b) => {
-    if (previewUrl.value) {
-      URL.revokeObjectURL(previewUrl.value)
-      previewUrl.value = null
+async function regenerate(): Promise<void> {
+  if (!props.cardData) return
+  generating.value = true
+  try {
+    if (typeof document !== 'undefined' && document.fonts?.ready) {
+      await document.fonts.ready
     }
-    if (b) previewUrl.value = URL.createObjectURL(b)
-  },
-  { immediate: true },
-)
+    const next = await buildShareCardBlob(props.cardData, palette.value)
+    blob.value = next
+    if (previewUrl.value) URL.revokeObjectURL(previewUrl.value)
+    previewUrl.value = URL.createObjectURL(next)
+  } catch (err) {
+    console.warn('[share-modal] canvas build failed', err)
+  } finally {
+    generating.value = false
+  }
+}
 
+// Open → render immediately. Close → release the blob URL so the GC can
+// reclaim the canvas-derived bitmap (these are 1200x630 PNGs, not free).
 watch(
   () => props.open,
   (open) => {
-    if (!open && previewUrl.value) {
-      URL.revokeObjectURL(previewUrl.value)
-      previewUrl.value = null
+    if (open) {
+      // Reset to default palette on each open — the shuffle is per-session.
+      palette.value = GRADIENT_PALETTES[0]!
+      blob.value = null
+      void regenerate()
+    } else {
+      if (previewUrl.value) {
+        URL.revokeObjectURL(previewUrl.value)
+        previewUrl.value = null
+      }
+      blob.value = null
     }
   },
 )
 
-// Detect native share-files capability so we only show the Share button
-// when it actually does something. Safari macOS has navigator.share but
-// rejects file payloads — canShare gates that.
+function onShuffle(): void {
+  palette.value = nextPalette(palette.value)
+  void regenerate()
+}
+
 const canShareFiles = computed(() => {
-  if (!props.blob) return false
+  if (!blob.value) return false
   const nav = navigator as Navigator & {
     canShare?: (data: ShareData) => boolean
   }
   if (typeof nav.share !== 'function' || typeof nav.canShare !== 'function') return false
   try {
-    const file = new File([props.blob], 'card.png', { type: 'image/png' })
+    const file = new File([blob.value], 'card.png', { type: 'image/png' })
     return nav.canShare({ files: [file] })
   } catch {
     return false
@@ -73,8 +102,8 @@ function fileName(): string {
 }
 
 async function onDownload(): Promise<void> {
-  if (!props.blob) return
-  const url = URL.createObjectURL(props.blob)
+  if (!blob.value) return
+  const url = URL.createObjectURL(blob.value)
   const a = document.createElement('a')
   a.href = url
   a.download = fileName()
@@ -85,8 +114,8 @@ async function onDownload(): Promise<void> {
 }
 
 async function onShare(): Promise<void> {
-  if (!props.blob) return
-  const file = new File([props.blob], fileName(), { type: 'image/png' })
+  if (!blob.value) return
+  const file = new File([blob.value], fileName(), { type: 'image/png' })
   try {
     await (navigator as Navigator).share({
       files: [file],
@@ -101,10 +130,10 @@ async function onShare(): Promise<void> {
 }
 
 async function onCopy(): Promise<void> {
-  if (!props.blob) return
+  if (!blob.value) return
   try {
     await navigator.clipboard.write([
-      new ClipboardItem({ 'image/png': props.blob }),
+      new ClipboardItem({ 'image/png': blob.value }),
     ])
     emit('copied')
   } catch (err) {
@@ -146,9 +175,21 @@ watch(() => props.open, (open) => {
             <img
               v-else
               :src="previewUrl"
+              :class="{ regenerating: generating }"
               alt="Burn rate share card"
               class="preview"
             />
+            <button
+              type="button"
+              class="shuffle-btn"
+              :disabled="generating"
+              :title="$t('share.shuffle')"
+              :aria-label="$t('share.shuffle')"
+              @click="onShuffle"
+            >
+              <IconShuffle />
+              <span class="shuffle-label">{{ palette.name }}</span>
+            </button>
           </div>
 
           <p class="caption">{{ caption }}</p>
@@ -268,7 +309,35 @@ watch(() => props.open, (open) => {
   width: 100%;
   height: 100%;
   object-fit: contain;
+  transition: opacity 0.18s ease;
 }
+.preview.regenerating { opacity: 0.55; }
+
+.shuffle-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px 6px 8px;
+  background: rgba(15, 23, 42, 0.78);
+  color: white;
+  border: 0;
+  border-radius: var(--r-pill);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 4px 14px -4px rgba(15, 23, 42, 0.35);
+  transition: transform 0.15s var(--ease-spring), background 0.18s ease;
+}
+.shuffle-btn:hover:not(:disabled) { background: rgba(15, 23, 42, 0.92); transform: translateY(-1px); }
+.shuffle-btn:disabled { opacity: 0.6; cursor: progress; }
+.shuffle-btn :deep(svg) { width: 14px; height: 14px; }
+.shuffle-label { font-family: var(--font-sans); }
 .preview-placeholder {
   position: absolute;
   inset: 0;
