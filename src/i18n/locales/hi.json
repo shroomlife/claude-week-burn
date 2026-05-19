@@ -1,0 +1,321 @@
+{
+  "app": {
+    "name": "Claude Burn Rate",
+    "tagline": "लाइव वीकली पेस ट्रैकर"
+  },
+  "header": {
+    "openPalette": "कमांड पैलेट खोलो"
+  },
+  "lang": {
+    "switcher": "भाषा"
+  },
+  "auth": {
+    "signIn": "Sign in",
+    "signingIn": "Sign in हो रहा है…",
+    "ariaSignIn": "GitHub से Sign in करो",
+    "tooltip": {
+      "bootstrapping": "कनेक्ट हो रहा है…",
+      "pulling": "स्टेट लोड हो रहा है…",
+      "pushing": "सेव हो रहा है…",
+      "error": "Sync error",
+      "dirty": "बदलाव sync हो रहे हैं…",
+      "lastSync": "आख़िरी sync: {time}",
+      "synced": "Synced"
+    }
+  },
+  "onboarding": {
+    "title": "Claude Burn Rate में स्वागत है",
+    "intro": "बस दो क्विक चीज़ें और तुम सेट हो। कोई अकाउंट चाहिए नहीं, सब कुछ लोकल रहता है। पहले से किसी और डिवाइस पर sign in हो? ऊपर Sign in दबाओ, हम तुम्हारी स्टेट पुल कर लेंगे।",
+    "step1": {
+      "title": "तुम्हारा वीकली reset कब है?",
+      "hint": "जब तुम्हारा quota वापस 0 पर रीसेट होता है।"
+    },
+    "step2": {
+      "title": "इस हफ़्ते कितना जला चुके हो?",
+      "hint": "% में। ज़्यादातर plans ये Claude Code की status line में दिखाते हैं।"
+    },
+    "cta": "चलो शुरू करें"
+  },
+  "initialSync": {
+    "title": {
+      "connecting": "GitHub से कनेक्ट हो रहा है",
+      "fetching": "तुम्हारी स्टेट लोड हो रही है",
+      "error": "Sync फ़ेल हो गया"
+    },
+    "subtitle": {
+      "connecting": "रुको, sign in हो रहे हो…",
+      "fetching": "तुम्हारी प्राइवेट gist से लेटेस्ट वैल्यू ला रहे हैं।",
+      "error": "GitHub तक नहीं पहुँच पाए।"
+    },
+    "retry": "फिर से कोशिश करो"
+  },
+  "preWeek": {
+    "title": "तुम्हारा reset {days} दिन दूर है — सही लग रहा है?",
+    "explanation": "Claude rolling 7-day window पर चलता है। तुम्हारी डेट से हफ़्ता {date} को शुरू होगा। तब तक \"time elapsed\" 0% पर अटका रहेगा और pace बेवजह लाल दिखेगी।",
+    "snap": "📅 Reset को अभी से 7 दिन पर सेट करो"
+  },
+  "pace": {
+    "usage": "Usage",
+    "time": "Time",
+    "headroom": "Headroom",
+    "overshoot": "Overshoot",
+    "ariaBar": "Usage {usage}%, Time {time}%"
+  },
+  "insight": {
+    "eyebrow": "Tomorrow Robin · Forecast",
+    "reichtBis": "पहुँचेगा",
+    "forecast": "Forecast"
+  },
+  "metrics": {
+    "resetIn": "Reset में",
+    "dailyBudget": "Daily Budget",
+    "quotaLeft": "Quota बाक़ी",
+    "perDay": "% / दिन"
+  },
+  "controls": {
+    "weeklyReset": "Weekly Reset",
+    "weeklyUsage": "Weekly Usage",
+    "weekFrom": "{date} से हफ़्ता",
+    "equalsTime": "= Time · {n}",
+    "sliderAria": "Weekly usage प्रतिशत"
+  },
+  "nextTick": {
+    "label": "अगला time-tick",
+    "countdown": "{time} में +1%",
+    "title": "अगला pace +1% {time} में"
+  },
+  "status": {
+    "exhausted": {
+      "label": "Maxed out",
+      "message": "Quota ख़त्म — reset का wait करो या plan upgrade करो।"
+    },
+    "resetNow": {
+      "label": "Reset live",
+      "message": "हफ़्ता ख़त्म — फ़्रेश quota आ रहा है।"
+    },
+    "preWeek": {
+      "label": "Pre-week",
+      "message": "हफ़्ता अभी शुरू ही नहीं हुआ — reset date दोबारा चेक करो।"
+    },
+    "burn": {
+      "label": "Send it",
+      "message": "ख़ूब headroom है — फ़ुल थ्रॉटल चलाओ, भाई!"
+    },
+    "cruise": {
+      "label": "Chill pace",
+      "message": "सब flow में है — pace बिल्कुल फिट है।"
+    },
+    "careful": {
+      "label": "Watch it",
+      "message": "थोड़ा गरम है — ब्रेक हल्के से दबाओ।"
+    },
+    "save": {
+      "label": "Save mode",
+      "message": "बहुत तेज़ जल रहा है — अभी से चालाकी से बचाना शुरू करो!"
+    }
+  },
+  "tomorrow": {
+    "exhausted": "Quota ख़त्म। Reset तक चिल करो — या plan upgrade करो।",
+    "fresh": "फ़्रेश हफ़्ता, untouched quota। फ़ुल पावर।",
+    "tooEarly": "Honest forecast के लिए अभी बहुत जल्दी है। कुछ घंटे बाद आना।",
+    "hits100WithLastSafe": "ऐसे चलते रहे तो: {day} को 100%। {lastSafe} तुम्हारा आख़िरी फ़ुल-थ्रॉटल दिन होगा।",
+    "hits100": "ऐसे चलते रहे तो: {day} को 100%।",
+    "safe": "इस pace पर तुम {pct}% पर लैंड करोगे। Quota आराम से चलेगा।"
+  },
+  "palette": {
+    "search": "एक्शन ढूँढो…",
+    "empty": "कोई एक्शन नहीं मिला।",
+    "footNav": "Navigate",
+    "footSelect": "Select",
+    "footClose": "Close",
+    "ariaLabel": "Command palette",
+    "actions": {
+      "snap": {
+        "title": "Reset को अभी से 7 दिन पर सेट करो",
+        "hint": "तुम्हारी week-end डेट को ठीक 7 दिन आगे snap कर देता है।"
+      },
+      "sync": {
+        "title": "Usage = Time",
+        "hint": "Usage slider को अभी elapsed time पर सेट कर देता है।"
+      },
+      "newWeek": {
+        "title": "नया हफ़्ता शुरू करो",
+        "hint": "Usage को 0% पर सेट करता है। Reset date वैसी ही रहती है।"
+      },
+      "share": {
+        "title": "Burn rate share करो",
+        "hint": "तुम्हारी currrent स्टेट को text कार्ड की तरह share करता है।"
+      },
+      "syncNow": {
+        "title": "अभी sync करो",
+        "hint": "तुम्हारी current स्टेट को sync gist पर तुरंत push करता है।"
+      },
+      "logout": {
+        "title": "Sign out",
+        "hint": "GitHub token लोकली डिलीट करो। Sync रुक जाएगा; localStorage रहेगा।"
+      },
+      "signIn": {
+        "title": "GitHub से Sign in",
+        "hint": "Private gist के ज़रिए cross-device sync enable करता है (scope: gist)।"
+      },
+      "reset": {
+        "title": "App reset करो",
+        "hint": "सारा local data wipe करके onboarding से शुरू करता है।"
+      }
+    }
+  },
+  "reset": {
+    "title": "App reset करें?",
+    "close": "Close",
+    "lead": "इस डिवाइस का सारा local data डिलीट हो जाएगा। App फिर से onboarding से शुरू होगी, जैसे पहली बार आए हो।",
+    "items": {
+      "resetDate": "Reset date",
+      "usage": "Current usage",
+      "onboarding": "Onboarding marker",
+      "github": "GitHub token + gist link"
+    },
+    "warn": "तुम @{login} के तौर पर sign in हो। हम तुम्हें sign out कर देंगे। github.com पर तुम्हारी sync gist वहीं रहेगी — चाहो तो मैन्युअली डिलीट कर सकते हो।",
+    "cancel": "Cancel",
+    "confirm": "Reset"
+  },
+  "install": {
+    "ctaApp": "App की तरह install करो",
+    "ctaIos": "iPhone पर जोड़ो",
+    "subline": "Homescreen शॉर्टकट · offline चलता है · कोई trackers नहीं",
+    "ariaApp": "App install करो",
+    "ios": {
+      "title": "iPhone पर जोड़ो",
+      "lead": "Claude Burn Rate को होम स्क्रीन पर जोड़ लो, ये असली app की तरह काम करेगा। क्विक एक्सेस, अपना आइकन, offline भी चलता है।",
+      "step1Text": "Safari में नीचे Share आइकन टैप करो",
+      "step1Hint": "(ऊपर एरो वाला स्क्वायर)",
+      "step2Text": "\"Add to Home Screen\" चुनो",
+      "step2Hint": "कभी-कभी थोड़ा नीचे लिस्ट में होता है",
+      "step3Text": "ऊपर दाईं तरफ़ \"Add\" टैप करो",
+      "step3Hint": "हो गया — app तुम्हारी होम स्क्रीन पर है",
+      "footnote": "सिर्फ़ Safari में काम करता है। iOS पर Chrome ये support नहीं करता।"
+    }
+  },
+  "toast": {
+    "updateAvailable": "नया वर्ज़न आ गया ✨",
+    "reload": "Reload",
+    "updating": "अपडेट लोड हो रहा है…",
+    "loggedIn": "@{login} के तौर पर sign in",
+    "syncError": "Sync error",
+    "resetSet": "Reset 7 दिन पर सेट",
+    "usageEqualsTime": "Usage = Time",
+    "newWeekStarted": "नया हफ़्ता — usage reset",
+    "syncStarted": "Sync हो रहा है…",
+    "syncDone": "Synced ✨",
+    "syncFailed": "Sync फ़ेल",
+    "loggedOut": "Sign out हो गए",
+    "copiedClipboard": "Clipboard पर कॉपी हो गया",
+    "rolloverSimple": "फ़्रेश हफ़्ता — quota 0 पर reset",
+    "rolloverGap": "तुम कुछ देर दूर थे — {weeks} हफ़्ते skip हुए, फ़्रेश quota लाइव है।",
+    "shared": "Shared ✨",
+    "downloaded": "Image डाउनलोड हो गई ✨"
+  },
+  "exhausted": {
+    "title": "Quota ख़त्म 🪫",
+    "subtitle": "Weekly Claude quota पूरा maxed out।",
+    "countdownLabel": "Reset में",
+    "footnote": "तब तक Claude Code तुम्हारे account पर pause है।",
+    "subFootnote": "Reset day {date} {time} पर तुम्हारी refresh line है।"
+  },
+  "account": {
+    "title": "Account",
+    "connectedAs": "इस तरह connected",
+    "profileLink": "GitHub पर प्रोफ़ाइल",
+    "gistLink": "Sync gist खोलो",
+    "lastSync": "आख़िरी sync",
+    "lastSyncNever": "अभी तक sync नहीं हुआ",
+    "syncNow": "अभी sync करो",
+    "logout": "Sign out",
+    "close": "Close",
+    "status": {
+      "off": "Connected नहीं",
+      "bootstrapping": "कनेक्ट हो रहा है…",
+      "pulling": "स्टेट लोड हो रही है…",
+      "pushing": "सेव हो रहा है…",
+      "idle": "Live कनेक्शन",
+      "error": "Sync error"
+    },
+    "device": "Device",
+    "deviceLocalOnly": "अगले sync तक ये डिवाइस तुम्हारी local स्टेट दिखाता है।",
+    "dirtyNotice": "Local बदलाव sync होने वाले हैं…"
+  },
+  "stepper": {
+    "groupAria": "Usage adjust करो",
+    "minusAria": "Usage माइनस 1",
+    "plusAria": "Usage प्लस 1"
+  },
+  "quickSet": {
+    "title": "Usage को {target}% पर सेट करें?",
+    "body": "Current वैल्यू: {current}%. {target}% से overwrite हो जाएगा। पक्का?",
+    "cancel": "Cancel",
+    "confirm": "Set"
+  },
+  "tz": {
+    "title": "Timezone",
+    "subtitle": "एक चुनो या ब्राउज़र का default यूज़ करो।",
+    "search": "ढूँढो…",
+    "useAuto": "Browser default",
+    "autoNote": "Auto-detected: {tz}",
+    "currentLabel": "Active",
+    "noResults": "कोई timezone नहीं मिला।",
+    "cancel": "Cancel",
+    "save": "Apply",
+    "editAria": "Timezone एडिट करो"
+  },
+  "weekStart": {
+    "title": "ये हफ़्ता कब शुरू हुआ?",
+    "subtitle": "Reset date को छुए बिना current हफ़्ते की शुरुआत बदलता है। Auto behavior अगले rollover पर वापस आ जाएगा।",
+    "useAuto": "Auto (reset से 7 दिन पहले)",
+    "autoNote": "Auto वैल्यू: {date}",
+    "cancel": "Cancel",
+    "save": "Apply",
+    "editAria": "Week start एडिट करो"
+  },
+  "datepicker": {
+    "ariaLabel": "Date & time चुनो",
+    "presets": {
+      "today22": "आज 22:00",
+      "tomorrow9": "कल 09:00",
+      "nextMonday": "अगला Mon",
+      "in7days": "7 दिन में"
+    },
+    "prevMonth": "पिछला महीना",
+    "nextMonth": "अगला महीना",
+    "hourMinus": "घंटा -1",
+    "hourPlus": "घंटा +1",
+    "minuteMinus": "मिनट -15",
+    "minutePlus": "मिनट +15"
+  },
+  "share": {
+    "title": "Claude Burn Rate",
+    "text": "🔋 {usage}% used · {time}% time · {sign}{delta}% headroom · Reset in {d}d {h}h",
+    "modalTitle": "तुम्हारी स्टेट, share के लिए तैयार",
+    "modalSubtitle": "सेव करो या share करो।",
+    "download": "Download",
+    "shareNative": "Share",
+    "copy": "Copy",
+    "copied": "Image clipboard पर कॉपी हो गई ✨",
+    "generating": "Image बन रही है…",
+    "close": "Close"
+  },
+  "about": {
+    "heading": "App के बारे में",
+    "intro": "{name} तुम्हारे weekly {claudeLink} quota को ट्रैक करता है। अपनी reset date और current usage डालो, फिर लाइव देखो कितना बाक़ी है, इस pace पर daily budget कैसा दिखता है, और weekend तक पहुँचोगे या नहीं। Free।",
+    "localNote": "Local-first. Default में कोई अकाउंट नहीं चाहिए, तुम्हारी वैल्यू सिर्फ़ तुम्हारे localStorage में रहती हैं, कोई trackers नहीं। Cross-device sync चाहिए? GitHub से Sign in करो और तुम्हारी स्टेट तुम्हारे ही GitHub account की प्राइवेट gist में जाती है। PWA की तरह installable, सीधा मोबाइल के homescreen पर।",
+    "keywords": {
+      "tracker": "Claude Code Usage Tracker",
+      "weekly": "Claude Pro Weekly Limit",
+      "calculator": "Anthropic Quota Calculator",
+      "rolling": "Rolling 7-Day Burn Rate",
+      "openSource": "Open Source · MIT · Vue 3 PWA"
+    },
+    "meta": "build by you · for you · shroomlife flavor",
+    "resetLink": "App reset करो",
+    "repo": "GitHub Repo",
+    "disclaimer": "ये कोई official Anthropic प्रोडक्ट नहीं है। shroomlife का personal hobby project — हम Anthropic, PBC से affiliated नहीं हैं। \"Claude\" और \"Anthropic\" Anthropic, PBC के trademarks हैं।"
+  }
+}

@@ -1,0 +1,321 @@
+{
+  "app": {
+    "name": "Claude Burn Rate",
+    "tagline": "实时周用量追踪器"
+  },
+  "header": {
+    "openPalette": "打开命令面板"
+  },
+  "lang": {
+    "switcher": "语言"
+  },
+  "auth": {
+    "signIn": "Sign in",
+    "signingIn": "登录中…",
+    "ariaSignIn": "用 GitHub 登录",
+    "tooltip": {
+      "bootstrapping": "连接中…",
+      "pulling": "获取状态中…",
+      "pushing": "保存中…",
+      "error": "Sync 出错",
+      "dirty": "同步更改中…",
+      "lastSync": "上次 sync：{time}",
+      "synced": "已同步"
+    }
+  },
+  "onboarding": {
+    "title": "欢迎来到 Claude Burn Rate",
+    "intro": "两件小事搞定就行了。不用注册，所有数据都在本地。已经在别的设备 sign in 了？点上面的 Sign in，我们把状态拉过来。",
+    "step1": {
+      "title": "你的周 reset 是什么时候？",
+      "hint": "就是 quota 归零的那一刻。"
+    },
+    "step2": {
+      "title": "这周烧了多少？",
+      "hint": "百分比。多数 plan 在 Claude Code 的状态栏里能看到。"
+    },
+    "cta": "走起"
+  },
+  "initialSync": {
+    "title": {
+      "connecting": "连接 GitHub 中",
+      "fetching": "加载你的状态",
+      "error": "Sync 失败"
+    },
+    "subtitle": {
+      "connecting": "稍等下，正在帮你 sign in…",
+      "fetching": "从你的私有 gist 拉取最新值。",
+      "error": "连不上 GitHub。"
+    },
+    "retry": "再试一次"
+  },
+  "preWeek": {
+    "title": "你的 reset 还有 {days} 天 — 这个对吗？",
+    "explanation": "Claude 用的是 7 天滚动窗口。按你的日期，这周从 {date} 开始。在那之前\"已经过去的时间\"会卡在 0%，节奏看起来红得有点冤。",
+    "snap": "📅 把 reset 设为从现在起 7 天"
+  },
+  "pace": {
+    "usage": "用量",
+    "time": "时间",
+    "headroom": "余量",
+    "overshoot": "超出",
+    "ariaBar": "用量 {usage}%，时间 {time}%"
+  },
+  "insight": {
+    "eyebrow": "Tomorrow Robin · 预测",
+    "reichtBis": "将到达",
+    "forecast": "预测"
+  },
+  "metrics": {
+    "resetIn": "Reset 倒计时",
+    "dailyBudget": "每日预算",
+    "quotaLeft": "Quota 剩余",
+    "perDay": "% / 天"
+  },
+  "controls": {
+    "weeklyReset": "周 Reset",
+    "weeklyUsage": "周用量",
+    "weekFrom": "{date} 起的这周",
+    "equalsTime": "= 时间 · {n}",
+    "sliderAria": "周用量百分比"
+  },
+  "nextTick": {
+    "label": "下一次时间跳",
+    "countdown": "{time} 后 +1%",
+    "title": "下一次节奏 +1%，{time}"
+  },
+  "status": {
+    "exhausted": {
+      "label": "已经满档",
+      "message": "Quota 空了 — 等 reset 或升级 plan 吧。"
+    },
+    "resetNow": {
+      "label": "Reset 进行中",
+      "message": "这周结束了 — 新 quota 正在到位。"
+    },
+    "preWeek": {
+      "label": "周还没开始",
+      "message": "这周还没开始呢 — 检查下 reset 日期。"
+    },
+    "burn": {
+      "label": "冲就完了",
+      "message": "余量充足 — 油门到底，兄弟！"
+    },
+    "cruise": {
+      "label": "巡航节奏",
+      "message": "全在 flow 里 — 节奏刚刚好。"
+    },
+    "careful": {
+      "label": "悠着点",
+      "message": "有点热 — 轻踩刹车。"
+    },
+    "save": {
+      "label": "省着用",
+      "message": "烧太快了 — 现在就要聪明地省着用！"
+    }
+  },
+  "tomorrow": {
+    "exhausted": "Quota 空了。等 reset — 或者升级 plan。",
+    "fresh": "新的一周，全新 quota。火力全开。",
+    "tooEarly": "现在做诚实预测还太早。几个小时后再来。",
+    "hits100WithLastSafe": "这么下去：{day} 就 100%。{lastSafe} 是你最后能全开的一天。",
+    "hits100": "这么下去：{day} 就 100%。",
+    "safe": "按目前节奏你会停在 {pct}%。Quota 撑得住。"
+  },
+  "palette": {
+    "search": "搜索操作…",
+    "empty": "没找到操作。",
+    "footNav": "导航",
+    "footSelect": "选择",
+    "footClose": "关闭",
+    "ariaLabel": "命令面板",
+    "actions": {
+      "snap": {
+        "title": "把 reset 设为从现在起 7 天",
+        "hint": "把周末日期精确推到 7 天后。"
+      },
+      "sync": {
+        "title": "用量 = 时间",
+        "hint": "把用量滑块设到当前已经过的时间。"
+      },
+      "newWeek": {
+        "title": "开始新的一周",
+        "hint": "用量设为 0%。Reset 日期不变。"
+      },
+      "share": {
+        "title": "分享 burn rate",
+        "hint": "把当前状态作为文字卡片分享。"
+      },
+      "syncNow": {
+        "title": "立即 sync",
+        "hint": "把当前状态立刻 push 到你的 sync gist。"
+      },
+      "logout": {
+        "title": "Sign out",
+        "hint": "本地删除 GitHub token。Sync 停止；localStorage 保留。"
+      },
+      "signIn": {
+        "title": "用 GitHub 登录",
+        "hint": "通过私有 gist 启用跨设备 sync（scope：gist）。"
+      },
+      "reset": {
+        "title": "重置 app",
+        "hint": "清掉所有本地数据，从 onboarding 重新开始。"
+      }
+    }
+  },
+  "reset": {
+    "title": "重置 app？",
+    "close": "关闭",
+    "lead": "这个设备上的所有本地数据会被删掉。然后 app 会像首次访问一样从 onboarding 重新开始。",
+    "items": {
+      "resetDate": "Reset 日期",
+      "usage": "当前用量",
+      "onboarding": "Onboarding 标记",
+      "github": "GitHub token + gist 链接"
+    },
+    "warn": "你以 @{login} 身份 sign in 中。我们会帮你 sign out。github.com 上的 sync gist 会留着 — 想删的话可以自己去那儿手动删。",
+    "cancel": "取消",
+    "confirm": "重置"
+  },
+  "install": {
+    "ctaApp": "作为 app 安装",
+    "ctaIos": "添加到 iPhone",
+    "subline": "主屏快捷方式 · 离线可用 · 无 tracker",
+    "ariaApp": "安装 app",
+    "ios": {
+      "title": "添加到 iPhone",
+      "lead": "把 Claude Burn Rate 加到主屏，它就跟真 app 一样。快速访问、专属图标、离线可用。",
+      "step1Text": "在 Safari 里点底部的分享图标",
+      "step1Hint": "（带向上箭头的方块）",
+      "step2Text": "选择\"添加到主屏幕\"",
+      "step2Hint": "有时候在列表稍下面一点",
+      "step3Text": "点右上角的\"添加\"",
+      "step3Hint": "完成 — app 已经在主屏上了",
+      "footnote": "只在 Safari 里能用。iOS 的 Chrome 不支持。"
+    }
+  },
+  "toast": {
+    "updateAvailable": "新版本来了 ✨",
+    "reload": "重新加载",
+    "updating": "加载更新中…",
+    "loggedIn": "以 @{login} 身份 sign in",
+    "syncError": "Sync 出错",
+    "resetSet": "Reset 设为 7 天",
+    "usageEqualsTime": "用量 = 时间",
+    "newWeekStarted": "新的一周 — 用量已 reset",
+    "syncStarted": "同步中…",
+    "syncDone": "已同步 ✨",
+    "syncFailed": "Sync 失败",
+    "loggedOut": "已 sign out",
+    "copiedClipboard": "已复制到剪贴板",
+    "rolloverSimple": "新的一周 — Quota 归零",
+    "rolloverGap": "你离开了一阵 — 跳过了 {weeks} 周，新 quota 已上线。",
+    "shared": "已分享 ✨",
+    "downloaded": "图片已下载 ✨"
+  },
+  "exhausted": {
+    "title": "Quota 空了 🪫",
+    "subtitle": "周 Claude quota 已全满。",
+    "countdownLabel": "Reset 倒计时",
+    "footnote": "在那之前你账号下的 Claude Code 暂停使用。",
+    "subFootnote": "Reset 日 {date} {time} 是你的刷新线。"
+  },
+  "account": {
+    "title": "账户",
+    "connectedAs": "已连接为",
+    "profileLink": "GitHub 上的资料",
+    "gistLink": "打开 sync gist",
+    "lastSync": "上次 sync",
+    "lastSyncNever": "还没 sync 过",
+    "syncNow": "立即 sync",
+    "logout": "Sign out",
+    "close": "关闭",
+    "status": {
+      "off": "未连接",
+      "bootstrapping": "连接中…",
+      "pulling": "获取状态中…",
+      "pushing": "保存中…",
+      "idle": "实时连接",
+      "error": "Sync 出错"
+    },
+    "device": "设备",
+    "deviceLocalOnly": "这个设备在下次 sync 之前显示你的本地状态。",
+    "dirtyNotice": "本地更改即将同步…"
+  },
+  "stepper": {
+    "groupAria": "调整用量",
+    "minusAria": "用量 -1",
+    "plusAria": "用量 +1"
+  },
+  "quickSet": {
+    "title": "把用量设为 {target}%？",
+    "body": "当前值：{current}%。会被覆盖为 {target}%。确定？",
+    "cancel": "取消",
+    "confirm": "设置"
+  },
+  "tz": {
+    "title": "时区",
+    "subtitle": "选一个或用浏览器默认的。",
+    "search": "搜索…",
+    "useAuto": "浏览器默认",
+    "autoNote": "自动检测：{tz}",
+    "currentLabel": "当前",
+    "noResults": "没找到时区。",
+    "cancel": "取消",
+    "save": "应用",
+    "editAria": "编辑时区"
+  },
+  "weekStart": {
+    "title": "这周是什么时候开始的？",
+    "subtitle": "不改 reset 日期的情况下移动当前周的起点。自动行为会在下次 rollover 时回来。",
+    "useAuto": "自动（reset 前 7 天）",
+    "autoNote": "自动值：{date}",
+    "cancel": "取消",
+    "save": "应用",
+    "editAria": "编辑周起点"
+  },
+  "datepicker": {
+    "ariaLabel": "选择日期和时间",
+    "presets": {
+      "today22": "今天 22:00",
+      "tomorrow9": "明天 09:00",
+      "nextMonday": "下周一",
+      "in7days": "7 天后"
+    },
+    "prevMonth": "上个月",
+    "nextMonth": "下个月",
+    "hourMinus": "小时 -1",
+    "hourPlus": "小时 +1",
+    "minuteMinus": "分钟 -15",
+    "minutePlus": "分钟 +15"
+  },
+  "share": {
+    "title": "Claude Burn Rate",
+    "text": "🔋 {usage}% used · {time}% time · {sign}{delta}% headroom · Reset in {d}d {h}h",
+    "modalTitle": "你的状态，准备好分享",
+    "modalSubtitle": "存下来或分享出去。",
+    "download": "下载",
+    "shareNative": "分享",
+    "copy": "复制",
+    "copied": "图片已复制到剪贴板 ✨",
+    "generating": "生成图片中…",
+    "close": "关闭"
+  },
+  "about": {
+    "heading": "关于这个 app",
+    "intro": "{name} 追踪你的周 {claudeLink} quota。填入你的 reset 日期和当前用量，然后实时看还剩多少、当前节奏下每日预算长啥样、能不能撑到周末。免费。",
+    "localNote": "Local-first。默认不需要账号，你的数据只存在你自己的 localStorage 里，没有 tracker。想要跨设备 sync？用 GitHub Sign in，状态就会进到你自己 GitHub 账号下的一个私有 gist 里。可以作为 PWA 安装，直接放到手机主屏。",
+    "keywords": {
+      "tracker": "Claude Code Usage Tracker",
+      "weekly": "Claude Pro Weekly Limit",
+      "calculator": "Anthropic Quota Calculator",
+      "rolling": "Rolling 7-Day Burn Rate",
+      "openSource": "Open Source · MIT · Vue 3 PWA"
+    },
+    "meta": "build by you · for you · shroomlife flavor",
+    "resetLink": "重置 app",
+    "repo": "GitHub Repo",
+    "disclaimer": "不是 Anthropic 官方产品。shroomlife 的个人爱好项目 — 我们和 Anthropic, PBC 没有任何关联。\"Claude\"和\"Anthropic\"是 Anthropic, PBC 的商标。"
+  }
+}

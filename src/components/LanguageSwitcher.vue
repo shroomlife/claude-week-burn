@@ -4,6 +4,13 @@ import IconCaretDown from '~icons/ph/caret-down-bold'
 import IconFlagDe from '~icons/circle-flags/de'
 import IconFlagGb from '~icons/circle-flags/gb'
 import IconFlagEs from '~icons/circle-flags/es'
+import IconFlagFr from '~icons/circle-flags/fr'
+import IconFlagBr from '~icons/circle-flags/br'
+import IconFlagJp from '~icons/circle-flags/jp'
+import IconFlagKr from '~icons/circle-flags/kr'
+import IconFlagCn from '~icons/circle-flags/cn'
+import IconFlagIn from '~icons/circle-flags/in'
+import IconFlagUa from '~icons/circle-flags/ua'
 import { useLocale, LOCALES } from '../i18n'
 
 const { locale } = useLocale()
@@ -17,6 +24,13 @@ const FLAG_ICONS: Record<string, Component> = {
   de: IconFlagDe,
   gb: IconFlagGb,
   es: IconFlagEs,
+  fr: IconFlagFr,
+  br: IconFlagBr,
+  jp: IconFlagJp,
+  kr: IconFlagKr,
+  cn: IconFlagCn,
+  in: IconFlagIn,
+  ua: IconFlagUa,
 }
 
 const open = ref(false)

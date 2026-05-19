@@ -3,12 +3,19 @@ import { computed, watch, type WritableComputedRef } from 'vue'
 import de from './locales/de.json'
 import en from './locales/en.json'
 import es from './locales/es.json'
+import fr from './locales/fr.json'
+import pt from './locales/pt.json'
+import ja from './locales/ja.json'
+import ko from './locales/ko.json'
+import zh from './locales/zh.json'
+import hi from './locales/hi.json'
+import uk from './locales/uk.json'
 
 /**
  * Add a new language in 3 steps:
- *   1. Create src/i18n/locales/<code>.json (copy de.json, translate)
+ *   1. Create src/i18n/locales/<code>.json (copy en.json, translate)
  *   2. Import it above + add to `messages` below
- *   3. Add entry to LOCALES — that's it, the switcher + detection auto-pick up
+ *   3. Add entry to LOCALES + flag icon import in LanguageSwitcher.vue
  */
 
 export interface LocaleDef {
@@ -23,10 +30,21 @@ export interface LocaleDef {
   flagCode: string
 }
 
+// Order matters — it's the visible order in the switcher dropdown.
+// Prioritised by where Claude is actually used (Anthropic Economic Index
+// 2025) blended with developer population (Stack Overflow 2024): EN +
+// large-share languages first, then long-tail markets.
 export const LOCALES: readonly LocaleDef[] = [
-  { code: 'de', label: 'Deutsch', flagCode: 'de' },
   { code: 'en', label: 'English', flagCode: 'gb' },
+  { code: 'de', label: 'Deutsch', flagCode: 'de' },
   { code: 'es', label: 'Español', flagCode: 'es' },
+  { code: 'fr', label: 'Français', flagCode: 'fr' },
+  { code: 'pt', label: 'Português', flagCode: 'br' },
+  { code: 'ja', label: '日本語', flagCode: 'jp' },
+  { code: 'ko', label: '한국어', flagCode: 'kr' },
+  { code: 'zh', label: '中文', flagCode: 'cn' },
+  { code: 'hi', label: 'हिन्दी', flagCode: 'in' },
+  { code: 'uk', label: 'Українська', flagCode: 'ua' },
 ] as const
 
 const STORAGE_KEY = 'burnRate:locale'
@@ -59,7 +77,7 @@ export const i18n = createI18n({
   globalInjection: true,
   locale: detectInitialLocale(),
   fallbackLocale: DEFAULT_LOCALE,
-  messages: { de, en, es },
+  messages: { de, en, es, fr, pt, ja, ko, zh, hi, uk },
 })
 
 /**

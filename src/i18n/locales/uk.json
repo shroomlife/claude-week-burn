@@ -1,0 +1,321 @@
+{
+  "app": {
+    "name": "Claude Burn Rate",
+    "tagline": "лайв-трекер тижневого темпу"
+  },
+  "header": {
+    "openPalette": "Відкрити command palette"
+  },
+  "lang": {
+    "switcher": "Мова"
+  },
+  "auth": {
+    "signIn": "Sign in",
+    "signingIn": "Заходимо…",
+    "ariaSignIn": "Sign in через GitHub",
+    "tooltip": {
+      "bootstrapping": "Підключаємось…",
+      "pulling": "Тягнемо стан…",
+      "pushing": "Зберігаємо…",
+      "error": "Помилка sync",
+      "dirty": "Sync змін…",
+      "lastSync": "Останній sync: {time}",
+      "synced": "Sync ок"
+    }
+  },
+  "onboarding": {
+    "title": "Вітаємо в Claude Burn Rate",
+    "intro": "Два швидких пункти і ти готовий. Акаунт не потрібен, все лишається локально. Вже sign in на іншому пристрої? Натискай Sign in зверху — ми підтягнемо твій стан.",
+    "step1": {
+      "title": "Коли в тебе тижневий reset?",
+      "hint": "Коли твоя quota скидається назад на 0."
+    },
+    "step2": {
+      "title": "Скільки ти вже спалив цього тижня?",
+      "hint": "У відсотках. Більшість plans показують це у status line Claude Code."
+    },
+    "cta": "Поїхали"
+  },
+  "initialSync": {
+    "title": {
+      "connecting": "Підключаємось до GitHub",
+      "fetching": "Завантажуємо твій стан",
+      "error": "Sync не вдався"
+    },
+    "subtitle": {
+      "connecting": "Хвилинку, sign in…",
+      "fetching": "Тягнемо твої останні значення з приватного gist.",
+      "error": "Не змогли достукатись до GitHub."
+    },
+    "retry": "Ще раз"
+  },
+  "preWeek": {
+    "title": "Твій reset через {days} днів — все правильно?",
+    "explanation": "Claude працює на rolling 7-денному вікні. З твоєю датою тиждень починається {date}. До того \"час, що минув\" зависне на 0%, і темп виглядатиме несправедливо червоним.",
+    "snap": "📅 Поставити reset на 7 днів від зараз"
+  },
+  "pace": {
+    "usage": "Використання",
+    "time": "Час",
+    "headroom": "Запас",
+    "overshoot": "Перевитрата",
+    "ariaBar": "Використання {usage}%, час {time}%"
+  },
+  "insight": {
+    "eyebrow": "Tomorrow Robin · Прогноз",
+    "reichtBis": "Досягне",
+    "forecast": "Прогноз"
+  },
+  "metrics": {
+    "resetIn": "Reset через",
+    "dailyBudget": "Денний бюджет",
+    "quotaLeft": "Quota лишилось",
+    "perDay": "% / день"
+  },
+  "controls": {
+    "weeklyReset": "Тижневий Reset",
+    "weeklyUsage": "Тижневе використання",
+    "weekFrom": "Тиждень з {date}",
+    "equalsTime": "= Час · {n}",
+    "sliderAria": "Відсоток тижневого використання"
+  },
+  "nextTick": {
+    "label": "Наступний time-tick",
+    "countdown": "+1% за {time}",
+    "title": "Наступний темп +1% за {time}"
+  },
+  "status": {
+    "exhausted": {
+      "label": "На стелі",
+      "message": "Quota вичерпано — чекай reset або апгрейдь plan."
+    },
+    "resetNow": {
+      "label": "Reset зараз",
+      "message": "Тиждень закінчився — свіжа quota котиться."
+    },
+    "preWeek": {
+      "label": "До тижня",
+      "message": "Тиждень ще не почався — переглянь дату reset."
+    },
+    "burn": {
+      "label": "Газу",
+      "message": "Купа запасу — топчи педаль, бро!"
+    },
+    "cruise": {
+      "label": "Чіл темп",
+      "message": "Все у флоу — темп лягає ідеально."
+    },
+    "careful": {
+      "label": "Обережно",
+      "message": "Трохи гаряче — пригальмуй злегка."
+    },
+    "save": {
+      "label": "Режим економії",
+      "message": "Палиш надто швидко — переходь на розумну економію!"
+    }
+  },
+  "tomorrow": {
+    "exhausted": "Quota вичерпано. Чіл до reset — або апгрейдь plan.",
+    "fresh": "Свіжий тиждень, неторкана quota. Повна потужність.",
+    "tooEarly": "Зарано для чесного прогнозу. Заходь через кілька годин.",
+    "hits100WithLastSafe": "Якщо так продовжиш: 100% {day}. {lastSafe} був би твій останній день на повну.",
+    "hits100": "Якщо так продовжиш: 100% {day}.",
+    "safe": "При поточному темпі прийдеш до {pct}%. Quota витримає спокійно."
+  },
+  "palette": {
+    "search": "Шукати дію…",
+    "empty": "Дію не знайдено.",
+    "footNav": "Навігація",
+    "footSelect": "Вибрати",
+    "footClose": "Закрити",
+    "ariaLabel": "Command palette",
+    "actions": {
+      "snap": {
+        "title": "Поставити reset на 7 днів від зараз",
+        "hint": "Зсуває дату кінця тижня рівно на 7 днів вперед."
+      },
+      "sync": {
+        "title": "Використання = Час",
+        "hint": "Ставить слайдер використання на поточний час, що минув."
+      },
+      "newWeek": {
+        "title": "Почати новий тиждень",
+        "hint": "Скидає використання до 0%. Дата reset лишається."
+      },
+      "share": {
+        "title": "Поділитись burn rate",
+        "hint": "Ділиться твоїм поточним станом як текстовою карткою."
+      },
+      "syncNow": {
+        "title": "Sync зараз",
+        "hint": "Push твого поточного стану в sync gist одразу."
+      },
+      "logout": {
+        "title": "Sign out",
+        "hint": "Видалити GitHub token локально. Sync зупиняється; localStorage лишається."
+      },
+      "signIn": {
+        "title": "Sign in через GitHub",
+        "hint": "Вмикає sync між пристроями через приватний gist (scope: gist)."
+      },
+      "reset": {
+        "title": "Скинути app",
+        "hint": "Стирає всі локальні дані й починає з onboarding."
+      }
+    }
+  },
+  "reset": {
+    "title": "Скинути app?",
+    "close": "Закрити",
+    "lead": "Всі локальні дані на цьому пристрої будуть видалені. Потім app перезапуститься з onboarding, як при першому відвідуванні.",
+    "items": {
+      "resetDate": "Дата reset",
+      "usage": "Поточне використання",
+      "onboarding": "Маркер onboarding",
+      "github": "GitHub token + посилання на gist"
+    },
+    "warn": "Ти sign in як @{login}. Ми зробимо тобі sign out. Твій sync gist на github.com лишиться — можеш видалити вручну там, якщо хочеш.",
+    "cancel": "Скасувати",
+    "confirm": "Скинути"
+  },
+  "install": {
+    "ctaApp": "Встановити як app",
+    "ctaIos": "Додати на iPhone",
+    "subline": "Ярлик на homescreen · працює офлайн · без трекерів",
+    "ariaApp": "Встановити app",
+    "ios": {
+      "title": "Додати на iPhone",
+      "lead": "Додай Claude Burn Rate на головний екран — і він поводитиметься як справжній app. Швидкий доступ, власна іконка, працює офлайн.",
+      "step1Text": "У Safari тапни іконку Share знизу",
+      "step1Hint": "(квадрат зі стрілкою вгору)",
+      "step2Text": "Вибери \"Додати на головний екран\"",
+      "step2Hint": "інколи трохи нижче у списку",
+      "step3Text": "Тапни \"Додати\" у правому верхньому куті",
+      "step3Hint": "готово — app на твоєму головному екрані",
+      "footnote": "Працює тільки в Safari. Chrome на iOS це не підтримує."
+    }
+  },
+  "toast": {
+    "updateAvailable": "Доступна нова версія ✨",
+    "reload": "Перезавантажити",
+    "updating": "Завантажуємо оновлення…",
+    "loggedIn": "Sign in як @{login}",
+    "syncError": "Помилка sync",
+    "resetSet": "Reset виставлено на 7 днів",
+    "usageEqualsTime": "Використання = Час",
+    "newWeekStarted": "Новий тиждень — використання скинуто",
+    "syncStarted": "Sync…",
+    "syncDone": "Sync ок ✨",
+    "syncFailed": "Sync не вдався",
+    "loggedOut": "Sign out",
+    "copiedClipboard": "Скопійовано в буфер",
+    "rolloverSimple": "Свіжий тиждень — quota скинуто до 0",
+    "rolloverGap": "Тебе не було — пропущено {weeks} тижнів, свіжа quota активна.",
+    "shared": "Поділились ✨",
+    "downloaded": "Картинка завантажена ✨"
+  },
+  "exhausted": {
+    "title": "Quota вичерпано 🪫",
+    "subtitle": "Тижнева Claude quota повністю вибрана.",
+    "countdownLabel": "Reset через",
+    "footnote": "До цього Claude Code на твоєму акаунті на паузі.",
+    "subFootnote": "День reset {date} о {time} — твоя лінія оновлення."
+  },
+  "account": {
+    "title": "Акаунт",
+    "connectedAs": "Підключено як",
+    "profileLink": "Профіль на GitHub",
+    "gistLink": "Відкрити sync gist",
+    "lastSync": "Останній sync",
+    "lastSyncNever": "Ще не синхронізовано",
+    "syncNow": "Sync зараз",
+    "logout": "Sign out",
+    "close": "Закрити",
+    "status": {
+      "off": "Не підключено",
+      "bootstrapping": "Підключаємось…",
+      "pulling": "Тягнемо стан…",
+      "pushing": "Зберігаємо…",
+      "idle": "Лайв-зʼєднання",
+      "error": "Помилка sync"
+    },
+    "device": "Пристрій",
+    "deviceLocalOnly": "Цей пристрій показує твій локальний стан до наступного sync.",
+    "dirtyNotice": "Локальні зміни от-от синхронізуються…"
+  },
+  "stepper": {
+    "groupAria": "Налаштувати використання",
+    "minusAria": "Використання мінус 1",
+    "plusAria": "Використання плюс 1"
+  },
+  "quickSet": {
+    "title": "Виставити використання на {target}%?",
+    "body": "Поточне значення: {current}%. Перепишеться на {target}%. Точно?",
+    "cancel": "Скасувати",
+    "confirm": "Виставити"
+  },
+  "tz": {
+    "title": "Часовий пояс",
+    "subtitle": "Вибери один або користуйся дефолтом браузера.",
+    "search": "Пошук…",
+    "useAuto": "Дефолт браузера",
+    "autoNote": "Авто-визначено: {tz}",
+    "currentLabel": "Активний",
+    "noResults": "Часового поясу не знайдено.",
+    "cancel": "Скасувати",
+    "save": "Застосувати",
+    "editAria": "Редагувати часовий пояс"
+  },
+  "weekStart": {
+    "title": "Коли почався цей тиждень?",
+    "subtitle": "Пересуває початок поточного тижня без зміни дати reset. Автоматична поведінка повертається на наступному rollover.",
+    "useAuto": "Авто (7 днів до reset)",
+    "autoNote": "Авто-значення: {date}",
+    "cancel": "Скасувати",
+    "save": "Застосувати",
+    "editAria": "Редагувати початок тижня"
+  },
+  "datepicker": {
+    "ariaLabel": "Вибрати дату й час",
+    "presets": {
+      "today22": "Сьогодні 22:00",
+      "tomorrow9": "Завтра 09:00",
+      "nextMonday": "Наступн. Пн",
+      "in7days": "За 7 днів"
+    },
+    "prevMonth": "Попередній місяць",
+    "nextMonth": "Наступний місяць",
+    "hourMinus": "Година -1",
+    "hourPlus": "Година +1",
+    "minuteMinus": "Хвилина -15",
+    "minutePlus": "Хвилина +15"
+  },
+  "share": {
+    "title": "Claude Burn Rate",
+    "text": "🔋 {usage}% used · {time}% time · {sign}{delta}% headroom · Reset in {d}d {h}h",
+    "modalTitle": "Твій стан, готовий до поширення",
+    "modalSubtitle": "Збережи або поділись.",
+    "download": "Завантажити",
+    "shareNative": "Поділитись",
+    "copy": "Копіювати",
+    "copied": "Картинка скопійована в буфер ✨",
+    "generating": "Генеруємо картинку…",
+    "close": "Закрити"
+  },
+  "about": {
+    "heading": "Про app",
+    "intro": "{name} трекає твою тижневу quota {claudeLink}. Кидай дату reset і поточне використання — і дивися лайв, скільки лишилось, який денний бюджет при цьому темпі, чи дотягнеш до вікенду. Безкоштовно.",
+    "localNote": "Local-first. Акаунт за замовчуванням не потрібен, твої значення живуть лише в localStorage, ніяких трекерів. Хочеш sync між пристроями? Sign in через GitHub — і стан їде у приватний gist на твоєму ж GitHub-акаунті. Встановлюється як PWA, прямо на homescreen на мобільному.",
+    "keywords": {
+      "tracker": "Claude Code Usage Tracker",
+      "weekly": "Claude Pro Weekly Limit",
+      "calculator": "Anthropic Quota Calculator",
+      "rolling": "Rolling 7-Day Burn Rate",
+      "openSource": "Open Source · MIT · Vue 3 PWA"
+    },
+    "meta": "build by you · for you · shroomlife flavor",
+    "resetLink": "Скинути app",
+    "repo": "GitHub Repo",
+    "disclaimer": "Не офіційний продукт Anthropic. Особистий хобі-проєкт від shroomlife — ми не повʼязані з Anthropic, PBC. \"Claude\" і \"Anthropic\" — торгові марки Anthropic, PBC."
+  }
+}

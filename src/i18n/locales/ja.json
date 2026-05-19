@@ -1,0 +1,321 @@
+{
+  "app": {
+    "name": "Claude Burn Rate",
+    "tagline": "ライブ週次ペーストラッカー"
+  },
+  "header": {
+    "openPalette": "コマンドパレットを開く"
+  },
+  "lang": {
+    "switcher": "言語"
+  },
+  "auth": {
+    "signIn": "Sign in",
+    "signingIn": "サインイン中…",
+    "ariaSignIn": "GitHubでSign in",
+    "tooltip": {
+      "bootstrapping": "接続中…",
+      "pulling": "ステートを取得中…",
+      "pushing": "保存中…",
+      "error": "Syncエラー",
+      "dirty": "変更をsync中…",
+      "lastSync": "最終sync: {time}",
+      "synced": "Sync完了"
+    }
+  },
+  "onboarding": {
+    "title": "Claude Burn Rateへようこそ",
+    "intro": "2つだけサクッと設定すれば準備OK。アカウント不要、すべてローカルに保存されます。他のデバイスで既にsign in済み？上のSign inを押せばステートを引っ張ってきます。",
+    "step1": {
+      "title": "週次リセットはいつ？",
+      "hint": "クォータが0に戻るタイミング。"
+    },
+    "step2": {
+      "title": "今週どれくらい使った？",
+      "hint": "％で。だいたいのplanはClaude Codeのステータスラインに表示されます。"
+    },
+    "cta": "はじめよう"
+  },
+  "initialSync": {
+    "title": {
+      "connecting": "GitHubに接続中",
+      "fetching": "ステートを読み込み中",
+      "error": "Sync失敗"
+    },
+    "subtitle": {
+      "connecting": "ちょっと待ってね、sign in中…",
+      "fetching": "プライベートgistから最新の値を取得中。",
+      "error": "GitHubに到達できませんでした。"
+    },
+    "retry": "もう一度"
+  },
+  "preWeek": {
+    "title": "リセットまであと{days}日 — これで合ってる？",
+    "explanation": "Claudeはローリング7日間ウィンドウで動きます。あなたの日付だと週は{date}から始まります。それまで「経過時間」は0％のままで、ペースが不当に赤く見えちゃいます。",
+    "snap": "📅 リセットを今から7日後に設定"
+  },
+  "pace": {
+    "usage": "使用量",
+    "time": "時間",
+    "headroom": "余裕",
+    "overshoot": "オーバー",
+    "ariaBar": "使用量 {usage}%、時間 {time}%"
+  },
+  "insight": {
+    "eyebrow": "Tomorrow Robin · 予測",
+    "reichtBis": "到達予定",
+    "forecast": "予測"
+  },
+  "metrics": {
+    "resetIn": "リセットまで",
+    "dailyBudget": "1日の予算",
+    "quotaLeft": "クォータ残量",
+    "perDay": "% / 日"
+  },
+  "controls": {
+    "weeklyReset": "週次リセット",
+    "weeklyUsage": "週次使用量",
+    "weekFrom": "{date}からの週",
+    "equalsTime": "= 時間 · {n}",
+    "sliderAria": "週次使用量パーセント"
+  },
+  "nextTick": {
+    "label": "次のタイムティック",
+    "countdown": "{time}で+1%",
+    "title": "次のペース+1%まで{time}"
+  },
+  "status": {
+    "exhausted": {
+      "label": "上限到達",
+      "message": "クォータ枯渇 — リセット待ちかplanアップグレードを。"
+    },
+    "resetNow": {
+      "label": "リセット中",
+      "message": "週が終わった — 新しいクォータが入ってきます。"
+    },
+    "preWeek": {
+      "label": "週開始前",
+      "message": "週がまだ始まってない — リセット日を再確認して。"
+    },
+    "burn": {
+      "label": "アクセル全開",
+      "message": "余裕たっぷり — 全力でいこう！"
+    },
+    "cruise": {
+      "label": "巡航ペース",
+      "message": "全部フローの中 — ペース完璧。"
+    },
+    "careful": {
+      "label": "ちょっと注意",
+      "message": "やや熱め — ブレーキ軽く踏もう。"
+    },
+    "save": {
+      "label": "節約モード",
+      "message": "燃焼が速すぎ — 賢く節約モードに切り替えて！"
+    }
+  },
+  "tomorrow": {
+    "exhausted": "クォータ枯渇。リセットまでチル — もしくはplanアップグレード。",
+    "fresh": "新しい週、まっさらなクォータ。フルパワー。",
+    "tooEarly": "正直な予測には早すぎ。数時間後にまた来てね。",
+    "hits100WithLastSafe": "このまま行くと: {day}に100%。{lastSafe}が最後の全開デーになる。",
+    "hits100": "このまま行くと: {day}に100%。",
+    "safe": "現状のペースだと{pct}%で着地。クォータは余裕で持ちます。"
+  },
+  "palette": {
+    "search": "アクションを検索…",
+    "empty": "アクションが見つかりません。",
+    "footNav": "ナビゲート",
+    "footSelect": "選択",
+    "footClose": "閉じる",
+    "ariaLabel": "コマンドパレット",
+    "actions": {
+      "snap": {
+        "title": "リセットを今から7日後に設定",
+        "hint": "週末の日付をきっかり7日後にスナップ。"
+      },
+      "sync": {
+        "title": "使用量 = 時間",
+        "hint": "使用量スライダーを現在の経過時間に合わせます。"
+      },
+      "newWeek": {
+        "title": "新しい週を始める",
+        "hint": "使用量を0%にセット。リセット日はそのまま。"
+      },
+      "share": {
+        "title": "Burn rateをシェア",
+        "hint": "現在のステートをテキストカードとしてシェア。"
+      },
+      "syncNow": {
+        "title": "今すぐsync",
+        "hint": "現在のステートをsync gistに即push。"
+      },
+      "logout": {
+        "title": "Sign out",
+        "hint": "GitHubトークンをローカルから削除。Syncは停止、localStorageは残ります。"
+      },
+      "signIn": {
+        "title": "GitHubでSign in",
+        "hint": "プライベートgist経由でデバイス間syncを有効化 (scope: gist)。"
+      },
+      "reset": {
+        "title": "アプリをリセット",
+        "hint": "すべてのローカルデータを消してオンボーディングからやり直し。"
+      }
+    }
+  },
+  "reset": {
+    "title": "アプリをリセットする？",
+    "close": "閉じる",
+    "lead": "このデバイス上のローカルデータがすべて削除されます。その後アプリは初回訪問のようにオンボーディングから再起動します。",
+    "items": {
+      "resetDate": "リセット日",
+      "usage": "現在の使用量",
+      "onboarding": "オンボーディングマーカー",
+      "github": "GitHubトークン + gistリンク"
+    },
+    "warn": "@{login}としてsign in中です。sign outします。github.com上のsync gistは残ります — 必要なら手動で削除できます。",
+    "cancel": "キャンセル",
+    "confirm": "リセット"
+  },
+  "install": {
+    "ctaApp": "アプリとしてインストール",
+    "ctaIos": "iPhoneに追加",
+    "subline": "ホーム画面ショートカット · オフラインOK · トラッカーなし",
+    "ariaApp": "アプリをインストール",
+    "ios": {
+      "title": "iPhoneに追加",
+      "lead": "Claude Burn Rateをホーム画面に追加すれば本物のアプリみたいに動きます。クイックアクセス、専用アイコン、オフラインOK。",
+      "step1Text": "Safariで下の共有アイコンをタップ",
+      "step1Hint": "(上向き矢印の四角)",
+      "step2Text": "「ホーム画面に追加」を選択",
+      "step2Hint": "リストの少し下にあることも",
+      "step3Text": "右上の「追加」をタップ",
+      "step3Hint": "完了 — アプリがホーム画面に",
+      "footnote": "Safariのみ対応。iOSのChromeは未対応。"
+    }
+  },
+  "toast": {
+    "updateAvailable": "新しいバージョンあり ✨",
+    "reload": "再読み込み",
+    "updating": "アップデート読み込み中…",
+    "loggedIn": "@{login}としてsign in",
+    "syncError": "Syncエラー",
+    "resetSet": "リセットを7日後に設定",
+    "usageEqualsTime": "使用量 = 時間",
+    "newWeekStarted": "新しい週 — 使用量リセット",
+    "syncStarted": "Sync中…",
+    "syncDone": "Sync完了 ✨",
+    "syncFailed": "Sync失敗",
+    "loggedOut": "Sign outしました",
+    "copiedClipboard": "クリップボードにコピー",
+    "rolloverSimple": "新しい週 — クォータ0にリセット",
+    "rolloverGap": "しばらく不在でしたね — {weeks}週スキップ、新しいクォータがライブ。",
+    "shared": "シェア完了 ✨",
+    "downloaded": "画像をダウンロード ✨"
+  },
+  "exhausted": {
+    "title": "クォータ枯渇 🪫",
+    "subtitle": "週次Claudeクォータが完全に上限到達。",
+    "countdownLabel": "リセットまで",
+    "footnote": "それまであなたのアカウントではClaude Codeは一時停止。",
+    "subFootnote": "リセット日{date}の{time}がリフレッシュラインです。"
+  },
+  "account": {
+    "title": "アカウント",
+    "connectedAs": "接続中",
+    "profileLink": "GitHubのプロフィール",
+    "gistLink": "Sync gistを開く",
+    "lastSync": "最終sync",
+    "lastSyncNever": "まだsyncされてません",
+    "syncNow": "今すぐsync",
+    "logout": "Sign out",
+    "close": "閉じる",
+    "status": {
+      "off": "未接続",
+      "bootstrapping": "接続中…",
+      "pulling": "ステート取得中…",
+      "pushing": "保存中…",
+      "idle": "ライブ接続",
+      "error": "Syncエラー"
+    },
+    "device": "デバイス",
+    "deviceLocalOnly": "このデバイスは次のsyncまでローカルステートを表示します。",
+    "dirtyNotice": "ローカルの変更がsyncされます…"
+  },
+  "stepper": {
+    "groupAria": "使用量を調整",
+    "minusAria": "使用量マイナス1",
+    "plusAria": "使用量プラス1"
+  },
+  "quickSet": {
+    "title": "使用量を{target}%にセット？",
+    "body": "現在の値: {current}%。{target}%で上書きされます。OK？",
+    "cancel": "キャンセル",
+    "confirm": "セット"
+  },
+  "tz": {
+    "title": "タイムゾーン",
+    "subtitle": "選ぶかブラウザのデフォルトを使ってね。",
+    "search": "検索…",
+    "useAuto": "ブラウザのデフォルト",
+    "autoNote": "自動検出: {tz}",
+    "currentLabel": "アクティブ",
+    "noResults": "タイムゾーンが見つかりません。",
+    "cancel": "キャンセル",
+    "save": "適用",
+    "editAria": "タイムゾーンを編集"
+  },
+  "weekStart": {
+    "title": "今週はいつから始まった？",
+    "subtitle": "リセット日を触らずに今週の開始だけ動かします。自動挙動は次のロールオーバーで戻ります。",
+    "useAuto": "自動 (リセットの7日前)",
+    "autoNote": "自動値: {date}",
+    "cancel": "キャンセル",
+    "save": "適用",
+    "editAria": "週の開始を編集"
+  },
+  "datepicker": {
+    "ariaLabel": "日時を選択",
+    "presets": {
+      "today22": "今日 22:00",
+      "tomorrow9": "明日 09:00",
+      "nextMonday": "次の月曜",
+      "in7days": "7日後"
+    },
+    "prevMonth": "前の月",
+    "nextMonth": "次の月",
+    "hourMinus": "時間 -1",
+    "hourPlus": "時間 +1",
+    "minuteMinus": "分 -15",
+    "minutePlus": "分 +15"
+  },
+  "share": {
+    "title": "Claude Burn Rate",
+    "text": "🔋 {usage}% used · {time}% time · {sign}{delta}% headroom · Reset in {d}d {h}h",
+    "modalTitle": "ステートをシェア準備完了",
+    "modalSubtitle": "保存するかシェアしよう。",
+    "download": "ダウンロード",
+    "shareNative": "シェア",
+    "copy": "コピー",
+    "copied": "画像をクリップボードにコピー ✨",
+    "generating": "画像生成中…",
+    "close": "閉じる"
+  },
+  "about": {
+    "heading": "このアプリについて",
+    "intro": "{name}はあなたの週次{claudeLink}クォータをトラックします。リセット日と現在の使用量を入れて、残量がどれくらいか、このペースだと1日の予算はどうか、週末まで持つかをライブで見れます。無料。",
+    "localNote": "Local-first。デフォルトではアカウント不要、値はあなたのlocalStorageにだけ存在、トラッカーなし。デバイス間syncが欲しい？GitHubでSign inすればステートがあなた自身のGitHubアカウントのプライベートgistに入ります。PWAとしてインストール可能、モバイルのホーム画面に直接。",
+    "keywords": {
+      "tracker": "Claude Code Usage Tracker",
+      "weekly": "Claude Pro Weekly Limit",
+      "calculator": "Anthropic Quota Calculator",
+      "rolling": "Rolling 7-Day Burn Rate",
+      "openSource": "Open Source · MIT · Vue 3 PWA"
+    },
+    "meta": "build by you · for you · shroomlife flavor",
+    "resetLink": "アプリをリセット",
+    "repo": "GitHub Repo",
+    "disclaimer": "Anthropic公式プロダクトではありません。shroomlifeによる個人の趣味プロジェクト — Anthropic, PBCとは無関係です。「Claude」と「Anthropic」はAnthropic, PBCの商標です。"
+  }
+}
