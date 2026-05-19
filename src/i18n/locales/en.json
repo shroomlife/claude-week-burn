@@ -250,6 +250,27 @@
     "cancel": "Cancel",
     "confirm": "Set"
   },
+  "tz": {
+    "title": "Timezone",
+    "subtitle": "Pick one or use your browser's default.",
+    "search": "Search…",
+    "useAuto": "Browser default",
+    "autoNote": "Auto-detected: {tz}",
+    "currentLabel": "Active",
+    "noResults": "No timezone found.",
+    "cancel": "Cancel",
+    "save": "Apply",
+    "editAria": "Edit timezone"
+  },
+  "weekStart": {
+    "title": "When did this week start?",
+    "subtitle": "Shifts the current week's start without moving the reset date. The next rollover restores the automatic relationship.",
+    "useAuto": "Auto (7 days before reset)",
+    "autoNote": "Auto value: {date}",
+    "cancel": "Cancel",
+    "save": "Apply",
+    "editAria": "Edit week start"
+  },
   "datepicker": {
     "ariaLabel": "Select date & time",
     "presets": {

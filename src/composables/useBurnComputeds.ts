@@ -30,21 +30,32 @@ export interface BurnComputeds {
 }
 
 export function useBurnComputeds(now: Ref<number>): BurnComputeds {
-  const { resetDate, usagePercent } = useBurnState()
+  const { resetDate, usagePercent, weekStartOverride, timezone } = useBurnState()
   const { t, locale } = useI18n()
+
+  /** Active IANA timezone — user override wins, else browser default. */
+  const activeTz = computed(() => {
+    if (timezone.value) return timezone.value
+    try { return Intl.DateTimeFormat().resolvedOptions().timeZone } catch { return 'UTC' }
+  })
+
+  function dtFmt(opts: Intl.DateTimeFormatOptions): Intl.DateTimeFormat {
+    return new Intl.DateTimeFormat(locale.value, { ...opts, timeZone: activeTz.value })
+  }
 
   /** Localised "Weekday HH:mm" — used inside tomorrow sentences. */
   function formatDayWithTime(d: Date): string {
-    const day = new Intl.DateTimeFormat(locale.value, { weekday: 'long' }).format(d)
-    const hh = String(d.getHours()).padStart(2, '0')
-    const mm = String(d.getMinutes()).padStart(2, '0')
-    return `${day} ${hh}:${mm}`
+    const day = dtFmt({ weekday: 'long' }).format(d)
+    const time = dtFmt({ hour: '2-digit', minute: '2-digit', hour12: false }).format(d)
+    return `${day} ${time}`
   }
 
   /** Localised "WeekdayShort DD.MM." — last-safe-day marker. */
   function formatShortDate(d: Date): string {
-    const day = new Intl.DateTimeFormat(locale.value, { weekday: 'short' }).format(d)
-    return `${day} ${String(d.getDate()).padStart(2, '0')}.${String(d.getMonth() + 1).padStart(2, '0')}.`
+    const day = dtFmt({ weekday: 'short' }).format(d)
+    const dd = dtFmt({ day: '2-digit' }).format(d)
+    const mm = dtFmt({ month: '2-digit' }).format(d)
+    return `${day} ${dd}.${mm}.`
   }
 
   function buildStatus(delta: number, usage: number, preWeek: boolean, expired: boolean): Status {
@@ -109,7 +120,18 @@ export function useBurnComputeds(now: Ref<number>): BurnComputeds {
     return Number.isFinite(ts) ? ts : now.value + burnConstants.WEEK_MS
   })
 
-  const weekStart = computed(() => resetTs.value - burnConstants.WEEK_MS)
+  /**
+   * weekStart honors the user override if set, else derives from reset.
+   * The override is invalidated/cleared on the next rollover (see useBurnState's
+   * shiftResetByWeek + useAutoRollover), so the natural relationship returns.
+   */
+  const weekStart = computed(() => {
+    if (weekStartOverride.value) {
+      const ts = new Date(weekStartOverride.value).getTime()
+      if (Number.isFinite(ts)) return ts
+    }
+    return resetTs.value - burnConstants.WEEK_MS
+  })
 
   const timeElapsedMs = computed(() =>
     Math.max(0, Math.min(burnConstants.WEEK_MS, now.value - weekStart.value)),
@@ -198,23 +220,23 @@ export function useBurnComputeds(now: Ref<number>): BurnComputeds {
   })
 
   const weekStartLabel = computed(() =>
-    new Date(weekStart.value).toLocaleString(locale.value, {
+    dtFmt({
       day: '2-digit',
       month: '2-digit',
       year: 'numeric',
       hour: '2-digit',
       minute: '2-digit',
-    }),
+      hour12: false,
+    }).format(new Date(weekStart.value)),
   )
 
   const timezoneLabel = computed(() => {
     try {
-      const tz = Intl.DateTimeFormat().resolvedOptions().timeZone
-      const parts = new Date().toLocaleString(locale.value, { timeZoneName: 'short' }).split(' ')
+      const tz = activeTz.value
+      const parts = dtFmt({ timeZoneName: 'short' }).format(new Date()).split(' ')
       const abbr = parts[parts.length - 1] ?? ''
       return `${tz} · ${abbr}`
     } catch {
-      // Intl unavailable — best-effort fallback to UTC.
       return 'UTC'
     }
   })

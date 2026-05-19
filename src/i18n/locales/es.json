@@ -250,6 +250,27 @@
     "cancel": "Cancelar",
     "confirm": "Establecer"
   },
+  "tz": {
+    "title": "Zona horaria",
+    "subtitle": "Elige una o usa la del navegador.",
+    "search": "Buscar…",
+    "useAuto": "Por defecto del navegador",
+    "autoNote": "Detectada: {tz}",
+    "currentLabel": "Activa",
+    "noResults": "Ninguna zona encontrada.",
+    "cancel": "Cancelar",
+    "save": "Aplicar",
+    "editAria": "Editar zona horaria"
+  },
+  "weekStart": {
+    "title": "¿Cuándo empezó esta semana?",
+    "subtitle": "Mueve el inicio de la semana actual sin cambiar la fecha de reset. El próximo reset vuelve a la lógica automática.",
+    "useAuto": "Auto (7 días antes del reset)",
+    "autoNote": "Valor automático: {date}",
+    "cancel": "Cancelar",
+    "save": "Aplicar",
+    "editAria": "Editar inicio de semana"
+  },
   "datepicker": {
     "ariaLabel": "Elegir fecha y hora",
     "presets": {

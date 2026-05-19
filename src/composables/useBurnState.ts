@@ -34,6 +34,8 @@ function defaultState(): PersistedDataV1 {
     usagePercent: 0,
     lastSeen: new Date().toISOString(),
     setupComplete: false,
+    weekStartOverride: null,
+    timezone: null,
   }
 }
 
@@ -46,7 +48,13 @@ function validate(value: PersistedDataV1): PersistedDataV1 | null {
   // pass through the onboarding card. Acceptable because the intro confirms
   // values the user can already see in the same UI; nothing destructive.
   const setupComplete = typeof value.setupComplete === 'boolean' ? value.setupComplete : false
-  return { resetDate, usagePercent, lastSeen, setupComplete }
+  const weekStartOverride = typeof value.weekStartOverride === 'string' && value.weekStartOverride.length > 0
+    ? value.weekStartOverride
+    : null
+  const timezone = typeof value.timezone === 'string' && value.timezone.length > 0
+    ? value.timezone
+    : null
+  return { resetDate, usagePercent, lastSeen, setupComplete, weekStartOverride, timezone }
 }
 
 // Singleton bound at module load. Survives HMR via the module cache.
@@ -82,10 +90,30 @@ const setupComplete: WritableComputedRef<boolean> = computed({
   },
 })
 
+const weekStartOverride: WritableComputedRef<string | null> = computed({
+  get: () => persisted.value.weekStartOverride ?? null,
+  set: (v) => {
+    const next = v && v.length > 0 ? v : null
+    if (next === (persisted.value.weekStartOverride ?? null)) return
+    persisted.value = { ...persisted.value, weekStartOverride: next }
+  },
+})
+
+const timezone: WritableComputedRef<string | null> = computed({
+  get: () => persisted.value.timezone ?? null,
+  set: (v) => {
+    const next = v && v.length > 0 ? v : null
+    if (next === (persisted.value.timezone ?? null)) return
+    persisted.value = { ...persisted.value, timezone: next }
+  },
+})
+
 export interface BurnStateApi {
   resetDate: WritableComputedRef<string>
   usagePercent: WritableComputedRef<number>
   setupComplete: WritableComputedRef<boolean>
+  weekStartOverride: WritableComputedRef<string | null>
+  timezone: WritableComputedRef<string | null>
   shiftResetByWeek: () => void
   resetWeek: () => void
   snapResetToSevenDays: () => void
@@ -97,10 +125,20 @@ export function useBurnState(): BurnStateApi {
     resetDate,
     usagePercent,
     setupComplete,
+    weekStartOverride,
+    timezone,
     shiftResetByWeek: () => {
       const t = new Date(persisted.value.resetDate).getTime()
       const next = new Date(Number.isFinite(t) ? t + WEEK_MS : Date.now() + WEEK_MS)
-      persisted.value = { ...persisted.value, resetDate: toLocalISO(next) }
+      // Rollover: the old resetDate becomes the new week's start. Clear any
+      // manual override so the natural derivation (newResetDate - 7d = old
+      // resetDate) takes over again — exactly what the user described:
+      // "normal das alte End-Date wird neues Start-Date".
+      persisted.value = {
+        ...persisted.value,
+        resetDate: toLocalISO(next),
+        weekStartOverride: null,
+      }
     },
     resetWeek: () => {
       if (persisted.value.usagePercent === 0) return
@@ -108,7 +146,13 @@ export function useBurnState(): BurnStateApi {
     },
     snapResetToSevenDays: () => {
       const d = new Date(Date.now() + WEEK_MS)
-      persisted.value = { ...persisted.value, resetDate: toLocalISO(d) }
+      // Snap also clears the override — the user is intentionally aligning
+      // to a fresh 7-day window from now.
+      persisted.value = {
+        ...persisted.value,
+        resetDate: toLocalISO(d),
+        weekStartOverride: null,
+      }
     },
     completeSetup: () => {
       if (persisted.value.setupComplete) return

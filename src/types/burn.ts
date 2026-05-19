@@ -19,6 +19,19 @@ export interface PersistedDataV1 {
   usagePercent: number
   lastSeen: string
   setupComplete: boolean
+  /**
+   * Optional local-ISO override for the current week's start time. When null,
+   * weekStart is derived as resetDate - 7d. When set, this lets the user
+   * shift their week boundary mid-cycle without moving the reset (e.g. they
+   * got an early reset but want the end-of-week date to stay where it was).
+   * Cleared automatically on the next rollover.
+   */
+  weekStartOverride?: string | null
+  /**
+   * Optional IANA timezone string (e.g. "Europe/Berlin", "America/New_York").
+   * When null, all date formatting uses the browser's auto-detected zone.
+   */
+  timezone?: string | null
 }
 
 export interface Forecast {

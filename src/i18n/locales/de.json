@@ -250,6 +250,27 @@
     "cancel": "Abbrechen",
     "confirm": "Setzen"
   },
+  "tz": {
+    "title": "Zeitzone",
+    "subtitle": "Auswählen oder Browser-Standard nutzen.",
+    "search": "Suchen…",
+    "useAuto": "Browser-Standard",
+    "autoNote": "Automatisch erkannt: {tz}",
+    "currentLabel": "Aktiv",
+    "noResults": "Keine Zeitzone gefunden.",
+    "cancel": "Abbrechen",
+    "save": "Übernehmen",
+    "editAria": "Zeitzone bearbeiten"
+  },
+  "weekStart": {
+    "title": "Wann startete diese Woche?",
+    "subtitle": "Verschiebt das Start-Datum der laufenden Woche, ohne das Reset-Datum zu ändern. Beim nächsten Reset wieder Auto-Logik.",
+    "useAuto": "Auto (7 Tage vor Reset)",
+    "autoNote": "Auto-Wert: {date}",
+    "cancel": "Abbrechen",
+    "save": "Übernehmen",
+    "editAria": "Wochenstart bearbeiten"
+  },
   "datepicker": {
     "ariaLabel": "Datum & Zeit auswählen",
     "presets": {
