@@ -23,6 +23,9 @@ bootWindow.__bootOk = true
 if (bootWindow.__bootDeadline !== undefined) {
   clearTimeout(bootWindow.__bootDeadline)
 }
+// Reset the circuit-breaker counter so the next failure (if any) gets a
+// fresh budget. The key matches RECOVERY_COUNTER_KEY in public/recovery.js.
+try { sessionStorage.removeItem('burnRate:recovery:count') } catch { /* storage may be restricted */ }
 
 // The boot skeleton (declared inline in index.html) is dismissed by
 // App.vue once the app is actually ready — see `markBootReady()` there.
