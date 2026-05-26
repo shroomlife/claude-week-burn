@@ -62,12 +62,29 @@ export default defineConfig({
         ],
       },
       workbox: {
-        // Minimal precache — just the offline shell. Everything else goes
-        // through NetworkFirst runtime caching below, so users always see
-        // the freshest content on reload but still have a fallback if
-        // they're on a flaky train or in airplane mode.
-        globPatterns: ['**/*.{html,svg,ico,webmanifest}'],
-        navigateFallback: 'index.html',
+        // Minimal precache — icons + manifest only. index.html is deliberately
+        // EXCLUDED: precaching it causes Workbox to register an implicit
+        // cache-first NavigationRoute (via createHandlerBoundToURL +
+        // directoryIndex normalization) that runs BEFORE the explicit
+        // NetworkFirst route below — silently shadowing it. The result was
+        // every navigation served from precache, and after a deploy the
+        // cached HTML still referenced the previous build's JS hash, which
+        // GitHub Pages no longer hosted → 404 on the bundle → white screen
+        // that survived F5 because each F5 hit the same precache. With
+        // navigations on a real NetworkFirst path the HTML and the JS hashes
+        // it references stay in sync; offline-after-first-visit still works
+        // via the 'pages' runtime cache. The recovery.js script in <head> is
+        // the belt+suspenders for any future cache pathology that gets past
+        // this. (See commit history of vite.config.ts + public/recovery.js.)
+        globPatterns: ['**/*.{svg,ico,webmanifest}'],
+        // EXPLICIT empty string — vite-plugin-pwa silently defaults this to
+        // 'index.html' (see node_modules/vite-plugin-pwa/dist/index.js:791),
+        // and Object.assign only overwrites keys we set. The Workbox sw
+        // template generates the NavigationRoute under `if (navigateFallback)`,
+        // so an empty string falsy-skips the auto-injection AND keeps
+        // index.html out of the precache (also gated on the same value).
+        // This is the actual fix for the recurring white-screen on F5.
+        navigateFallback: '',
         cleanupOutdatedCaches: true,
         // Auto-takeover: new SW activates + claims the page right away.
         // Safe with NetworkFirst because the new SW won't be serving

@@ -14,6 +14,16 @@ import { i18n } from './i18n'
 
 createApp(App).use(i18n).mount('#app')
 
+// Disarm the self-healing recovery from index.html / public/recovery.js.
+// Mount happened, the bundle is live — no need to purge SW + caches.
+// Done synchronously right after mount() returns so even a render error
+// in App.vue still counts as "bundle reached this line".
+const bootWindow = window as Window & { __bootOk?: boolean; __bootDeadline?: ReturnType<typeof setTimeout> }
+bootWindow.__bootOk = true
+if (bootWindow.__bootDeadline !== undefined) {
+  clearTimeout(bootWindow.__bootDeadline)
+}
+
 // The boot skeleton (declared inline in index.html) is dismissed by
 // App.vue once the app is actually ready — see `markBootReady()` there.
 // We don't dismiss it from main.ts because then it'd flash away before
